@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """Audit the AYAB-ESP32 MCU sheet against the KH910 Rev A pin architecture.
 
-This intentionally uses only the Python standard library so it can run in CI without
-KiCad or third-party parsers. It extracts the ESP32-S3-MINI symbol pin coordinates,
-connectivity from KiCad wire geometry, and labels attached to each GPIO.
+KiCad library-symbol coordinates use a mathematical Y axis, while schematic sheet
+coordinates increase downward. The symbol-local Y coordinate therefore has to be
+inverted when converting an unrotated library pin to a sheet coordinate.
 """
 
 from __future__ import annotations
 
-import math
 import re
 from pathlib import Path
 
@@ -58,8 +57,6 @@ TARGET = {
 ALIASES = {
     "ENC_C": {"ENC_BP", "ENC_BELTPHASE"},
     "BUZZER": {"PIEZO", "BUZZER"},
-    "USB_M": {"USB_M"},
-    "USB_P": {"USB_P"},
 }
 
 IGNORE_LABEL = re.compile(r"ESP\d+$")
@@ -95,6 +92,9 @@ def pt(x: float, y: float) -> tuple[float, float]:
 
 
 def transform(cx: float, cy: float, x: float, y: float, rot: int) -> tuple[float, float]:
+    """Convert library-symbol pin coordinates to KiCad schematic coordinates."""
+    # First convert the library's Y-up coordinate system to sheet Y-down.
+    y = -y
     rot %= 360
     if rot == 0:
         return pt(cx + x, cy + y)
@@ -125,9 +125,8 @@ class DSU:
         self.parent = {x: x for x in items}
 
     def find(self, x):
-        p = self.parent[x]
-        if p != x:
-            self.parent[x] = self.find(p)
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
         return self.parent[x]
 
     def union(self, a, b):
@@ -173,12 +172,27 @@ def main() -> None:
         if not gpio:
             continue
         g = int(gpio.group(1))
-        p = transform(cx, cy, float(at.group(1)), float(at.group(2)), rotation)
         gpio_pins[g] = {
-            "point": p,
+            "point": transform(cx, cy, float(at.group(1)), float(at.group(2)), rotation),
             "module_pin": number.group(1),
             "symbol_name": name.group(1),
         }
+
+    # Hard sanity anchors from the ESP32-S3-MINI symbol currently instantiated on
+    # this sheet. These make an axis/rotation regression fail loudly instead of
+    # producing a plausible but inverted pin map.
+    expected_points = {
+        19: (185.42, 67.31),   # native USB D-
+        20: (185.42, 64.77),   # native USB D+
+        38: (185.42, 118.11),  # buzzer row in the upstream design
+        45: (185.42, 120.65),  # strapping GPIO45 / VCC_SPI row
+    }
+    for gpio, expected in expected_points.items():
+        actual = gpio_pins[gpio]["point"]
+        if actual != expected:
+            raise RuntimeError(
+                f"coordinate sanity failure for GPIO{gpio}: expected {expected}, got {actual}"
+            )
 
     wires = []
     for m in re.finditer(
@@ -199,8 +213,7 @@ def main() -> None:
 
     points = set()
     for a, b in wires:
-        points.add(a)
-        points.add(b)
+        points.update((a, b))
     for _, p, _ in labels:
         points.add(p)
     for info in gpio_pins.values():
@@ -211,9 +224,8 @@ def main() -> None:
     for a, b in wires:
         on = [p for p in point_list if on_segment(p, a, b)]
         if on:
-            base = on[0]
             for p in on[1:]:
-                dsu.union(base, p)
+                dsu.union(on[0], p)
 
     labels_by_root = {}
     for name, p, kind in labels:
@@ -233,47 +245,47 @@ def main() -> None:
             status = "OK" if acceptable.intersection(names) else "MISMATCH"
             if status == "MISMATCH":
                 mismatch += 1
-        rows.append((gpio, info["module_pin"], info["symbol_name"], names, target, status))
+        rows.append((gpio, info["module_pin"], info["symbol_name"], info["point"], names, target, status))
 
-    usb19 = next((r for r in rows if r[0] == 19), None)
-    usb20 = next((r for r in rows if r[0] == 20), None)
+    usb19 = next(r for r in rows if r[0] == 19)
+    usb20 = next(r for r in rows if r[0] == 20)
 
-    out = []
-    out.append("# AYAB-ESP32 KH910 Rev A — Current MCU Pin Audit")
-    out.append("")
-    out.append("Generated automatically from `mcu.kicad_sch` by `tools/audit_esp32_pinmap.py`.")
-    out.append("")
-    out.append("This report describes the **current electrical connectivity**, not the desired Rev A design. The target column comes from `KH910_REV_A_IO_MAP.md`.")
-    out.append("")
-    out.append(f"- ESP32 instance origin: `{cx}, {cy}`, rotation `{rotation}`")
-    out.append(f"- GPIOs extracted: **{len(gpio_pins)}**")
-    out.append(f"- Target-function mismatches: **{mismatch}**")
-    if usb19 and usb20:
-        out.append(f"- Native USB GPIO19 current labels: `{', '.join(usb19[3]) or '(none)'}`")
-        out.append(f"- Native USB GPIO20 current labels: `{', '.join(usb20[3]) or '(none)'}`")
-    out.append("")
-    out.append("| GPIO | Module pin | ESP32 symbol function | Current attached net/label(s) | Rev A target | Status |")
-    out.append("|---:|---:|---|---|---|---|")
-    for gpio, module_pin, symbol_name, names, target, status in rows:
+    out = [
+        "# AYAB-ESP32 KH910 Rev A — Current MCU Pin Audit",
+        "",
+        "Generated automatically from `mcu.kicad_sch` by `tools/audit_esp32_pinmap.py`.",
+        "",
+        "This report describes the **current electrical connectivity**, not the desired Rev A design. The target column comes from `KH910_REV_A_IO_MAP.md`.",
+        "",
+        f"- ESP32 instance origin: `{cx}, {cy}`, rotation `{rotation}`",
+        f"- GPIOs extracted: **{len(gpio_pins)}**",
+        f"- Target-function mismatches: **{mismatch}**",
+        f"- Native USB GPIO19 current labels: `{', '.join(usb19[4]) or '(none)'}`",
+        f"- Native USB GPIO20 current labels: `{', '.join(usb20[4]) or '(none)'}`",
+        "",
+        "| GPIO | Sheet coordinate | Module pin | ESP32 symbol function | Current attached net/label(s) | Rev A target | Status |",
+        "|---:|---|---:|---|---|---|---|",
+    ]
+    for gpio, module_pin, symbol_name, point, names, target, status in rows:
         current = ", ".join(f"`{x}`" for x in names) if names else "—"
-        out.append(f"| {gpio} | {module_pin} | `{symbol_name}` | {current} | `{target}` | **{status}** |")
+        out.append(
+            f"| {gpio} | `{point[0]}, {point[1]}` | {module_pin} | `{symbol_name}` | {current} | `{target}` | **{status}** |"
+        )
 
-    out.extend(
-        [
-            "",
-            "## Interpretation rules",
-            "",
-            "- **OK** means the current named net matches the Rev A target or an explicit compatibility alias.",
-            "- **MISMATCH** means the GPIO is occupied by a different function or the expected function is absent.",
-            "- **review** means a pin intended to be spare/reserved is currently labeled and must be examined before reuse.",
-            "- **open** means a spare/reserved pin has no meaningful label on the MCU sheet.",
-            "",
-            "## Fabrication rule",
-            "",
-            "Do not fabricate while any critical target (USB, encoder, KH-910 K/L, Hall ADC, power enable, internal I2C) remains `MISMATCH`.",
-            "",
-        ]
-    )
+    out.extend([
+        "",
+        "## Interpretation rules",
+        "",
+        "- **OK** means the current named net matches the Rev A target or an explicit compatibility alias.",
+        "- **MISMATCH** means the GPIO is occupied by a different function or the expected function is absent.",
+        "- **review** means a pin intended to be spare/reserved is currently labeled and must be examined before reuse.",
+        "- **open** means a spare/reserved pin has no meaningful label on the MCU sheet.",
+        "",
+        "## Fabrication rule",
+        "",
+        "Do not fabricate while any critical target (USB, encoder, KH-910 K/L, Hall ADC, power enable, internal I2C) remains `MISMATCH`.",
+        "",
+    ])
 
     REPORT.write_text("\n".join(out), encoding="utf-8")
     print(f"Wrote {REPORT}")
