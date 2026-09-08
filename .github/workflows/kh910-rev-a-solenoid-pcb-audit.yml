@@ -1,0 +1,42 @@
+name: KH910 Rev A Solenoid PCB Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/audit_rev_a_solenoid_pcb.py'
+      - '.github/workflows/kh910-rev-a-solenoid-pcb-audit.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Audit PCB parity
+        run: python3 ayab-esp32/tools/audit_rev_a_solenoid_pcb.py
+
+      - name: Show audit
+        run: cat ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md
+
+      - name: Commit audit report
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain -- ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md)" ]; then
+            echo "Audit report unchanged"
+            exit 0
+          fi
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md
+          git commit -m "Audit solenoid fail-safe PCB parity"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push
