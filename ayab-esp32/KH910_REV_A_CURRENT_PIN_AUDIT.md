@@ -6,9 +6,9 @@ This report describes the **current electrical connectivity**, not the desired R
 
 - ESP32 instance origin: `139.7, 92.71`, rotation `0`
 - GPIOs extracted: **39**
-- Target-function mismatches: **15**
-- Native USB GPIO19 current labels: `BUZZER`
-- Native USB GPIO20 current labels: `(none)`
+- Target-function mismatches: **12**
+- Native USB GPIO19 current labels: `USB_M`
+- Native USB GPIO20 current labels: `USB_P`
 
 | GPIO | Sheet coordinate | Module pin | ESP32 symbol function | Current attached net/label(s) | Rev A target | Status |
 |---:|---|---:|---|---|---|---|
@@ -31,8 +31,8 @@ This report describes the **current electrical connectivity**, not the desired R
 | 16 | `93.98, 64.77` | 20 | `GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N` | `I2C1_SCL` | `I2C1_SCL` | **OK** |
 | 17 | `185.42, 110.49` | 21 | `GPIO17/U1TXD/ADC2_CH6` | — | `KH910_R_K` | **MISMATCH** |
 | 18 | `185.42, 113.03` | 22 | `GPIO18/U1RXD/ADC2_CH7/CLK_OUT3` | — | `KH910_R_L` | **MISMATCH** |
-| 19 | `185.42, 67.31` | 23 | `GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-` | `BUZZER` | `USB_M` | **MISMATCH** |
-| 20 | `185.42, 64.77` | 24 | `GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+` | — | `USB_P` | **MISMATCH** |
+| 19 | `185.42, 67.31` | 23 | `GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-` | `USB_M` | `USB_M` | **OK** |
+| 20 | `185.42, 64.77` | 24 | `GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+` | `USB_P` | `USB_P` | **OK** |
 | 21 | `185.42, 115.57` | 25 | `GPIO21` | — | `SOLENOID_PWR_EN` | **MISMATCH** |
 | 26 | `93.98, 115.57` | 26 | `GPIO26` | — | `—` | **open** |
 | 33 | `93.98, 118.11` | 28 | `SPIIO4/GPIO33/FSPIHD/SUBSPIHD` | `RED` | `LED_R` | **MISMATCH** |
@@ -40,14 +40,14 @@ This report describes the **current electrical connectivity**, not the desired R
 | 35 | `93.98, 123.19` | 31 | `SPIIO6/GPIO35/FSPID/SUBSPID` | `YEL` | `LED_B` | **MISMATCH** |
 | 36 | `93.98, 125.73` | 32 | `SPIIO7/GPIO36/FSPICLK/SUBSPICLK` | — | `USER_BUTTON` | **MISMATCH** |
 | 37 | `93.98, 128.27` | 33 | `SPIDQS/GPIO37/FSPIQ/SUBSPIQ` | — | `—` | **open** |
-| 38 | `185.42, 118.11` | 34 | `GPIO38/FSPIWP/SUBSPIWP` | `USB_M` | `BUZZER` | **MISMATCH** |
+| 38 | `185.42, 118.11` | 34 | `GPIO38/FSPIWP/SUBSPIWP` | `BUZZER` | `BUZZER` | **OK** |
 | 39 | `93.98, 69.85` | 35 | `MTCK/GPIO39/CLK_OUT3/SUBSPICS1` | — | `PANEL_INT` | **MISMATCH** |
 | 40 | `93.98, 72.39` | 36 | `MTDO/GPIO40/CLK_OUT2` | — | `SPARE` | **open** |
 | 41 | `93.98, 74.93` | 37 | `MTDI/GPIO41/CLK_OUT1` | — | `SPARE` | **open** |
 | 42 | `93.98, 77.47` | 38 | `MTMS/GPIO42` | — | `SPARE` | **open** |
 | 43 | `185.42, 57.15` | 39 | `U0TXD/GPIO43/CLK_OUT1` | `UART_TX` | `UART_TX` | **OK** |
 | 44 | `185.42, 59.69` | 40 | `U0RXD/GPIO44/CLK_OUT2` | `UART_RX` | `UART_RX` | **OK** |
-| 45 | `185.42, 120.65` | 41 | `GPIO45` | `USB_P` | `RESERVED_STRAP` | **review** |
+| 45 | `185.42, 120.65` | 41 | `GPIO45` | `VCC_SPI` | `RESERVED_STRAP` | **review** |
 | 46 | `185.42, 123.19` | 44 | `GPIO46` | `BOOT1` | `RESERVED_STRAP` | **review** |
 | 47 | `185.42, 125.73` | 27 | `GPIO47/SPICLK_P/SUBSPICLK_P_DIFF` | — | `SPARE` | **open** |
 | 48 | `185.42, 128.27` | 30 | `GPIO48/SPICLK_N/SUBSPICLK_N_DIFF` | — | `SPARE` | **open** |
