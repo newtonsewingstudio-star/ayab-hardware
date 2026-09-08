@@ -1,0 +1,38 @@
+name: KH910 Rev A Patch
+
+on:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - scripts/kh910_rev_a_patch.py
+      - ayab-esp32/**
+      - .github/workflows/kh910-rev-a-patch.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+
+      - name: Apply Rev A scripted fixes
+        run: python3 scripts/kh910_rev_a_patch.py
+
+      - name: Commit generated KiCad edits
+        run: |
+          if git diff --quiet; then
+            echo "No generated edits"
+            exit 0
+          fi
+          git config user.email "newtonsewingstudio@gmail.com"
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git add ayab-esp32/psu.kicad_sch ayab-esp32/ayab-esp32.kicad_pcb
+          git commit -m "Fix U602 3.3V regulator metadata [skip ci]"
+          git push
