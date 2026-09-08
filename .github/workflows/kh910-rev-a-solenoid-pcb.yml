@@ -1,0 +1,70 @@
+name: KH910 Rev A Solenoid PCB
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/patch_rev_a_solenoid_pcb.py'
+      - '.github/workflows/kh910-rev-a-solenoid-pcb.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Patch fail-safe PCB layout
+        run: python3 ayab-esp32/tools/patch_rev_a_solenoid_pcb.py
+
+      - name: Regenerate solenoid PCB parity audit
+        run: python3 ayab-esp32/tools/audit_rev_a_solenoid_pcb.py
+
+      - name: Structural PCB safety checks
+        run: |
+          cat ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md
+          for ref in Q805 Q806 R820 R821 R822 TP703; do
+            grep -q "fp_text reference \"$ref\"" ayab-esp32/ayab-esp32.kicad_pcb
+          done
+          grep -q '(net 153 "SOLENOID_12V_SW")' ayab-esp32/ayab-esp32.kicad_pcb
+          grep -q '(net 148 "SOLENOID_PWR_EN")' ayab-esp32/ayab-esp32.kicad_pcb
+          ! grep -q '/ESP32/ESP21' ayab-esp32/ayab-esp32.kicad_pcb
+          grep -q 'C383257' ayab-esp32/ayab-esp32.kicad_pcb
+          grep -q 'C20917' ayab-esp32/ayab-esp32.kicad_pcb
+          grep -q 'C25803' ayab-esp32/ayab-esp32.kicad_pcb
+          grep -q 'C25804' ayab-esp32/ayab-esp32.kicad_pcb
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Run full KiCad ERC and DRC
+        run: |
+          kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ayab-esp32/ayab-esp32.kicad_pro
+
+      - name: Commit only validated PCB migration
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain -- ayab-esp32/ayab-esp32.kicad_pcb ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md)" ]; then
+            echo "Solenoid fail-safe PCB already in target state"
+            exit 0
+          fi
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/ayab-esp32.kicad_pcb ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md
+          git commit -m "Layout hardware-default-OFF solenoid power gate"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push
+
+      - name: Archive ERC/DRC artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kh910-rev-a-solenoid-pcb-erc-drc
+          path: DesignChecks
