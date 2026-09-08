@@ -8,6 +8,7 @@ on:
     paths:
       - 'ayab-esp32/tools/patch_rev_a_5v_isolation.py'
       - 'ayab-esp32/tools/patch_rev_a_5v_isolation_v2.py'
+      - 'ayab-esp32/tools/patch_rev_a_5v_isolation_v3.py'
       - '.github/workflows/kh910-rev-a-5v-isolation.yml'
 
 permissions:
@@ -23,15 +24,20 @@ jobs:
           fetch-depth: 0
 
       - name: Patch LM66100 reverse-current isolation
-        run: python3 ayab-esp32/tools/patch_rev_a_5v_isolation_v2.py
+        run: python3 ayab-esp32/tools/patch_rev_a_5v_isolation_v3.py
 
       - name: Confirm isolation topology and metadata
         run: |
           grep -n 'LM66100DCKR' ayab-esp32/psu.kicad_sch
           grep -n 'C2869734' ayab-esp32/psu.kicad_sch
           grep -n 'MACHINE_5V_RAW' ayab-esp32/psu.kicad_sch
+          grep -n 'symbol (lib_id "power:PWR_FLAG") (at 257.81 52.07 0)' ayab-esp32/psu.kicad_sch
           if grep -q 'symbol (lib_id "ayab-lib:R_Small_US") (at 264.16 54.61 90)' ayab-esp32/psu.kicad_sch; then
             echo '5V 0-ohm isolation jumper still present'
+            exit 1
+          fi
+          if grep -q 'symbol (lib_id "power:PWR_FLAG") (at 270.51 52.07 0)' ayab-esp32/psu.kicad_sch; then
+            echo 'Old system-side PWR_FLAG still present'
             exit 1
           fi
 
