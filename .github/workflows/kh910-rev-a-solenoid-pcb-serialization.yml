@@ -1,0 +1,96 @@
+name: KH910 Rev A Solenoid PCB Serialization
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/debug_rev_a_solenoid_pcb_serialization.py'
+      - '.github/workflows/kh910-rev-a-solenoid-pcb-serialization.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Save valid original and stage rejected patch
+        run: |
+          cp ayab-esp32/ayab-esp32.kicad_pcb /tmp/original.kicad_pcb
+          python3 ayab-esp32/tools/patch_rev_a_solenoid_pcb.py
+          cp ayab-esp32/ayab-esp32.kicad_pcb /tmp/full.kicad_pcb
+          git restore ayab-esp32/ayab-esp32.kicad_pcb ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md
+
+      - name: Build parser-isolation variants
+        run: |
+          rm -rf /tmp/solenoid-variants
+          python3 ayab-esp32/tools/debug_rev_a_solenoid_pcb_serialization.py \
+            /tmp/original.kicad_pcb /tmp/full.kicad_pcb /tmp/solenoid-variants
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Probe every variant and write report
+        shell: bash
+        run: |
+          REPORT=ayab-esp32/KH910_REV_A_SOLENOID_PCB_SERIALIZATION.md
+          {
+            echo '# KH910 Rev A — Solenoid PCB Serialization Isolation'
+            echo
+            echo 'Each staged board is temporary. No staged PCB is committed by this workflow.'
+            echo
+            echo '## Structural metadata'
+            echo '```text'
+            cat /tmp/solenoid-variants/meta.txt
+            echo '```'
+            echo
+            echo '## KiCad load probes'
+          } > "$REPORT"
+
+          for f in /tmp/solenoid-variants/*.kicad_pcb; do
+            name=$(basename "$f")
+            out="/tmp/${name}.out"
+            rpt="/tmp/${name}.rpt"
+            set +e
+            kicad-cli pcb drc --output "$rpt" "$f" >"$out" 2>&1
+            rc=$?
+            set -e
+            {
+              echo
+              echo "### $name"
+              echo "- exit: $rc"
+              if grep -q 'Failed to load board' "$out"; then
+                echo '- parser: **FAILED TO LOAD**'
+              else
+                echo '- parser: **LOADED**'
+              fi
+              echo '```text'
+              sed -n '1,300p' "$out"
+              if [ -f "$rpt" ]; then
+                echo
+                echo '--- report excerpt ---'
+                sed -n '1,160p' "$rpt"
+              fi
+              echo '```'
+            } >> "$REPORT"
+          done
+          cat "$REPORT"
+
+      - name: Commit parser isolation report only
+        shell: bash
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_SOLENOID_PCB_SERIALIZATION.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Isolate solenoid PCB serialization failure"
+            git pull --rebase origin ayab-esp32-kh910-rev-a
+            git push
+          fi
