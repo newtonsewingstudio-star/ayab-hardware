@@ -8,6 +8,7 @@ on:
     paths:
       - 'ayab-esp32/tools/patch_rev_a_analog_hall.py'
       - 'ayab-esp32/tools/patch_rev_a_analog_hall_v2.py'
+      - 'ayab-esp32/tools/patch_rev_a_analog_hall_v3.py'
       - '.github/workflows/kh910-rev-a-analog-hall-patch.yml'
 
 permissions:
@@ -23,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Patch passive analog Hall paths
-        run: python3 ayab-esp32/tools/patch_rev_a_analog_hall_v2.py
+        run: python3 ayab-esp32/tools/patch_rev_a_analog_hall_v3.py
 
       - name: Generate corrected MCU pin audit
         run: python3 ayab-esp32/tools/audit_esp32_pinmap.py
