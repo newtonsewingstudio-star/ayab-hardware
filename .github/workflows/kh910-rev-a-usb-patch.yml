@@ -1,0 +1,37 @@
+name: KH910 Rev A Native USB Patch
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/patch_rev_a_usb.py'
+      - '.github/workflows/kh910-rev-a-usb-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+
+      - name: Patch MCU sheet for native USB
+        run: python3 ayab-esp32/tools/patch_rev_a_usb.py
+
+      - name: Commit MCU schematic correction
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain -- ayab-esp32/mcu.kicad_sch)" ]; then
+            echo "MCU sheet already in target USB state"
+            exit 0
+          fi
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/mcu.kicad_sch
+          git commit -m "Route ESP32 native USB to GPIO19/20 [skip ci]"
+          git push
