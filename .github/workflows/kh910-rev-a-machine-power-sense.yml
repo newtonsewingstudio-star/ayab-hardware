@@ -10,6 +10,7 @@ on:
       - 'ayab-esp32/tools/patch_rev_a_machine_power_sense_v2.py'
       - 'ayab-esp32/tools/patch_rev_a_machine_power_sense_v3.py'
       - 'ayab-esp32/tools/patch_rev_a_machine_power_sense_v4.py'
+      - 'ayab-esp32/tools/patch_rev_a_machine_power_sense_v5.py'
       - '.github/workflows/kh910-rev-a-machine-power-sense.yml'
 
 permissions:
@@ -25,7 +26,7 @@ jobs:
           fetch-depth: 0
 
       - name: Patch machine-power sensing
-        run: python3 ayab-esp32/tools/patch_rev_a_machine_power_sense_v4.py
+        run: python3 ayab-esp32/tools/patch_rev_a_machine_power_sense_v5.py
 
       - name: Generate MCU pin audit
         run: python3 ayab-esp32/tools/audit_esp32_pinmap.py
@@ -45,14 +46,13 @@ jobs:
       - name: Commit validated machine-power sense
         shell: bash
         run: |
-          if [ -z "$(git status --porcelain -- ayab-esp32/ayab-esp32.kicad_sch ayab-esp32/mcu.kicad_sch ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md)" ]; then
+          if [ -z "$(git status --porcelain -- ayab-esp32/mcu.kicad_sch ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md)" ]; then
             echo "Machine-power sensing already in target state"
             exit 0
           fi
           git config user.name "Newton Sewing Studio AYAB Bot"
           git config user.email "newtonsewingstudio@gmail.com"
-          git add ayab-esp32/ayab-esp32.kicad_sch \
-                  ayab-esp32/mcu.kicad_sch \
+          git add ayab-esp32/mcu.kicad_sch \
                   ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
           git commit -m "Add machine power sensing on GPIO4"
           git pull --rebase origin ayab-esp32-kh910-rev-a
