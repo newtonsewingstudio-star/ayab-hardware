@@ -33,5 +33,5 @@ jobs:
           git config user.name "Newton Sewing Studio AYAB Bot"
           git config user.email "newtonsewingstudio@gmail.com"
           git add ayab-esp32/mcu.kicad_sch
-          git commit -m "Route ESP32 native USB to GPIO19/20 [skip ci]"
+          git commit -m "Route ESP32 native USB to GPIO19/20"
           git push
