@@ -16,23 +16,40 @@ Do not replace the complete USB-C/data circuit merely to solve the XL1509 revers
 
 Instead, split the 5 V nets into:
 
-- `MACHINE_5V_RAW`: direct output of the machine-powered U401 5 V buck;
+- `MACHINE_5V_RAW`: filtered output of the machine-powered U401 5 V buck;
 - `+5V` / `SYS_5V`: controller logic rail used by the rest of the board and by the existing USB power path.
 
 Insert a reverse-blocking ideal diode between those rails:
 
-`U401 5 V output -> MACHINE_5V_RAW -> LM66100 -> SYS_5V / +5V`
+`U401 5 V filtered output -> MACHINE_5V_RAW -> LM66100 -> SYS_5V / +5V`
 
 Selected part:
 
 - **TI LM66100DCKR**
 - LCSC / JLCPCB: **C2869734**
-- Package: SC-70-6
+- Package: SC-70-6 / SOT-363
 - Operating input: 1.5 V to 5.5 V
 - Maximum continuous current: 1.5 A
 - Typical on resistance at 5 V: approximately 79 mOhm
 - Integrated reverse-current blocking and reverse-polarity protection
 - Active / current-production TI part
+
+## Exact insertion point in the existing schematic
+
+The current 5 V power stage already contains the ideal break point:
+
+- U401 feeds the existing output inductor/filter network;
+- the filtered 5 V node has an existing **10 uF ceramic capacitor** (`C15850`, Samsung `CL21A106KAYNNNE`);
+- that filtered node then passes through **R406, a 0 ohm 0603 jumper**;
+- the far side of R406 feeds the PSU sheet hierarchical `5V` output and system rail.
+
+Rev A therefore replaces **R406's electrical function** with the LM66100 stage:
+
+`filtered 5 V / C15850 side -> MACHINE_5V_RAW -> LM66100 -> existing 5V output side`
+
+This is intentionally *after* the XL1509 switching inductor and output filtering. The LM66100 must never be inserted in the XL1509 switching node.
+
+The existing 10 uF ceramic remains on the LM66100 VIN / `MACHINE_5V_RAW` side. It already exceeds the LM66100's typical 1 uF local input-capacitance recommendation; do not add redundant capacitance merely to satisfy a nominal value. PCB placement must keep the existing capacitor and LM66100 current loop compact.
 
 ## Why this part
 
@@ -59,32 +76,26 @@ TI defines the DCK / SC-70-6 pinout as:
 | 3 | CE | **tie to VOUT / `SYS_5V` for reverse-current blocking** |
 | 4 | N/C | leave unconnected |
 | 5 | ST | tie to GND when status output is not used |
-| 6 | VOUT | `SYS_5V` / existing global `+5V` |
+| 6 | VOUT | `SYS_5V` / existing `5V` output |
 
 The CE connection is intentional and important. TI specifies that CE is active-low relative to VIN and explicitly allows CE to be connected to VOUT for reverse-current protection. Rev A will use that configuration so USB-powered `SYS_5V` cannot force current backward into `MACHINE_5V_RAW`.
 
 `ST` is an active-low open-drain status output. TI permits connecting it to GND if status reporting is not required; Rev A does that rather than consuming another MCU pin for a redundant indication.
 
-Local input/output ceramic decoupling must follow the datasheet recommendation and be placed close to the LM66100 during PCB layout.
-
 ## Required schematic changes
 
-1. Rename the current U401 output net from the system 5 V rail to `MACHINE_5V_RAW`.
-2. Insert LM66100 between `MACHINE_5V_RAW` and the existing global system `+5V` rail using the locked pin configuration above.
-3. Preserve the existing USB power circuit on the system side during this stage.
-4. Add test points for:
-   - `MACHINE_5V_RAW`;
-   - `SYS_5V`;
-   - machine `12V`;
-   - USB VBUS.
-5. Re-run ERC/DRC.
-6. Review every other possible machine-domain backfeed path after this primary path is removed.
+1. Remove/bypass R406 as the conductive link between the two power domains.
+2. Name the R406 input/filter side `MACHINE_5V_RAW`.
+3. Insert LM66100 between the former R406 input and output nodes using the locked pin configuration above.
+4. Preserve C15850 on the `MACHINE_5V_RAW` side.
+5. Preserve the existing USB power circuit on the system side during this stage.
+6. Use KiCad footprint `Package_TO_SOT_SMD:SOT-363_SC-70-6` for the DCK package.
+7. Add test points for `MACHINE_5V_RAW`, `SYS_5V`, machine `12V`, and USB VBUS where layout permits.
+8. Re-run ERC/DRC and then review every other possible machine-domain backfeed path.
 
 ## Required power-state results
 
 ### USB only
-
-Expected:
 
 - USB VBUS: approximately 5 V;
 - SYS_5V: powered;
@@ -95,16 +106,12 @@ Expected:
 
 ### Machine only
 
-Expected:
-
 - machine 12 V: normal;
 - MACHINE_5V_RAW: approximately 5 V;
 - SYS_5V: approximately 5 V minus only the ideal-diode conduction loss;
 - USB VBUS connector must not be driven by the board.
 
 ### USB + machine
-
-Expected:
 
 - no source fighting;
 - no reverse current into the machine 5 V buck;
