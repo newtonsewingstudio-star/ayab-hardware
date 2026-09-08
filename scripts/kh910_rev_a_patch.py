@@ -4,52 +4,97 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def enclosing_block(text: str, needle: str, starters=("(symbol ", "(footprint ")):
-    pos = text.find(needle)
-    if pos < 0:
-        raise RuntimeError(f"Could not find {needle!r}")
+def block_end(text: str, start: int) -> int:
+    depth = 0
+    in_string = False
+    escape = False
+    for i in range(start, len(text)):
+        ch = text[i]
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+        elif ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+            if depth == 0:
+                return i + 1
+    raise RuntimeError("Unbalanced KiCad block")
 
-    candidates = []
-    for starter in starters:
-        i = text.rfind(starter, 0, pos)
-        while i >= 0:
-            depth = 0
-            in_string = False
-            escape = False
-            end = None
-            for j in range(i, len(text)):
-                ch = text[j]
-                if in_string:
-                    if escape:
-                        escape = False
-                    elif ch == "\\":
-                        escape = True
-                    elif ch == '"':
-                        in_string = False
-                    continue
-                if ch == '"':
-                    in_string = True
-                elif ch == "(":
-                    depth += 1
-                elif ch == ")":
-                    depth -= 1
-                    if depth == 0:
-                        end = j + 1
-                        break
-            if end is not None and i <= pos < end:
-                candidates.append((end - i, i, end))
-                break
-            i = text.rfind(starter, 0, i)
-    if not candidates:
-        raise RuntimeError(f"Could not find enclosing KiCad block for {needle!r}")
-    _, start, end = min(candidates)
-    return start, end
+
+def iter_blocks(text: str, starter: str):
+    pos = 0
+    while True:
+        start = text.find(starter, pos)
+        if start < 0:
+            return
+        end = block_end(text, start)
+        yield start, end, text[start:end]
+        pos = end
+
+
+def schematic_ref_for_block(full_text: str, block: str):
+    m = re.search(r'\(uuid ([0-9a-fA-F-]+)\)', block)
+    if not m:
+        return None
+    uuid = re.escape(m.group(1))
+    # KiCad hierarchical instance path ends with the placed symbol UUID and
+    # carries the annotated reference separately.
+    pat = rf'\(path "[^"]*/{uuid}"\s+\(reference "([^"]+)"\)'
+    m2 = re.search(pat, full_text, re.S)
+    return m2.group(1) if m2 else None
+
+
+def pcb_ref_for_block(block: str):
+    patterns = (
+        r'\(property "Reference" "([^"]+)"',
+        r'\(fp_text reference "([^"]+)"',
+    )
+    for pat in patterns:
+        m = re.search(pat, block)
+        if m:
+            return m.group(1)
+    return None
+
+
+def find_u602_block(text: str, path: Path):
+    if path.suffix == ".kicad_sch":
+        candidates = []
+        for start, end, block in iter_blocks(text, "(symbol "):
+            if "XL1509-5.0E1" in block or "XL1509-3.3E1" in block:
+                ref = schematic_ref_for_block(text, block)
+                candidates.append((ref, start, end, block))
+        for ref, start, end, block in candidates:
+            if ref == "U602":
+                return start, end, block
+        refs = [r for r, *_ in candidates]
+        raise RuntimeError(f"{path}: could not identify U602 regulator symbol; regulator refs={refs}")
+
+    if path.suffix == ".kicad_pcb":
+        candidates = []
+        for start, end, block in iter_blocks(text, "(footprint "):
+            if "XL1509-5.0E1" in block or "XL1509-3.3E1" in block:
+                ref = pcb_ref_for_block(block)
+                candidates.append((ref, start, end, block))
+        for ref, start, end, block in candidates:
+            if ref == "U602":
+                return start, end, block
+        refs = [r for r, *_ in candidates]
+        raise RuntimeError(f"{path}: could not identify U602 regulator footprint; regulator refs={refs}")
+
+    raise RuntimeError(f"Unsupported KiCad file: {path}")
 
 
 def patch_u602(path: Path):
     text = path.read_text(encoding="utf-8")
-    start, end = enclosing_block(text, '(property "Reference" "U602"')
-    block = text[start:end]
+    start, end, block = find_u602_block(text, path)
 
     if "XL1509-3.3E1" in block and '"C74193"' in block:
         print(f"{path}: U602 already corrected")
@@ -61,9 +106,6 @@ def patch_u602(path: Path):
     block2 = block.replace("XL1509-5.0E1", "XL1509-3.3E1")
     block2 = block2.replace("XL1509-5-0E1_C61063.pdf", "XL1509-3-3E1_C74193.html")
     block2 = block2.replace('"C61063"', '"C74193"')
-
-    # If the old LCSC datasheet URL remains for any reason, replace the entire
-    # Datasheet field inside U602 with a stable LCSC product page.
     block2 = re.sub(
         r'\(property "Datasheet" "[^"]*"',
         '(property "Datasheet" "https://www.lcsc.com/product-detail/C74193.html"',
