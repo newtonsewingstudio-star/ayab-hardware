@@ -4,17 +4,26 @@ Status: architecture draft for Rev A. This document is intended to become the au
 
 ## Why this document exists
 
-The current AYAB-ESP32 hardware and the experimental ESP32 firmware have drifted apart. The firmware `board.h` intends encoder GPIO5/6/7, internal I2C GPIO8/9, display SPI GPIO10-13, external I2C GPIO15/16, UART GPIO43/44, piezo GPIO38, LEDs GPIO33-35 and user button GPIO36. The current `mcu.kicad_sch` does not consistently place those named nets on those GPIOs.
+The current AYAB-ESP32 hardware and the experimental ESP32 firmware must be reconciled explicitly before Rev A is fabricated. The firmware `board.h` intends encoder GPIO5/6/7, internal I2C GPIO8/9, display SPI GPIO10-13, external I2C GPIO15/16, UART GPIO43/44, piezo GPIO38, LEDs GPIO33-35 and user button GPIO36.
 
 The current schematic also normalizes Hall/end-of-line signals through an LM393 network, while the KH-910 already provides distinct open-collector right-side K/L outputs. Upstream issue #43 documents that the board comparators can actively prevent the KH-910 outputs from being read correctly.
 
 Rev A therefore freezes intent first, then changes KiCad to match.
 
-## Critical MCU audit finding
+## MCU audit finding and correction
 
-The current MCU sheet must not be trusted as an authoritative pin map. Direct wire/label inspection shows multiple conflicts with the experimental firmware map. In particular, the present schematic places `USB_P`/`USB_M` on GPIOs that are not the ESP32-S3 native USB pins, while GPIO19/20 are used by other named nets. ESPressif specifies USB D- on GPIO19 and USB D+ on GPIO20.
+A first automated audit incorrectly treated KiCad library-symbol Y coordinates as sheet coordinates and therefore reported the MCU pin map vertically inverted. KiCad's library symbols use a mathematical Y-up axis while schematic sheet coordinates increase downward. ERC exposed the error immediately: a test patch based on the inverted audit disconnected native USB D+.
 
-This is a fabrication blocker. Rev A will explicitly route native USB to GPIO19/20 and audit every MCU net against this document.
+That test patch was reverted. The corrected auditor now includes hard coordinate sanity anchors for GPIO19, GPIO20, GPIO38 and GPIO45 so the same transform error cannot silently recur.
+
+The original AYAB-ESP32 schematic already routes native ESP32-S3 USB correctly:
+
+- GPIO19 = USB D- / `USB_M`;
+- GPIO20 = USB D+ / `USB_P`;
+- GPIO38 = buzzer;
+- GPIO45 = the existing `VCC_SPI` strapping-related net.
+
+USB pin assignment is therefore **not** a Rev A schematic defect. USB power-path/backfeed behavior remains a separate Rev A defect to solve.
 
 ## Rev A proposed ESP32-S3 allocation
 
@@ -38,26 +47,26 @@ This is a fabrication blocker. Rev A will explicitly route native USB to GPIO19/
 | External/front-panel I2C SCL | GPIO16 | I2C | Retain external I2C intent |
 | KH-910 right K | GPIO17 | digital input | Dedicated open-collector input, external 10 kOhm pull-up to 3.3 V |
 | KH-910 right L | GPIO18 | digital input | Dedicated open-collector input, external 10 kOhm pull-up to 3.3 V |
-| USB D- | GPIO19 | USB | Fixed native ESP32-S3 USB function |
-| USB D+ | GPIO20 | USB | Fixed native ESP32-S3 USB function |
+| USB D- | GPIO19 | USB | Native ESP32-S3 USB; already correct in baseline schematic |
+| USB D+ | GPIO20 | USB | Native ESP32-S3 USB; already correct in baseline schematic |
 | Solenoid power enable | GPIO21 | output | Proposed hard machine/solenoid-domain enable; default hardware OFF |
-| RGB/status LED R | GPIO33 | output | Retain only after module-pin restriction audit |
-| RGB/status LED G | GPIO34 | output | Retain only after module-pin restriction audit |
-| RGB/status LED B | GPIO35 | output | Retain only after module-pin restriction audit |
-| User/service button | GPIO36 | input | Retain only after module-pin restriction audit |
-| Piezo/buzzer | GPIO38 | output | Retain firmware intent; must not share USB net |
+| RGB/status LED R | GPIO33 | output | Available on ESP32-S3-MINI-1-N4R2; retain firmware intent |
+| RGB/status LED G | GPIO34 | output | Available on ESP32-S3-MINI-1-N4R2; retain firmware intent |
+| RGB/status LED B | GPIO35 | output | Available on ESP32-S3-MINI-1-N4R2; retain firmware intent |
+| User/service button | GPIO36 | input | Available on ESP32-S3-MINI-1-N4R2; retain firmware intent |
+| Piezo/buzzer | GPIO38 | output | Retain firmware intent; already correct in baseline schematic |
 | Front-panel interrupt / spare | GPIO39 | input | Candidate keypad-expander interrupt; JTAG overlap must be documented |
 | Spare | GPIO40 | I/O | JTAG overlap; available after JTAG policy is defined |
 | Spare | GPIO41 | I/O | JTAG overlap; available after JTAG policy is defined |
 | Spare | GPIO42 | I/O | JTAG overlap; available after JTAG policy is defined |
 | UART TX | GPIO43 | output | Retain firmware intent |
 | UART RX | GPIO44 | input | Retain firmware intent |
-| Reserved / avoid | GPIO45 | reserved | ESP32-S3 strapping pin; do not use for USB or machine input |
+| Reserved / avoid | GPIO45 | reserved | ESP32-S3 strapping pin; existing VCC_SPI strap behavior must be preserved/reviewed |
 | Reserved / avoid | GPIO46 | reserved | ESP32-S3 strapping pin |
 | Spare | GPIO47 | I/O | General-purpose if needed |
 | Spare | GPIO48 | I/O | General-purpose if needed |
 
-GPIO33-37 usage must be checked specifically against the exact ESP32-S3-MINI-1-N4R2 module/chip configuration before the pin map is frozen.
+For the exact ESP32-S3-MINI-1-N4R2 configuration, GPIO33-37 remain available. GPIO26 is unavailable because it is used by the embedded PSRAM and must not be allocated by Rev A.
 
 ## KH-910 carriage / Hall architecture
 
@@ -133,10 +142,11 @@ Mechanical geometry is intentionally not guessed here. Existing documentation wi
 
 Rev A requirement is native ESP32-S3 USB-C:
 
-- USB D- -> GPIO19;
-- USB D+ -> GPIO20;
+- USB D- -> GPIO19 (already correct in baseline schematic);
+- USB D+ -> GPIO20 (already correct in baseline schematic);
 - appropriate USB-C CC resistors and ESD protection;
 - controlled differential routing and minimal stubs;
+- review/add series-resistor footprints according to Espressif hardware guidance if not already present;
 - USB VBUS used only as a logic-power source/sense according to the power-domain document;
 - USB must never partially energize the 12 V machine/solenoid domain.
 
@@ -160,9 +170,9 @@ Legacy `EOL_*_P`, `EOL_*_N`, `EOL_R_S` names should not survive merely because t
 
 This map is not frozen until:
 
-1. exact ESP32-S3-MINI-1-N4R2 restricted pins are checked;
-2. Brother connector pins are traced to each logical signal;
-3. USB19/20 correction is implemented and verified in KiCad;
+1. Brother connector pins are traced to each logical signal;
+2. the corrected pin auditor agrees with the KiCad MCU sheet;
+3. native USB GPIO19/20 is verified by ERC after every MCU-sheet change;
 4. every MCU net in the schematic is mechanically compared against this table;
 5. front-panel display interface is selected;
 6. ERC passes with documented exceptions only.
@@ -171,4 +181,4 @@ Sources / design evidence:
 
 - Upstream AYAB hardware issue #43 — KH-910 digital right Hall signals vs board comparators.
 - Upstream experimental ESP32 firmware `src/ayab/board.h` — intended GPIO allocation.
-- Espressif ESP32-S3 documentation — native USB D-/D+ on GPIO19/GPIO20 and strapping/JTAG restrictions.
+- Espressif ESP32-S3 and ESP32-S3-MINI-1 documentation — native USB D-/D+ on GPIO19/GPIO20, strapping/JTAG restrictions, and N4R2 PSRAM pin use.
