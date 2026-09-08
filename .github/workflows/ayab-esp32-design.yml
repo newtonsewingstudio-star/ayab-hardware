@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - ayab-esp32-kh910-rev-a
     paths:
       - ayab-esp32/**
 
