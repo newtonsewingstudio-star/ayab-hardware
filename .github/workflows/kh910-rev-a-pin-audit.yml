@@ -42,3 +42,24 @@ jobs:
           git commit -m "Update Rev A MCU pin audit"
           git pull --rebase origin ayab-esp32-kh910-rev-a
           git push
+
+  design-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Run ERC and DRC jobset
+        run: |
+          kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ayab-esp32/ayab-esp32.kicad_pro
+
+      - name: Archive ERC/DRC artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kh910-rev-a-erc-drc-artifacts
+          path: DesignChecks
