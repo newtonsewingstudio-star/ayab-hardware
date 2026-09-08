@@ -1,0 +1,83 @@
+name: KH910 Rev A Solenoid Fail-Safe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/patch_rev_a_solenoid_failsafe.py'
+      - 'ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v2.py'
+      - '.github/workflows/kh910-rev-a-solenoid-failsafe.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Patch hardware-default-OFF solenoid power gate
+        run: python3 ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v2.py
+
+      - name: Generate MCU pin audit
+        run: python3 ayab-esp32/tools/audit_esp32_pinmap.py
+
+      - name: Confirm GPIO21 enable mapping
+        run: |
+          cat ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
+          grep -E '\| 21 \|.*SOLENOID_PWR_EN.*\*\*OK\*\*' ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
+
+      - name: Confirm fail-safe topology and BOM metadata
+        run: |
+          grep -n 'LP9435LT1G' ayab-esp32/solenoids.kicad_sch
+          grep -n 'C383257' ayab-esp32/solenoids.kicad_sch
+          grep -n 'AO3400A_FAILSAFE' ayab-esp32/solenoids.kicad_sch
+          grep -n 'C20917' ayab-esp32/solenoids.kicad_sch
+          grep -n 'C25803' ayab-esp32/solenoids.kicad_sch
+          grep -n 'C25804' ayab-esp32/solenoids.kicad_sch
+          grep -n 'SOLENOID_PWR_EN' ayab-esp32/mcu.kicad_sch
+          grep -n 'SOLENOID_PWR_EN' ayab-esp32/solenoids.kicad_sch
+          test "$(grep -c 'SOLENOID_12V_SW' ayab-esp32/brother-connectors.kicad_sch)" -ge 3
+          test "$(grep -c 'SOLENOID_12V_SW' ayab-esp32/solenoids.kicad_sch)" -ge 2
+          ! grep -q 'symbol (lib_id "power:+12V") (at 227.33 25.4 0)' ayab-esp32/solenoids.kicad_sch
+          ! grep -q 'symbol (lib_id "power:+12V") (at 55.88 34.29 0)' ayab-esp32/brother-connectors.kicad_sch
+          ! grep -q 'symbol (lib_id "power:+12V") (at 144.78 34.29 0)' ayab-esp32/brother-connectors.kicad_sch
+          ! grep -q 'symbol (lib_id "power:+12V") (at 234.95 36.83 0)' ayab-esp32/brother-connectors.kicad_sch
+          grep -q 'symbol (lib_id "power:+12V") (at 228.6 165.1 0)' ayab-esp32/solenoids.kicad_sch
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Run ERC and DRC before commit
+        run: |
+          kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ayab-esp32/ayab-esp32.kicad_pro
+
+      - name: Commit validated solenoid fail-safe
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain -- ayab-esp32/mcu.kicad_sch ayab-esp32/solenoids.kicad_sch ayab-esp32/brother-connectors.kicad_sch ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md)" ]; then
+            echo "Solenoid fail-safe already in target state"
+            exit 0
+          fi
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/mcu.kicad_sch \
+                  ayab-esp32/solenoids.kicad_sch \
+                  ayab-esp32/brother-connectors.kicad_sch \
+                  ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
+          git commit -m "Add hardware-default-OFF solenoid power gate"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push
+
+      - name: Archive ERC/DRC artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kh910-rev-a-solenoid-failsafe-erc-drc
+          path: DesignChecks
