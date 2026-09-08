@@ -6,7 +6,7 @@ This report describes the **current electrical connectivity**, not the desired R
 
 - ESP32 instance origin: `139.7, 92.71`, rotation `0`
 - GPIOs extracted: **39**
-- Target-function mismatches: **7**
+- Target-function mismatches: **6**
 - Native USB GPIO19 current labels: `USB_M`
 - Native USB GPIO20 current labels: `USB_P`
 
@@ -33,7 +33,7 @@ This report describes the **current electrical connectivity**, not the desired R
 | 18 | `185.42, 113.03` | 22 | `GPIO18/U1RXD/ADC2_CH7/CLK_OUT3` | `KH910_R_L` | `KH910_R_L` | **OK** |
 | 19 | `185.42, 67.31` | 23 | `GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-` | `USB_M` | `USB_M` | **OK** |
 | 20 | `185.42, 64.77` | 24 | `GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+` | `USB_P` | `USB_P` | **OK** |
-| 21 | `185.42, 115.57` | 25 | `GPIO21` | — | `SOLENOID_PWR_EN` | **MISMATCH** |
+| 21 | `185.42, 115.57` | 25 | `GPIO21` | `SOLENOID_PWR_EN` | `SOLENOID_PWR_EN` | **OK** |
 | 26 | `93.98, 115.57` | 26 | `GPIO26` | — | `—` | **open** |
 | 33 | `93.98, 118.11` | 28 | `SPIIO4/GPIO33/FSPIHD/SUBSPIHD` | `RED` | `LED_R` | **MISMATCH** |
 | 34 | `93.98, 120.65` | 29 | `SPIIO5/GPIO34/FSPICS0/SUBSPICS0` | `GRN` | `LED_G` | **MISMATCH** |
