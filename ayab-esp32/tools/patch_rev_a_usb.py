@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Apply the first KH910 Rev A MCU-sheet correction: native ESP32-S3 USB.
+"""Ensure native ESP32-S3 USB is connected to the correct MCU sheet rows.
 
-Changes are deliberately narrow and assertion-heavy:
-- USB D- (USB_M) moves from GPIO38 to native USB GPIO19.
-- BUZZER moves from GPIO19 to GPIO38.
-- USB D+ (USB_P) moves from strapping GPIO45 to native USB GPIO20.
-- The obsolete MCU-side VCC_SPI attachment on GPIO20 is removed.
+KiCad sheet coordinates increase downward, so the ESP32-S3-MINI library pin rows
+are vertically inverted relative to the library symbol definition. The correct
+sheet locations are:
+- GPIO19 / USB D-: y=67.31
+- GPIO20 / USB D+: y=64.77
+- GPIO38 / buzzer: y=118.11
+- GPIO45 / VCC_SPI strapping row: y=120.65
 
-This script edits only mcu.kicad_sch. It is idempotent: if the target state is
-already present it exits successfully without rewriting the file.
+This script restores those upstream-correct connections if an earlier audit-axis
+mistake moved them. It is assertion-heavy and idempotent.
 """
 
 from pathlib import Path
@@ -24,154 +26,85 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
     return text.replace(old, new, 1)
 
 
-def remove_balanced_block(text: str, start_token: str, label: str) -> str:
-    start = text.find(start_token)
-    if start < 0:
-        raise RuntimeError(f"{label}: block start not found")
-    depth = 0
-    in_string = False
-    escaped = False
-    for i in range(start, len(text)):
-        ch = text[i]
-        if in_string:
-            if escaped:
-                escaped = False
-            elif ch == "\\":
-                escaped = True
-            elif ch == '"':
-                in_string = False
-            continue
-        if ch == '"':
-            in_string = True
-        elif ch == '(':
-            depth += 1
-        elif ch == ')':
-            depth -= 1
-            if depth == 0:
-                end = i + 1
-                # Remove one trailing newline to keep formatting tidy.
-                if end < len(text) and text[end] == '\n':
-                    end += 1
-                return text[:start] + text[end:]
-    raise RuntimeError(f"{label}: unbalanced block")
-
-
 def main() -> None:
     text = PATH.read_text(encoding="utf-8")
 
-    target_markers = [
-        '(hierarchical_label "USB_M" (shape bidirectional) (at 198.12 118.11 0)',
-        '(label "BUZZER" (at 198.12 67.31 180)',
-        '(hierarchical_label "USB_P" (shape bidirectional) (at 198.12 120.65 0)',
-    ]
-    obsolete_markers = [
+    correct_markers = [
         '(hierarchical_label "USB_M" (shape bidirectional) (at 198.12 67.31 0)',
-        '(label "BUZZER" (at 198.12 118.11 180)',
         '(hierarchical_label "USB_P" (shape bidirectional) (at 198.12 64.77 0)',
+        '(label "BUZZER" (at 198.12 118.11 180)',
         '(label "VCC_SPI" (at 198.12 120.65 180)',
     ]
-
-    if all(x in text for x in target_markers) and not any(x in text for x in obsolete_markers):
-        print("Rev A native USB patch already applied")
+    if all(marker in text for marker in correct_markers):
+        print("Native USB/buzzer/VCC_SPI MCU mapping already correct")
         return
 
-    # Move label identities to the GPIO rows we actually want.
+    # Undo the erroneous vertically-inverted mapping if present.
     text = replace_once(
         text,
-        '(hierarchical_label "USB_M" (shape bidirectional) (at 198.12 67.31 0)',
         '(hierarchical_label "USB_M" (shape bidirectional) (at 198.12 118.11 0)',
+        '(hierarchical_label "USB_M" (shape bidirectional) (at 198.12 67.31 0)',
         "USB_M label",
     )
     text = replace_once(
         text,
-        '(label "BUZZER" (at 198.12 118.11 180)',
         '(label "BUZZER" (at 198.12 67.31 180)',
+        '(label "BUZZER" (at 198.12 118.11 180)',
         "BUZZER label",
     )
     text = replace_once(
         text,
-        '(hierarchical_label "USB_P" (shape bidirectional) (at 198.12 64.77 0)',
         '(hierarchical_label "USB_P" (shape bidirectional) (at 198.12 120.65 0)',
+        '(hierarchical_label "USB_P" (shape bidirectional) (at 198.12 64.77 0)',
         "USB_P label",
     )
 
-    # GPIO20's VCC_SPI local label is legacy MCU-side baggage. Keep the separate
-    # configuration-section VCC_SPI label intact; remove only the one on GPIO20.
-    text = remove_balanced_block(
-        text,
-        '(label "VCC_SPI" (at 198.12 120.65 180)',
-        "GPIO20 VCC_SPI label",
-    )
+    # Restore the local GPIO45/VCC_SPI label removed by the erroneous patch.
+    if '(label "VCC_SPI" (at 198.12 120.65 180)' not in text:
+        anchor = '  (label "ESP14" (at 198.12 107.95 180)'
+        block = '''  (label "VCC_SPI" (at 198.12 120.65 180) (fields_autoplaced)\n    (effects (font (size 1.27 1.27)) (justify right bottom))\n    (uuid f1f8d09c-bb40-4cd2-b2a8-64507c3c2397)\n  )\n'''
+        pos = text.find(anchor)
+        if pos < 0:
+            raise RuntimeError("VCC_SPI insertion anchor not found")
+        text = text[:pos] + block + text[pos:]
 
-    wire_usb_m = """(wire (pts (xy 185.42 67.31) (xy 198.12 67.31))
-    (stroke (width 0) (type default))
-    (uuid b6d2f484-9bee-4259-90e9-0a57fede749c)
-  )"""
-    wire_buzzer = """(wire (pts (xy 185.42 118.11) (xy 198.12 118.11))
-    (stroke (width 0) (type default))
-    (uuid 6c8d4e5b-64d5-4725-8ab2-a8260da28abb)
-  )"""
-    wire_usb_p = """(wire (pts (xy 185.42 64.77) (xy 198.12 64.77))
-    (stroke (width 0) (type default))
-    (uuid 3983eb93-9526-48db-85d8-1875e8cba104)
-  )"""
-    wire_vcc_spi = """(wire (pts (xy 185.42 120.65) (xy 198.12 120.65))
-    (stroke (width 0) (type default))
-    (uuid 2db3c421-da0a-412a-bfa1-93464a1ea3c6)
-  )"""
+    # Correct the three wire rows. UUIDs identify the original logical wires.
+    wrong_to_right = {
+        '''(wire (pts (xy 185.42 118.11) (xy 198.12 118.11))\n    (stroke (width 0) (type default))\n    (uuid b6d2f484-9bee-4259-90e9-0a57fede749c)\n  )''':
+        '''(wire (pts (xy 185.42 67.31) (xy 198.12 67.31))\n    (stroke (width 0) (type default))\n    (uuid b6d2f484-9bee-4259-90e9-0a57fede749c)\n  )''',
+        '''(wire (pts (xy 185.42 67.31) (xy 198.12 67.31))\n    (stroke (width 0) (type default))\n    (uuid 6c8d4e5b-64d5-4725-8ab2-a8260da28abb)\n  )''':
+        '''(wire (pts (xy 185.42 118.11) (xy 198.12 118.11))\n    (stroke (width 0) (type default))\n    (uuid 6c8d4e5b-64d5-4725-8ab2-a8260da28abb)\n  )''',
+        '''(wire (pts (xy 185.42 120.65) (xy 198.12 120.65))\n    (stroke (width 0) (type default))\n    (uuid 3983eb93-9526-48db-85d8-1875e8cba104)\n  )''':
+        '''(wire (pts (xy 185.42 64.77) (xy 198.12 64.77))\n    (stroke (width 0) (type default))\n    (uuid 3983eb93-9526-48db-85d8-1875e8cba104)\n  )''',
+    }
+    for wrong, right in wrong_to_right.items():
+        text = replace_once(text, wrong, right, "MCU wire restoration")
 
-    for block, name in (
-        (wire_usb_m, "USB_M wire"),
-        (wire_buzzer, "BUZZER wire"),
-        (wire_usb_p, "USB_P wire"),
-        (wire_vcc_spi, "VCC_SPI wire"),
-    ):
-        if text.count(block) != 1:
-            raise RuntimeError(f"{name}: expected exactly one wire block")
+    # Restore the original VCC_SPI wire if missing.
+    vcc_wire = '''(wire (pts (xy 185.42 120.65) (xy 198.12 120.65))\n    (stroke (width 0) (type default))\n    (uuid 2db3c421-da0a-412a-bfa1-93464a1ea3c6)\n  )'''
+    if vcc_wire not in text:
+        anchor = '(wire (pts (xy 185.42 118.11) (xy 198.12 118.11))'
+        pos = text.find(anchor)
+        if pos < 0:
+            raise RuntimeError("VCC_SPI wire insertion anchor not found")
+        text = text[:pos] + vcc_wire + "\n  " + text[pos:]
 
-    # Swap USB_M and BUZZER wire rows while preserving each wire UUID.
-    token_a = "__REV_A_USB_M_WIRE__"
-    token_b = "__REV_A_BUZZER_WIRE__"
-    text = text.replace(wire_usb_m, token_a, 1)
-    text = text.replace(wire_buzzer, token_b, 1)
-    text = text.replace(
-        token_a,
-        wire_usb_m.replace("185.42 67.31", "185.42 118.11").replace("198.12 67.31", "198.12 118.11"),
-        1,
-    )
-    text = text.replace(
-        token_b,
-        wire_buzzer.replace("185.42 118.11", "185.42 67.31").replace("198.12 118.11", "198.12 67.31"),
-        1,
-    )
-
-    # Remove the obsolete GPIO20 VCC_SPI wire, then move USB_P to GPIO20.
-    text = text.replace(wire_vcc_spi, "", 1)
-    text = text.replace(
-        wire_usb_p,
-        wire_usb_p.replace("185.42 64.77", "185.42 120.65").replace("198.12 64.77", "198.12 120.65"),
-        1,
-    )
-
-    # Hard postconditions: do not write a half-patched schematic.
-    for marker in target_markers:
+    # Hard postconditions.
+    for marker in correct_markers:
         if marker not in text:
             raise RuntimeError(f"postcondition missing: {marker}")
-    for marker in obsolete_markers:
-        if marker in text:
-            raise RuntimeError(f"postcondition still obsolete: {marker}")
-
-    if text.count("(xy 185.42 118.11) (xy 198.12 118.11)") != 1:
-        raise RuntimeError("GPIO19 wire count is not exactly one")
-    if text.count("(xy 185.42 120.65) (xy 198.12 120.65)") != 1:
-        raise RuntimeError("GPIO20 wire count is not exactly one")
-    if text.count("(xy 185.42 67.31) (xy 198.12 67.31)") != 1:
-        raise RuntimeError("GPIO38 wire count is not exactly one")
-    if "(xy 185.42 64.77) (xy 198.12 64.77)" in text:
-        raise RuntimeError("GPIO45 USB wire still present")
+    expected_wires = [
+        '(xy 185.42 67.31) (xy 198.12 67.31)',
+        '(xy 185.42 64.77) (xy 198.12 64.77)',
+        '(xy 185.42 118.11) (xy 198.12 118.11)',
+        '(xy 185.42 120.65) (xy 198.12 120.65)',
+    ]
+    for wire in expected_wires:
+        if text.count(wire) != 1:
+            raise RuntimeError(f"expected exactly one MCU wire at {wire}")
 
     PATH.write_text(text, encoding="utf-8")
-    print("Applied Rev A native USB patch to mcu.kicad_sch")
+    print("Restored correct native USB/buzzer/VCC_SPI MCU mapping")
 
 
 if __name__ == "__main__":
