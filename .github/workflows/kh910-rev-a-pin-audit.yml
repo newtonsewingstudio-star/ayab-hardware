@@ -1,0 +1,42 @@
+name: KH910 Rev A Pin Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/mcu.kicad_sch'
+      - 'ayab-esp32/tools/audit_esp32_pinmap.py'
+      - 'ayab-esp32/KH910_REV_A_IO_MAP.md'
+      - '.github/workflows/kh910-rev-a-pin-audit.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+
+      - name: Generate MCU pin audit
+        run: python3 ayab-esp32/tools/audit_esp32_pinmap.py
+
+      - name: Show audit
+        run: cat ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
+
+      - name: Commit updated audit report
+        shell: bash
+        run: |
+          if git diff --quiet -- ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md; then
+            echo "Audit report unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
+          git commit -m "Update Rev A MCU pin audit [skip ci]"
+          git push
