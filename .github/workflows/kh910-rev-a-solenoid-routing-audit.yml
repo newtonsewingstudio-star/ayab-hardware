@@ -1,0 +1,36 @@
+name: KH910 Rev A Solenoid Routing Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/audit_rev_a_solenoid_routing.py'
+      - '.github/workflows/kh910-rev-a-solenoid-routing-audit.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+      - name: Audit routing geometry
+        run: python3 ayab-esp32/tools/audit_rev_a_solenoid_routing.py
+      - name: Show routing audit
+        run: cat ayab-esp32/KH910_REV_A_SOLENOID_ROUTING_AUDIT.md
+      - name: Commit routing audit
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain -- ayab-esp32/KH910_REV_A_SOLENOID_ROUTING_AUDIT.md)" ]; then exit 0; fi
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_SOLENOID_ROUTING_AUDIT.md
+          git commit -m "Audit solenoid fail-safe routing geometry"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push
