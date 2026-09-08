@@ -48,20 +48,29 @@ The LM66100 behaves as an integrated ideal diode:
 
 The 1.5 A limit becomes a formal Rev A logic-domain budget. If the final display/front-panel design would push worst-case continuous 5 V demand close to this limit, the design must be reevaluated before fabrication rather than assuming margin.
 
-## Intended connection
+## Locked LM66100 pin configuration
 
-- `VIN`: `MACHINE_5V_RAW`.
-- `VOUT`: `SYS_5V` / existing global `+5V`.
-- `GND`: board ground.
-- `CE`: held in the enabled state for normal machine-power operation according to the TI datasheet; implementation must not allow USB `SYS_5V` to force the part on backward.
-- `ST`: optional diagnostic/status output; may be left unused if not needed, or routed to a test pad if layout permits.
+TI defines the DCK / SC-70-6 pinout as:
 
-Local input/output ceramic decoupling must follow the datasheet recommendation.
+| Pin | Name | Rev A connection |
+|---:|---|---|
+| 1 | VIN | `MACHINE_5V_RAW` |
+| 2 | GND | board GND |
+| 3 | CE | **tie to VOUT / `SYS_5V` for reverse-current blocking** |
+| 4 | N/C | leave unconnected |
+| 5 | ST | tie to GND when status output is not used |
+| 6 | VOUT | `SYS_5V` / existing global `+5V` |
+
+The CE connection is intentional and important. TI specifies that CE is active-low relative to VIN and explicitly allows CE to be connected to VOUT for reverse-current protection. Rev A will use that configuration so USB-powered `SYS_5V` cannot force current backward into `MACHINE_5V_RAW`.
+
+`ST` is an active-low open-drain status output. TI permits connecting it to GND if status reporting is not required; Rev A does that rather than consuming another MCU pin for a redundant indication.
+
+Local input/output ceramic decoupling must follow the datasheet recommendation and be placed close to the LM66100 during PCB layout.
 
 ## Required schematic changes
 
 1. Rename the current U401 output net from the system 5 V rail to `MACHINE_5V_RAW`.
-2. Insert LM66100 between `MACHINE_5V_RAW` and the existing global system `+5V` rail.
+2. Insert LM66100 between `MACHINE_5V_RAW` and the existing global system `+5V` rail using the locked pin configuration above.
 3. Preserve the existing USB power circuit on the system side during this stage.
 4. Add test points for:
    - `MACHINE_5V_RAW`;
@@ -107,3 +116,8 @@ Expected:
 This change is not considered proven merely because ERC/DRC passes. Prototype bring-up must explicitly measure the four nodes above under USB-only, machine-only, and combined power.
 
 The USB-only machine 12 V measurement that was approximately 4 V on the upstream prototype is a direct regression test for Rev A.
+
+## Primary references
+
+- TI LM66100 datasheet, Rev. A, especially Section 5 (Pin Configuration and Functions) and Section 8.3.2 (Always-ON Reverse Current Blocking).
+- Upstream AYAB hardware issue #28, prototype-board revisions / USB-only 12 V backfeed observation.
