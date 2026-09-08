@@ -40,24 +40,11 @@ def iter_blocks(text: str, starter: str):
         pos = end
 
 
-def schematic_ref_for_block(full_text: str, block: str):
-    m = re.search(r'\(uuid ([0-9a-fA-F-]+)\)', block)
-    if not m:
-        return None
-    uuid = re.escape(m.group(1))
-    # KiCad hierarchical instance path ends with the placed symbol UUID and
-    # carries the annotated reference separately.
-    pat = rf'\(path "[^"]*/{uuid}"\s+\(reference "([^"]+)"\)'
-    m2 = re.search(pat, full_text, re.S)
-    return m2.group(1) if m2 else None
-
-
 def pcb_ref_for_block(block: str):
-    patterns = (
+    for pat in (
         r'\(property "Reference" "([^"]+)"',
         r'\(fp_text reference "([^"]+)"',
-    )
-    for pat in patterns:
+    ):
         m = re.search(pat, block)
         if m:
             return m.group(1)
@@ -66,16 +53,19 @@ def pcb_ref_for_block(block: str):
 
 def find_u602_block(text: str, path: Path):
     if path.suffix == ".kicad_sch":
+        # In this KiCad schematic the placed symbols retain generic reference
+        # properties and annotation is stored in the instance table. The 3V3
+        # regulator U602 is the XL1509 symbol placed at x=201.93, y=128.27.
         candidates = []
         for start, end, block in iter_blocks(text, "(symbol "):
             if "XL1509-5.0E1" in block or "XL1509-3.3E1" in block:
-                ref = schematic_ref_for_block(text, block)
-                candidates.append((ref, start, end, block))
-        for ref, start, end, block in candidates:
-            if ref == "U602":
-                return start, end, block
-        refs = [r for r, *_ in candidates]
-        raise RuntimeError(f"{path}: could not identify U602 regulator symbol; regulator refs={refs}")
+                candidates.append((start, end, block))
+                if "(at 201.93 128.27" in block:
+                    return start, end, block
+        raise RuntimeError(
+            f"{path}: could not identify U602 at expected placement; "
+            f"found {len(candidates)} XL1509 regulator symbols"
+        )
 
     if path.suffix == ".kicad_pcb":
         candidates = []
