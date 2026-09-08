@@ -9,6 +9,7 @@ on:
       - 'ayab-esp32/tools/patch_rev_a_machine_power_sense.py'
       - 'ayab-esp32/tools/patch_rev_a_machine_power_sense_v2.py'
       - 'ayab-esp32/tools/patch_rev_a_machine_power_sense_v3.py'
+      - 'ayab-esp32/tools/patch_rev_a_machine_power_sense_v4.py'
       - '.github/workflows/kh910-rev-a-machine-power-sense.yml'
 
 permissions:
@@ -24,18 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Patch machine-power sensing
-        run: python3 ayab-esp32/tools/patch_rev_a_machine_power_sense_v3.py
-
-      - name: Inspect generated hierarchy
-        run: |
-          echo '--- TOP MACHINE_PWR_SENSE ---'
-          grep -n -B 5 -A 8 'MACHINE_PWR_SENSE' ayab-esp32/ayab-esp32.kicad_sch || true
-          echo '--- TOP 140.97 142.24 ---'
-          grep -n -B 3 -A 5 '140.97 142.24' ayab-esp32/ayab-esp32.kicad_sch || true
-          echo '--- MCU MACHINE_PWR_SENSE ---'
-          grep -n -B 5 -A 8 'MACHINE_PWR_SENSE' ayab-esp32/mcu.kicad_sch || true
-          echo '--- MCU GPIO4 COORDINATE ---'
-          grep -n -B 4 -A 5 '185.42 82.55' ayab-esp32/mcu.kicad_sch || true
+        run: python3 ayab-esp32/tools/patch_rev_a_machine_power_sense_v4.py
 
       - name: Generate MCU pin audit
         run: python3 ayab-esp32/tools/audit_esp32_pinmap.py
