@@ -46,8 +46,10 @@ jobs:
 
       - name: Run full KiCad ERC and DRC
         id: designcheck
+        shell: bash
         run: |
-          kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ayab-esp32/ayab-esp32.kicad_pro
+          set -o pipefail
+          kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ayab-esp32/ayab-esp32.kicad_pro 2>&1 | tee ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
 
       - name: Capture failed design-check report
         if: failure() && steps.designcheck.outcome == 'failure'
@@ -58,6 +60,11 @@ jobs:
             echo '# KH910 Rev A — Solenoid PCB DRC Failure'
             echo
             echo 'Generated from the rejected staged PCB. The invalid PCB itself was not committed.'
+            echo
+            echo '## KiCad jobset output'
+            echo '```text'
+            sed -n '1,1600p' ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt 2>/dev/null || true
+            echo '```'
             echo
             echo '## DesignChecks files'
             find DesignChecks -type f -maxdepth 4 -print 2>/dev/null | sort || true
@@ -74,6 +81,7 @@ jobs:
 
           # Never allow the rejected PCB or its generated parity audit into this diagnostic commit.
           git restore ayab-esp32/ayab-esp32.kicad_pcb ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md
+          rm -f ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
           git config user.name "Newton Sewing Studio AYAB Bot"
           git config user.email "newtonsewingstudio@gmail.com"
           git add "$REPORT"
@@ -87,6 +95,7 @@ jobs:
         if: success()
         shell: bash
         run: |
+          rm -f ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
           if [ -z "$(git status --porcelain -- ayab-esp32/ayab-esp32.kicad_pcb ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md)" ]; then
             echo "Solenoid fail-safe PCB already in target state"
             exit 0
