@@ -10,6 +10,7 @@ on:
       - 'ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v2.py'
       - 'ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v3.py'
       - 'ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v4.py'
+      - 'ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v5.py'
       - '.github/workflows/kh910-rev-a-solenoid-failsafe.yml'
 
 permissions:
@@ -28,6 +29,7 @@ jobs:
         run: |
           python3 ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v3.py
           python3 ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v4.py
+          python3 ayab-esp32/tools/patch_rev_a_solenoid_failsafe_v5.py
 
       - name: Generate MCU pin audit
         run: python3 ayab-esp32/tools/audit_esp32_pinmap.py
@@ -49,6 +51,8 @@ jobs:
           grep -n 'SOLENOID_PWR_EN' ayab-esp32/solenoids.kicad_sch
           grep -n 'SOL12_SW' ayab-esp32/solenoids.kicad_sch
           grep -q '(wire (pts (xy 248.92 167.64) (xy 248.92 172.72))' ayab-esp32/solenoids.kicad_sch
+          grep -q '(pin passive line (at 0 -7.62 90) (length 2.54)' ayab-esp32/solenoids.kicad_sch
+          grep -q '(pin passive line (at 0 7.62 270) (length 2.54)' ayab-esp32/solenoids.kicad_sch
           test "$(grep -c 'SOLENOID_12V_SW' ayab-esp32/brother-connectors.kicad_sch)" -ge 3
           test "$(grep -c 'SOLENOID_12V_SW' ayab-esp32/solenoids.kicad_sch)" -ge 2
           ! grep -q 'symbol (lib_id "power:+12V") (at 227.33 25.4 0)' ayab-esp32/solenoids.kicad_sch
@@ -77,7 +81,7 @@ jobs:
                   ayab-esp32/solenoids.kicad_sch \
                   ayab-esp32/brother-connectors.kicad_sch \
                   ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
-          git commit -m "Add switched solenoid rail test point"
+          git commit -m "Complete corrected solenoid fail-safe schematic"
           git pull --rebase origin ayab-esp32-kh910-rev-a
           git push
 
