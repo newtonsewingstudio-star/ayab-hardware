@@ -7,6 +7,7 @@ on:
       - ayab-esp32-kh910-rev-a
     paths:
       - 'ayab-esp32/tools/patch_rev_a_machine_power_sense.py'
+      - 'ayab-esp32/tools/patch_rev_a_machine_power_sense_v2.py'
       - '.github/workflows/kh910-rev-a-machine-power-sense.yml'
 
 permissions:
@@ -22,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Patch machine-power sensing
-        run: python3 ayab-esp32/tools/patch_rev_a_machine_power_sense.py
+        run: python3 ayab-esp32/tools/patch_rev_a_machine_power_sense_v2.py
 
       - name: Generate MCU pin audit
         run: python3 ayab-esp32/tools/audit_esp32_pinmap.py
