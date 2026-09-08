@@ -36,3 +36,5 @@ jobs:
           git add ayab-esp32/psu.kicad_sch ayab-esp32/ayab-esp32.kicad_pcb
           git commit -m "Fix U602 3.3V regulator metadata [skip ci]"
           git push
+
+# Rev A workflow retrigger after U602 locator fix.
