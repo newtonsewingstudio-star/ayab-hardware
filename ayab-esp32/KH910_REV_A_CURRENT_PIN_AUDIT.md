@@ -6,7 +6,7 @@ This report describes the **current electrical connectivity**, not the desired R
 
 - ESP32 instance origin: `139.7, 92.71`, rotation `0`
 - GPIOs extracted: **39**
-- Target-function mismatches: **8**
+- Target-function mismatches: **7**
 - Native USB GPIO19 current labels: `USB_M`
 - Native USB GPIO20 current labels: `USB_P`
 
@@ -16,7 +16,7 @@ This report describes the **current electrical connectivity**, not the desired R
 | 1 | `185.42, 74.93` | 5 | `GPIO1/TOUCH1/ADC1_CH0` | `HALL_L_ADC` | `HALL_L_ADC` | **OK** |
 | 2 | `185.42, 77.47` | 6 | `GPIO2/TOUCH2/ADC1_CH1` | `HALL_R_ADC` | `HALL_R_ADC` | **OK** |
 | 3 | `185.42, 80.01` | 7 | `GPIO3/TOUCH3/ADC1_CH2` | — | `RESERVED_STRAP` | **open** |
-| 4 | `185.42, 82.55` | 8 | `GPIO4/TOUCH4/ADC1_CH3` | — | `MACHINE_PWR_SENSE` | **MISMATCH** |
+| 4 | `185.42, 82.55` | 8 | `GPIO4/TOUCH4/ADC1_CH3` | `MACHINE_PWR_SENSE` | `MACHINE_PWR_SENSE` | **OK** |
 | 5 | `185.42, 85.09` | 9 | `GPIO5/TOUCH5/ADC1_CH4` | `ENC_A` | `ENC_A` | **OK** |
 | 6 | `185.42, 87.63` | 10 | `GPIO6/TOUCH6/ADC1_CH5` | `ENC_B` | `ENC_B` | **OK** |
 | 7 | `185.42, 90.17` | 11 | `GPIO7/TOUCH7/ADC1_CH6` | `ENC_BP` | `ENC_C` | **OK** |
