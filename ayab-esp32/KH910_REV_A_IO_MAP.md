@@ -1,0 +1,174 @@
+# AYAB-ESP32 KH910 Rev A — I/O and Pin Architecture
+
+Status: architecture draft for Rev A. This document is intended to become the authoritative signal/pin map before schematic rerouting. Do not fabricate from the current schematic until this map is reconciled with KiCad and ERC/DRC.
+
+## Why this document exists
+
+The current AYAB-ESP32 hardware and the experimental ESP32 firmware have drifted apart. The firmware `board.h` intends encoder GPIO5/6/7, internal I2C GPIO8/9, display SPI GPIO10-13, external I2C GPIO15/16, UART GPIO43/44, piezo GPIO38, LEDs GPIO33-35 and user button GPIO36. The current `mcu.kicad_sch` does not consistently place those named nets on those GPIOs.
+
+The current schematic also normalizes Hall/end-of-line signals through an LM393 network, while the KH-910 already provides distinct open-collector right-side K/L outputs. Upstream issue #43 documents that the board comparators can actively prevent the KH-910 outputs from being read correctly.
+
+Rev A therefore freezes intent first, then changes KiCad to match.
+
+## Critical MCU audit finding
+
+The current MCU sheet must not be trusted as an authoritative pin map. Direct wire/label inspection shows multiple conflicts with the experimental firmware map. In particular, the present schematic places `USB_P`/`USB_M` on GPIOs that are not the ESP32-S3 native USB pins, while GPIO19/20 are used by other named nets. ESPressif specifies USB D- on GPIO19 and USB D+ on GPIO20.
+
+This is a fabrication blocker. Rev A will explicitly route native USB to GPIO19/20 and audit every MCU net against this document.
+
+## Rev A proposed ESP32-S3 allocation
+
+| Function | Rev A GPIO | Electrical type | Notes |
+|---|---:|---|---|
+| Left analog Hall / EOL | GPIO1 | ADC1 input | 5 V tolerant only through passive divider/protection; no comparator normalization |
+| Right analog Hall / EOL (non-KH910 machines) | GPIO2 | ADC1 input | Passive 5 V-to-3.3 V scaling; unused on KH-910 |
+| Reserved / avoid external strap loading | GPIO3 | reserved | ESP32-S3 strapping pin; do not use for KH-910 pull-up input |
+| Machine-power sense / spare ADC | GPIO4 | ADC1 input | Preferred for 12 V-present sensing through divider, subject to final power schematic |
+| Encoder A | GPIO5 | digital input | Retain firmware intent |
+| Encoder B | GPIO6 | digital input | Retain firmware intent |
+| Encoder belt phase / C | GPIO7 | digital input | Retain firmware intent |
+| Internal I2C SDA | GPIO8 | I2C | MCP23017 solenoid expander |
+| Internal I2C SCL | GPIO9 | I2C | MCP23017 solenoid expander |
+| Display SPI CS | GPIO10 | output | Retain firmware intent |
+| Display SPI CIPO/MISO | GPIO11 | input | Retain firmware intent; may be unused by display |
+| Display SPI COPI/MOSI | GPIO12 | output | Retain firmware intent |
+| Display SPI SCK | GPIO13 | output | Retain firmware intent |
+| Front-panel/display auxiliary | GPIO14 | digital I/O | Candidate D/C, reset, or panel interrupt; final assignment after display selection |
+| External/front-panel I2C SDA | GPIO15 | I2C | Retain external I2C intent |
+| External/front-panel I2C SCL | GPIO16 | I2C | Retain external I2C intent |
+| KH-910 right K | GPIO17 | digital input | Dedicated open-collector input, external 10 kOhm pull-up to 3.3 V |
+| KH-910 right L | GPIO18 | digital input | Dedicated open-collector input, external 10 kOhm pull-up to 3.3 V |
+| USB D- | GPIO19 | USB | Fixed native ESP32-S3 USB function |
+| USB D+ | GPIO20 | USB | Fixed native ESP32-S3 USB function |
+| Solenoid power enable | GPIO21 | output | Proposed hard machine/solenoid-domain enable; default hardware OFF |
+| RGB/status LED R | GPIO33 | output | Retain only after module-pin restriction audit |
+| RGB/status LED G | GPIO34 | output | Retain only after module-pin restriction audit |
+| RGB/status LED B | GPIO35 | output | Retain only after module-pin restriction audit |
+| User/service button | GPIO36 | input | Retain only after module-pin restriction audit |
+| Piezo/buzzer | GPIO38 | output | Retain firmware intent; must not share USB net |
+| Front-panel interrupt / spare | GPIO39 | input | Candidate keypad-expander interrupt; JTAG overlap must be documented |
+| Spare | GPIO40 | I/O | JTAG overlap; available after JTAG policy is defined |
+| Spare | GPIO41 | I/O | JTAG overlap; available after JTAG policy is defined |
+| Spare | GPIO42 | I/O | JTAG overlap; available after JTAG policy is defined |
+| UART TX | GPIO43 | output | Retain firmware intent |
+| UART RX | GPIO44 | input | Retain firmware intent |
+| Reserved / avoid | GPIO45 | reserved | ESP32-S3 strapping pin; do not use for USB or machine input |
+| Reserved / avoid | GPIO46 | reserved | ESP32-S3 strapping pin |
+| Spare | GPIO47 | I/O | General-purpose if needed |
+| Spare | GPIO48 | I/O | General-purpose if needed |
+
+GPIO33-37 usage must be checked specifically against the exact ESP32-S3-MINI-1-N4R2 module/chip configuration before the pin map is frozen.
+
+## KH-910 carriage / Hall architecture
+
+### Right side — KH-910
+
+The KH-910 exposes two separate digital open-collector outputs from its own comparator circuitry. They carry distinct carriage information and must remain separate.
+
+Rev A requirements:
+
+- `KH910_R_K` -> dedicated GPIO17.
+- `KH910_R_L` -> dedicated GPIO18.
+- Each input gets an external 10 kOhm pull-up to 3.3 V.
+- No LM393 output may share either net.
+- Preserve the native machine polarity; firmware interprets machine-specific meaning.
+- Add labeled test points for K and L.
+- Add modest input protection/series resistance if it does not distort edge timing.
+
+Do not OR K and L together.
+
+### Analog Hall machines
+
+For machines that provide analog Hall/EOL outputs, use ADC-capable GPIOs through passive scaling rather than converting them to synthetic digital polarities with LM393 comparators.
+
+Proposed:
+
+- left analog Hall -> GPIO1 / ADC1;
+- right analog Hall -> GPIO2 / ADC1;
+- passive resistor divider sized for a 5 V source and adequate ADC margin;
+- optional small RC filtering and clamp/ESD protection after source-impedance review;
+- firmware applies thresholds/hysteresis appropriate to machine type.
+
+This lets one board support KH-910 digital K/L and analog-Hall Brother models without electrically mixing the two schemes.
+
+## Encoder inputs
+
+Retain the existing firmware intent:
+
+- encoder A -> GPIO5;
+- encoder B -> GPIO6;
+- belt phase / encoder C -> GPIO7.
+
+Rev A must verify source voltage, polarity, edge rate, pull-ups and protection from the Brother connector through to the ESP32 pins. Add test points A/B/C.
+
+## Solenoid control
+
+Retain MCP23017 + ULN2003A as the baseline architecture unless the detailed fail-safe review finds a reason to change it.
+
+Requirements:
+
+- all solenoid outputs OFF during ESP32 reset/boot;
+- all solenoid outputs OFF if MCP23017 is unconfigured/reset;
+- all solenoid outputs OFF if firmware crashes before enabling machine power;
+- separate hardware `SOLENOID_PWR_EN` is proposed on GPIO21 so logic can boot from USB without energizing the machine power domain;
+- individual solenoid test mode is required in bring-up firmware.
+
+## Front panel / replacement console
+
+Rev A should support reuse of the original KH-910 rubber keypad and replacement of the original display, following the successful architectural precedent demonstrated by eKnitter but with our own implementation.
+
+Preferred electrical architecture:
+
+- display on the already-reserved SPI bus GPIO10-13, or I2C if the selected module makes that clearly superior;
+- original keypad contacts reproduced on a front-panel PCB;
+- keypad read through an I2C GPIO expander/keypad controller rather than consuming a large number of ESP32 pins;
+- front-panel bus on GPIO15/16;
+- optional panel interrupt on GPIO39;
+- original Brother button legends may be reassigned in firmware;
+- exact display D/C, reset and backlight pins remain unfrozen until a physical display is selected.
+
+Mechanical geometry is intentionally not guessed here. Existing documentation will be exhausted before requesting measurements from the prototype machine.
+
+## USB
+
+Rev A requirement is native ESP32-S3 USB-C:
+
+- USB D- -> GPIO19;
+- USB D+ -> GPIO20;
+- appropriate USB-C CC resistors and ESD protection;
+- controlled differential routing and minimal stubs;
+- USB VBUS used only as a logic-power source/sense according to the power-domain document;
+- USB must never partially energize the 12 V machine/solenoid domain.
+
+## Firmware naming cleanup
+
+Firmware and schematic must use one naming scheme. Proposed logical names:
+
+- `HALL_L_ADC`
+- `HALL_R_ADC`
+- `KH910_R_K`
+- `KH910_R_L`
+- `ENC_A`
+- `ENC_B`
+- `ENC_C`
+- `SOLENOID_PWR_EN`
+- `MACHINE_PWR_SENSE`
+
+Legacy `EOL_*_P`, `EOL_*_N`, `EOL_R_S` names should not survive merely because they exist in older prototypes. Compatibility aliases may exist in firmware temporarily, but KiCad should describe the actual electrical signals.
+
+## Freeze gate
+
+This map is not frozen until:
+
+1. exact ESP32-S3-MINI-1-N4R2 restricted pins are checked;
+2. Brother connector pins are traced to each logical signal;
+3. USB19/20 correction is implemented and verified in KiCad;
+4. every MCU net in the schematic is mechanically compared against this table;
+5. front-panel display interface is selected;
+6. ERC passes with documented exceptions only.
+
+Sources / design evidence:
+
+- Upstream AYAB hardware issue #43 — KH-910 digital right Hall signals vs board comparators.
+- Upstream experimental ESP32 firmware `src/ayab/board.h` — intended GPIO allocation.
+- Espressif ESP32-S3 documentation — native USB D-/D+ on GPIO19/GPIO20 and strapping/JTAG restrictions.
