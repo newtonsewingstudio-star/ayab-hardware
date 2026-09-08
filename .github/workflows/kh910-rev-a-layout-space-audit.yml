@@ -1,0 +1,30 @@
+name: KH910 Rev A Layout Space Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [ayab-esp32-kh910-rev-a]
+    paths:
+      - 'ayab-esp32/tools/audit_rev_a_layout_space.py'
+      - '.github/workflows/kh910-rev-a-layout-space-audit.yml'
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+      - run: python3 ayab-esp32/tools/audit_rev_a_layout_space.py
+      - run: cat ayab-esp32/KH910_REV_A_LAYOUT_SPACE_AUDIT.md
+      - name: Commit audit
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain -- ayab-esp32/KH910_REV_A_LAYOUT_SPACE_AUDIT.md)" ]; then exit 0; fi
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_LAYOUT_SPACE_AUDIT.md
+          git commit -m "Audit fail-safe PCB placement space"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push
