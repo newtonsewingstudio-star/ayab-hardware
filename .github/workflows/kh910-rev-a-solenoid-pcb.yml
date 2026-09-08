@@ -44,15 +44,28 @@ jobs:
       - name: Install KiCad
         run: bash ./scripts/dependencies.sh
 
-      - name: Run full KiCad ERC and DRC
-        id: designcheck
+      - name: Parse PCB and run direct DRC
+        id: directdrc
         shell: bash
         run: |
           set -o pipefail
-          kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ayab-esp32/ayab-esp32.kicad_pro 2>&1 | tee ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
+          kicad-cli pcb drc --exit-code-violations --output /tmp/solenoid-pcb-drc.rpt ayab-esp32/ayab-esp32.kicad_pcb 2>&1 | tee ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
+          if [ -f /tmp/solenoid-pcb-drc.rpt ]; then
+            echo >> ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
+            echo '--- direct DRC report ---' >> ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
+            cat /tmp/solenoid-pcb-drc.rpt >> ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
+          fi
+
+      - name: Run full KiCad ERC and DRC
+        id: designcheck
+        if: success()
+        shell: bash
+        run: |
+          set -o pipefail
+          kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ayab-esp32/ayab-esp32.kicad_pro 2>&1 | tee -a ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
 
       - name: Capture failed design-check report
-        if: failure() && steps.designcheck.outcome == 'failure'
+        if: failure() && (steps.directdrc.outcome == 'failure' || steps.designcheck.outcome == 'failure')
         shell: bash
         run: |
           REPORT=ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC.md
@@ -61,9 +74,9 @@ jobs:
             echo
             echo 'Generated from the rejected staged PCB. The invalid PCB itself was not committed.'
             echo
-            echo '## KiCad jobset output'
+            echo '## KiCad validation output'
             echo '```text'
-            sed -n '1,1600p' ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt 2>/dev/null || true
+            sed -n '1,2400p' ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt 2>/dev/null || true
             echo '```'
             echo
             echo '## DesignChecks files'
