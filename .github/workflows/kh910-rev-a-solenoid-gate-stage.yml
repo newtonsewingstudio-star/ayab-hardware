@@ -10,6 +10,7 @@ on:
       - 'ayab-esp32/tools/fix_rev_a_solenoid_pg_corner.py'
       - 'ayab-esp32/tools/route_rev_a_solenoid_enable_astar.py'
       - 'ayab-esp32/tools/stage_rev_a_solenoid_tp703.py'
+      - 'ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py'
       - '.github/workflows/kh910-rev-a-solenoid-gate-stage.yml'
 
 jobs:
@@ -60,6 +61,9 @@ jobs:
           cat /tmp/gate-stage-drc.rpt
           echo "DRC_REPORT_EXIT=$rc"
           exit $rc
+      - name: Require solenoid fail-safe topology
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb | tee /tmp/gate-topology.txt
       - name: Upload gate-stage evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -69,5 +73,6 @@ jobs:
             /tmp/gate-baseline.rpt
             /tmp/gate-stage.txt
             /tmp/gate-stage-drc.rpt
+            /tmp/gate-topology.txt
             /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb
           if-no-files-found: ignore
