@@ -87,14 +87,19 @@ REMOVE_SEGMENTS = {
     },
     core.LOCAL_K: {
         frozenset(((194.71, 157.31), (193.515, 158.505))),
-        # pair_key normalizes coordinates to 0.001 mm, so KiCad 191.4775
-        # serializes into the comparison key as 191.478.
-        frozenset(((193.515, 158.505), (191.478, 158.505))),
     },
     core.LOCAL_L: {
         frozenset(((194.98, 157.69), (193.515, 159.155))),
-        frozenset(((193.515, 159.155), (191.478, 159.155))),
     },
+}
+
+# These two 2.0375 mm tails are assigned their final local-net identity only
+# after KiCad rebuilds connectivity. Remove them by exact geometry instead of
+# transient serialized net ID. pair_key rounds to 0.001 mm, so 191.4775 is
+# represented as 191.478 here. The assertion below still requires exactly both.
+REMOVE_ANY_SEGMENTS = {
+    frozenset(((193.515, 158.505), (191.478, 158.505))),
+    frozenset(((193.515, 159.155), (191.478, 159.155))),
 }
 
 
@@ -163,6 +168,7 @@ def postprocess(path: Path) -> None:
     edits = []
     removed_vias = set()
     removed_segments: dict[str, set[frozenset]] = {k: set() for k in REMOVE_SEGMENTS}
+    removed_any_segments: set[frozenset] = set()
     moved = set()
 
     for item in children:
@@ -181,11 +187,15 @@ def postprocess(path: Path) -> None:
             continue
         if item.head != "segment":
             continue
+        key = pair_key(core.k.item_points(block))
+        if key in REMOVE_ANY_SEGMENTS:
+            edits.append((item.start, item.end, ""))
+            removed_any_segments.add(key)
+            continue
         nid = core.k.item_net_id(block)
         name = net_names_by_id.get(nid)
         if name not in REMOVE_SEGMENTS:
             continue
-        key = pair_key(core.k.item_points(block))
         if key in REMOVE_SEGMENTS[name]:
             edits.append((item.start, item.end, ""))
             removed_segments[name].add(key)
@@ -194,6 +204,8 @@ def postprocess(path: Path) -> None:
         raise RuntimeError(f"pull-up move mismatch: {moved}")
     if removed_vias != REMOVE_VIAS:
         raise RuntimeError(f"via cleanup mismatch: removed={removed_vias} expected={REMOVE_VIAS}")
+    if removed_any_segments != REMOVE_ANY_SEGMENTS:
+        raise RuntimeError(f"geometry-tail cleanup mismatch: {removed_any_segments} != {REMOVE_ANY_SEGMENTS}")
     for name, expected in REMOVE_SEGMENTS.items():
         if removed_segments[name] != expected:
             raise RuntimeError(f"segment cleanup mismatch for {name}: {removed_segments[name]} != {expected}")
@@ -230,6 +242,7 @@ def postprocess(path: Path) -> None:
     print("KL_V8_PULLUPS", R213_NEW, R214_NEW)
     print("KL_V8_LAUNCH_VIAS", K_LAUNCH, L_LAUNCH)
     print("KL_V8_3V3_LOCAL_VIA", P3V3_LOCAL_VIA)
+    print("KL_V8_GEOMETRY_TAILS_REMOVED", len(removed_any_segments))
 
 
 def migrate(src: Path, dst: Path) -> None:
