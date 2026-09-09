@@ -1,0 +1,39 @@
+name: KH910 Rev A Solenoid Gate Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/inspect_rev_a_solenoid_gate_left.py'
+      - '.github/workflows/kh910-rev-a-solenoid-gate-probe.yml'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Install KiCad 9 runtime
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update -qq
+          sudo apt-get install -qy --no-install-recommends kicad
+      - name: Require clean promoted partition baseline
+        run: |
+          kicad-cli pcb drc --exit-code-violations -o /tmp/gate-probe-baseline.rpt ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/gate-probe-baseline.rpt
+      - name: Probe lower-left gate corridor
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/inspect_rev_a_solenoid_gate_left.py ayab-esp32/ayab-esp32.kicad_pcb | tee /tmp/gate-left-probe.txt
+      - name: Upload probe evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-solenoid-gate-left-probe
+          path: |
+            /tmp/gate-probe-baseline.rpt
+            /tmp/gate-left-probe.txt
