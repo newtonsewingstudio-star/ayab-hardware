@@ -65,6 +65,17 @@ def unique_track(name,point,expected_len,layer=pcbnew.F_Cu,excluded=()):
         raise RuntimeError(f"expected one track at {name} {point} len {expected_len}; found {len(matches)}; candidates={candidates}")
     return matches[0]
 
+def unique_via(name,point,excluded=()):
+    matches=[item for item in board.GetTracks()
+             if isinstance(item,pcbnew.PCB_VIA) and item.GetNetname()==name
+             and near(mm(item.GetPosition()),point) and item not in excluded]
+    if len(matches)!=1:
+        candidates=[mm(item.GetPosition()) for item in board.GetTracks()
+                    if isinstance(item,pcbnew.PCB_VIA) and item.GetNetname()==name
+                    and near(mm(item.GetPosition()),point,0.05) and item not in excluded]
+        raise RuntimeError(f"expected one via at {name} {point}; found {len(matches)}; candidates={candidates}")
+    return matches[0]
+
 removed_adc={ADC_L:0,ADC_R:0}; remove=[]
 for item in board.GetTracks():
     if isinstance(item,pcbnew.PCB_VIA): continue
@@ -105,11 +116,17 @@ wave_specs=[
     (P5,(321.6700,153.4950),1.1950),
     (P5,(320.5950,153.4950),1.0750),
     (P5,(309.7000,153.3700),1.8650),
+    (P5,(320.1300,153.0300),0.6576),
 ]
 wave_found=[]
 for name,point,expected_len in wave_specs:
     item=unique_track(name,point,expected_len,excluded=remove)
     remove.append(item); wave_found.append((name,point,endpoints(item),round(length_mm(item),4)))
+
+# Final DRC pass exposed the now-isolated via at the root of the removed left
+# +5V comparator branch. Remove only that exact via.
+dead_via=unique_via(P5,(309.7000,153.3700),excluded=remove)
+remove.append(dead_via)
 
 for item in remove: board.Remove(item)
 
@@ -129,4 +146,5 @@ print("HALL_V4C_CLEANUP_OK",PATH)
 print("REMOVED_ADC_BCU",removed_adc)
 print("REMOVED_EXACT_SUPPLY_SEGMENTS",len(exact_remove))
 print("REMOVED_DRC_WAVE_SEGMENTS",wave_found)
+print("REMOVED_FINAL_DEAD_VIA",P5,(309.7000,153.3700))
 print("ADDED_U701_GND_LINK",p11,p12)
