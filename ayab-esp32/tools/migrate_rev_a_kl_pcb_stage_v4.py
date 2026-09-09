@@ -5,12 +5,11 @@ The electrical split from v3 is retained, but the physical implementation is
 post-processed before routing:
 
 - remove the obsolete machine-to-U701 branch copper left behind by the split;
-- remove the now-dangling local bridge stubs;
+- remove the now-dangling local bridge stubs and their two final dead tails;
 - remove all prototype endpoint/pull-up vias and short pull-up-bank traces;
-- move R213/R214 onto the real top-right board area at x=265 mm, beyond both
-  the top-edge notch and the rotated J801 footprint;
-- feed both pull-ups from existing +3V3 below J801 through a new local via;
-- launch the two machine sides from well-spaced new vias at (267,118/120).
+- place R213/R214 in the measured clear corridor between J801 and C609;
+- feed both pull-ups from existing +3V3 below J801 through a local via;
+- launch the two machine sides from well-spaced vias at (262,118/120).
 
 The companion router then uses controlled stubs and separate internal layers for
 K and L. The repository PCB remains fail-closed behind topology and two DRC
@@ -34,21 +33,24 @@ sys.modules[spec.name] = v3
 spec.loader.exec_module(v3)
 core = v3.mod
 
-# The board has a top-edge notch ending around x=249.71 mm. J801 is rotated 90
-# degrees and its physical courtyard extends to roughly x=261.45 mm. Keep the
-# pull-ups to the right of both structures with comfortable assembly clearance.
-R213_NEW = (265.0, 118.0)
-R214_NEW = (265.0, 120.0)
-R213_P1 = (264.175, 118.0)
-R213_P2 = (265.825, 118.0)
-R214_P1 = (264.175, 120.0)
-R214_P2 = (265.825, 120.0)
-# Existing +3V3 In2 segment from J801.3 ends at this point; extend from here so
-# no new copper crosses J801.4 (GND) on F.Cu.
+# Verified placement corridor from the run-16 staged board:
+# - J801 courtyard right edge: x ~= 253.85 mm
+# - C609 courtyard left edge: x ~= 263.64 mm
+# R_0603 courtyard half-width is 1.48 mm, so x=260 leaves >4 mm to J801
+# and >2 mm to C609 while remaining on real board area to the right of the
+# top-edge notch.
+R213_NEW = (260.0, 118.0)
+R214_NEW = (260.0, 120.0)
+R213_P1 = (259.175, 118.0)
+R213_P2 = (260.825, 118.0)
+R214_P1 = (259.175, 120.0)
+R214_P2 = (260.825, 120.0)
+# Existing +3V3 In2 segment from J801.3 ends at this point; extend downward
+# and rise locally in the clear corridor.
 P3V3_FEED = (257.13, 122.26)
-P3V3_LOCAL_VIA = (263.0, 124.0)
-K_LAUNCH = (267.0, 118.0)
-L_LAUNCH = (267.0, 120.0)
+P3V3_LOCAL_VIA = (258.0, 124.0)
+K_LAUNCH = (262.0, 118.0)
+L_LAUNCH = (262.0, 120.0)
 
 REMOVE_VIAS = {
     (194.71, 151.86, core.MACH_K),
@@ -85,9 +87,11 @@ REMOVE_SEGMENTS = {
     },
     core.LOCAL_K: {
         frozenset(((194.71, 157.31), (193.515, 158.505))),
+        frozenset(((193.515, 158.505), (191.4775, 158.505))),
     },
     core.LOCAL_L: {
         frozenset(((194.98, 157.69), (193.515, 159.155))),
+        frozenset(((193.515, 159.155), (191.4775, 159.155))),
     },
 }
 
@@ -136,9 +140,11 @@ def move_footprint(block: str, ref: str) -> str:
 
 
 def postprocess(path: Path) -> None:
-    # Fail closed on both geometry mistakes encountered during development.
-    if R213_NEW[0] <= 262.9 or R214_NEW[0] <= 262.9:
-        raise RuntimeError("K/L pull-ups must clear both top-edge notch and J801 courtyard")
+    # Fail closed on the measured component corridor. R_0603 courtyard must
+    # remain wholly between J801 x=253.85 and C609 x=263.64.
+    for ref, pos in (("R213", R213_NEW), ("R214", R214_NEW)):
+        if pos[0] - 1.48 <= 253.85 or pos[0] + 1.48 >= 263.64:
+            raise RuntimeError(f"{ref} placement leaves verified J801/C609 corridor: {pos}")
 
     text = path.read_text(encoding="utf-8")
     children = core.k.root_children(text)
@@ -202,36 +208,36 @@ def postprocess(path: Path) -> None:
 
     extra = [
         # Extend existing +3V3 on In2 below J801, then rise locally to F.Cu.
-        core.k.segment(P3V3_FEED, (257.13, 124.0), "In2.Cu", n3, "kl-v7-3v3-down"),
-        core.k.segment((257.13, 124.0), P3V3_LOCAL_VIA, "In2.Cu", n3, "kl-v7-3v3-right"),
-        core.k.via(P3V3_LOCAL_VIA, n3, "kl-v7-3v3-via"),
-        core.k.segment(P3V3_LOCAL_VIA, (263.0, 120.0), "F.Cu", n3, "kl-v7-3v3-rise-a"),
-        core.k.segment((263.0, 120.0), R214_P1, "F.Cu", n3, "kl-v7-r214-3v3"),
-        core.k.segment((263.0, 120.0), (263.0, 118.0), "F.Cu", n3, "kl-v7-3v3-rise-b"),
-        core.k.segment((263.0, 118.0), R213_P1, "F.Cu", n3, "kl-v7-r213-3v3"),
+        core.k.segment(P3V3_FEED, (257.13, 124.0), "In2.Cu", n3, "kl-v8-3v3-down"),
+        core.k.segment((257.13, 124.0), P3V3_LOCAL_VIA, "In2.Cu", n3, "kl-v8-3v3-right"),
+        core.k.via(P3V3_LOCAL_VIA, n3, "kl-v8-3v3-via"),
+        core.k.segment(P3V3_LOCAL_VIA, (258.0, 120.0), "F.Cu", n3, "kl-v8-3v3-rise-a"),
+        core.k.segment((258.0, 120.0), R214_P1, "F.Cu", n3, "kl-v8-r214-3v3"),
+        core.k.segment((258.0, 120.0), (258.0, 118.0), "F.Cu", n3, "kl-v8-3v3-rise-b"),
+        core.k.segment((258.0, 118.0), R213_P1, "F.Cu", n3, "kl-v8-r213-3v3"),
         # Short machine-side stubs to well-spaced launch vias.
-        core.k.segment(R213_P2, K_LAUNCH, "F.Cu", nk, "kl-v7-r213-k"),
-        core.k.segment(R214_P2, L_LAUNCH, "F.Cu", nl, "kl-v7-r214-l"),
-        core.k.via(K_LAUNCH, nk, "kl-v7-k-launch"),
-        core.k.via(L_LAUNCH, nl, "kl-v7-l-launch"),
+        core.k.segment(R213_P2, K_LAUNCH, "F.Cu", nk, "kl-v8-r213-k"),
+        core.k.segment(R214_P2, L_LAUNCH, "F.Cu", nl, "kl-v8-r214-l"),
+        core.k.via(K_LAUNCH, nk, "kl-v8-k-launch"),
+        core.k.via(L_LAUNCH, nl, "kl-v8-l-launch"),
     ]
     rend = core.root_end(text)
     text = text[:rend] + "\n\t" + "\n\t".join(extra) + "\n" + text[rend:]
     path.write_text(text, encoding="utf-8")
-    print("KL_V7_PHYSICAL_CLEANUP_OK")
-    print("KL_V7_PULLUPS", R213_NEW, R214_NEW)
-    print("KL_V7_LAUNCH_VIAS", K_LAUNCH, L_LAUNCH)
-    print("KL_V7_3V3_LOCAL_VIA", P3V3_LOCAL_VIA)
+    print("KL_V8_PHYSICAL_CLEANUP_OK")
+    print("KL_V8_PULLUPS", R213_NEW, R214_NEW)
+    print("KL_V8_LAUNCH_VIAS", K_LAUNCH, L_LAUNCH)
+    print("KL_V8_3V3_LOCAL_VIA", P3V3_LOCAL_VIA)
 
 
 def migrate(src: Path, dst: Path) -> None:
-    with tempfile.TemporaryDirectory(prefix="kh910-kl-v7-") as td:
+    with tempfile.TemporaryDirectory(prefix="kh910-kl-v8-") as td:
         temp = Path(td) / "stage.kicad_pcb"
         core.migrate(src, temp)
         postprocess(temp)
         core.validate(temp)
         dst.write_text(temp.read_text(encoding="utf-8"), encoding="utf-8")
-    print("KL_V7_ELECTRICAL_STAGE_OK", dst)
+    print("KL_V8_ELECTRICAL_STAGE_OK", dst)
 
 
 def main() -> None:
