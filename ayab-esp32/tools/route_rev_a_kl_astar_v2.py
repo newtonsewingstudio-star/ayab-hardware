@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Route Rev A KH-910 K/L parity using existing DRC-clean vias.
+"""Route Rev A KH-910 K/L parity with controlled endpoint approaches.
 
-Machine K/L and the R213 pull-up route on In1.Cu between existing/new vias.
-R214 is locally congested on In1.Cu, so its launch via uses a deliberate direct
-B.Cu segment into the already DRC-clean horizontal L corridor at y=130.71.
-KiCad DRC after zone refill is authoritative for that final segment.
+The K/L vias are intentionally close because they inherit already DRC-clean
+legacy geometry.  A generic endpoint escape window can erase the neighboring
+via from the obstacle map, so this router instead uses fixed, outward-facing
+stubs and A* only between those safe interior points.
+
+K routes on In1.Cu and L routes on In2.Cu.  The two new pull-up launch vias are
+well separated at the top-right of the ESP32.  KiCad DRC after zone refill is
+still authoritative.
 """
 from __future__ import annotations
 
@@ -25,15 +29,14 @@ STEP = 0.20
 TRACK_W = 0.25
 CLEAR = 0.22
 EDGE_CLEAR = 0.45
-ENDPOINT_ESCAPE_CELLS = 4
+
+# name, actual start via, safe start stub, safe goal stub, actual goal via,
+# label, layer.  Stubs point away from the neighboring K/L via.
 ROUTES = [
-    ("/BROTHER-CONNECTORS/EOL_R_N", (239.22, 145.65), (220.97, 134.15), "machine-k", pcbnew.In1_Cu, True, False),
-    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45, 145.63), (221.67, 134.14), "machine-l", pcbnew.In1_Cu, True, False),
-    ("/BROTHER-CONNECTORS/EOL_R_N", (207.5, 132.025), (220.97, 134.15), "pullup-k", pcbnew.In1_Cu, True, False),
-    # The B.Cu goal is a point on the pre-existing retagged GPIO18 corridor,
-    # which spans through x=207.5 at y=130.71.  A direct same-net segment is
-    # intentionally used here; downstream KiCad DRC is the acceptance gate.
-    ("/BROTHER-CONNECTORS/EOL_R_S", (207.5, 135.325), (207.5, 130.71), "pullup-l", pcbnew.B_Cu, False, True),
+    ("/BROTHER-CONNECTORS/EOL_R_N", (239.22,145.65), (239.30,144.90), (220.30,134.15), (220.97,134.15), "machine-k", pcbnew.In1_Cu),
+    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45,145.63), (237.70,145.63), (222.35,134.14), (221.67,134.14), "machine-l", pcbnew.In2_Cu),
+    ("/BROTHER-CONNECTORS/EOL_R_N", (241.60,118.00), (242.30,118.00), (220.30,134.15), (220.97,134.15), "pullup-k", pcbnew.In1_Cu),
+    ("/BROTHER-CONNECTORS/EOL_R_S", (241.60,120.00), (242.30,120.00), (222.35,134.14), (221.67,134.14), "pullup-l", pcbnew.In2_Cu),
 ]
 
 
@@ -82,27 +85,9 @@ def require_endpoint_via(name, xy, tol=0.02):
         raise RuntimeError(f"expected exactly one {name} via at {xy}, got {matches}")
 
 
-def point_on_same_net_track(name, goal, layer, tol=0.02):
-    code = net_code(name)
-    gx, gy = goal
-    for item in board.GetTracks():
-        if isinstance(item, pcbnew.PCB_VIA) or item.GetNetCode() != code or item.GetLayer() != layer:
-            continue
-        a = item.GetStart(); b = item.GetEnd()
-        ax, ay = mm(a.x), mm(a.y); bx, by = mm(b.x), mm(b.y)
-        if abs(ay - by) <= tol and abs(gy - ay) <= tol and min(ax, bx) - tol <= gx <= max(ax, bx) + tol:
-            return True
-        if abs(ax - bx) <= tol and abs(gx - ax) <= tol and min(ay, by) - tol <= gy <= max(ay, by) + tol:
-            return True
-    return False
-
-
-for name, start, goal, _label, layer, goal_is_via, _direct in ROUTES:
-    require_endpoint_via(name, start)
-    if goal_is_via:
-        require_endpoint_via(name, goal)
-    elif not point_on_same_net_track(name, goal, layer):
-        raise RuntimeError(f"goal {goal} is not on existing {name} copper on layer {layer}")
+for name, actual_start, _stub_start, _stub_goal, actual_goal, _label, _layer in ROUTES:
+    require_endpoint_via(name, actual_start)
+    require_endpoint_via(name, actual_goal)
 
 bb = board.GetBoardEdgesBoundingBox()
 X0 = math.floor(mm(bb.GetX()) / STEP) * STEP
@@ -154,111 +139,93 @@ def build_blocked(route_net, layer):
 
 
 DIRS = [
-    (1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0),
-    (1, 1, math.sqrt(2)), (1, -1, math.sqrt(2)),
-    (-1, 1, math.sqrt(2)), (-1, -1, math.sqrt(2)),
+    (1,0,1.0), (-1,0,1.0), (0,1,1.0), (0,-1,1.0),
+    (1,1,math.sqrt(2)), (1,-1,math.sqrt(2)),
+    (-1,1,math.sqrt(2)), (-1,-1,math.sqrt(2)),
 ]
 
 
 def astar(start_xy, goal_xy, blocked):
     start = cell(*start_xy); goal = cell(*goal_xy)
-    for q in (start, goal):
-        for di in range(-ENDPOINT_ESCAPE_CELLS, ENDPOINT_ESCAPE_CELLS + 1):
-            for dj in range(-ENDPOINT_ESCAPE_CELLS, ENDPOINT_ESCAPE_CELLS + 1):
-                blocked.discard((q[0] + di, q[1] + dj))
+    # Only the exact chosen stub cells may be cleared.  Never erase a broad
+    # endpoint neighborhood: the adjacent K/L via must remain an obstacle.
+    blocked.discard(start)
+    blocked.discard(goal)
 
-    def h(c): return math.hypot(c[0] - goal[0], c[1] - goal[1])
-
-    pq = [(h(start), 0.0, start, None)]
-    best = {start: 0.0}
-    parent = {}
+    def h(c): return math.hypot(c[0]-goal[0], c[1]-goal[1])
+    pq=[(h(start),0.0,start,None)]; best={start:0.0}; parent={}
     while pq:
-        _f, g, cur, incoming = heapq.heappop(pq)
-        if g != best.get(cur):
-            continue
+        _f,g,cur,incoming=heapq.heappop(pq)
+        if g != best.get(cur): continue
         if cur == goal:
-            out = [cur]
+            out=[cur]
             while cur != start:
-                cur = parent[cur]
-                out.append(cur)
+                cur=parent[cur]; out.append(cur)
             return list(reversed(out))
-        for di, dj, cost in DIRS:
-            nxt = (cur[0] + di, cur[1] + dj)
-            if not in_bounds(nxt) or nxt in blocked:
+        for di,dj,cost in DIRS:
+            nxt=(cur[0]+di,cur[1]+dj)
+            if not in_bounds(nxt) or nxt in blocked: continue
+            if di and dj and ((cur[0]+di,cur[1]) in blocked or (cur[0],cur[1]+dj) in blocked):
                 continue
-            if di and dj and ((cur[0] + di, cur[1]) in blocked or (cur[0], cur[1] + dj) in blocked):
-                continue
-            direction = (di, dj)
-            ng = g + cost + (0.10 if incoming is not None and direction != incoming else 0.0)
-            if ng < best.get(nxt, float("inf")):
-                best[nxt] = ng
-                parent[nxt] = cur
-                heapq.heappush(pq, (ng + h(nxt), ng, nxt, direction))
+            direction=(di,dj)
+            ng=g+cost+(0.10 if incoming is not None and direction != incoming else 0.0)
+            if ng < best.get(nxt,float("inf")):
+                best[nxt]=ng; parent[nxt]=cur
+                heapq.heappush(pq,(ng+h(nxt),ng,nxt,direction))
     raise RuntimeError(f"no route {start_xy}->{goal_xy}")
 
 
 def simplify(cells, start, goal):
-    pts = [start] + [xy(c) for c in cells[1:-1]] + [goal]
-    out = [pts[0]]; last = None
+    pts=[start]+[xy(c) for c in cells[1:-1]]+[goal]
+    out=[pts[0]]; last=None
     for b in pts[1:]:
-        a = out[-1]
-        dx = round(b[0] - a[0], 6); dy = round(b[1] - a[1], 6)
-        if abs(dx) < 1e-6: d = (0, 1 if dy > 0 else -1)
-        elif abs(dy) < 1e-6: d = (1 if dx > 0 else -1, 0)
-        elif abs(abs(dx) - abs(dy)) < 1e-6: d = (1 if dx > 0 else -1, 1 if dy > 0 else -1)
-        else: d = None
-        if last is not None and d == last and len(out) >= 2:
-            out[-1] = b
-        else:
-            out.append(b); last = d
+        a=out[-1]; dx=round(b[0]-a[0],6); dy=round(b[1]-a[1],6)
+        if abs(dx)<1e-6: d=(0,1 if dy>0 else -1)
+        elif abs(dy)<1e-6: d=(1 if dx>0 else -1,0)
+        elif abs(abs(dx)-abs(dy))<1e-6: d=(1 if dx>0 else -1,1 if dy>0 else -1)
+        else: d=None
+        if last is not None and d==last and len(out)>=2: out[-1]=b
+        else: out.append(b); last=d
     return out
 
 
-def add_track(a, b, name, layer):
-    tr = pcbnew.PCB_TRACK(board)
+def add_track(a,b,name,layer):
+    tr=pcbnew.PCB_TRACK(board)
     tr.SetStart(pt(*a)); tr.SetEnd(pt(*b)); tr.SetLayer(layer); tr.SetWidth(iu(TRACK_W))
-    n = net_obj(name)
-    if hasattr(tr, "SetNet"):
-        tr.SetNet(n)
-    else:
-        tr.SetNetCode(net_code(name))
+    n=net_obj(name)
+    if hasattr(tr,"SetNet"): tr.SetNet(n)
+    else: tr.SetNetCode(net_code(name))
     board.Add(tr)
 
 
-def layer_name(layer):
-    return board.GetLayerName(layer)
+def layer_name(layer): return board.GetLayerName(layer)
 
 
-report = [
-    "# KH910 Rev A K/L route report v3", "",
-    f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm; endpoint escape {ENDPOINT_ESCAPE_CELLS} cells",
-    "", "Machine/GPIO endpoints reuse DRC-clean vias. R214 uses a direct B.Cu same-net segment with KiCad DRC as the acceptance gate.", "",
+report=[
+    "# KH910 Rev A K/L route report v4", "",
+    f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm",
+    "", "K uses In1.Cu; L uses In2.Cu; close via pairs use controlled outward stubs.", "",
 ]
 
-for name, start, goal, label, layer, _goal_is_via, direct in ROUTES:
-    if direct:
-        add_track(start, goal, name, layer)
-        board.BuildConnectivity()
-        report += [
-            f"## {label}", f"- net: `{name}`", f"- layer: `{layer_name(layer)}`",
-            f"- start: {start}", f"- goal: {goal}", "- routing: deliberate direct segment; downstream KiCad DRC authoritative",
-            "- segments: 1", f"- points: ({start[0]:.3f},{start[1]:.3f}) -> ({goal[0]:.3f},{goal[1]:.3f})", "",
-        ]
-        continue
-    raw = astar(start, goal, build_blocked(name, layer))
-    points = simplify(raw, start, goal)
-    for a, b in zip(points, points[1:]):
-        add_track(a, b, name, layer)
+for name, actual_start, stub_start, stub_goal, actual_goal, label, layer in ROUTES:
+    # Fixed endpoint stubs preserve clearance direction around the close K/L via pairs.
+    add_track(actual_start, stub_start, name, layer)
+    board.BuildConnectivity()
+    raw=astar(stub_start,stub_goal,build_blocked(name,layer))
+    points=simplify(raw,stub_start,stub_goal)
+    for a,b in zip(points,points[1:]): add_track(a,b,name,layer)
+    add_track(stub_goal,actual_goal,name,layer)
     board.BuildConnectivity()
     report += [
         f"## {label}", f"- net: `{name}`", f"- layer: `{layer_name(layer)}`",
-        f"- start: {start}", f"- goal: {goal}", f"- cells: {len(raw)}",
-        f"- segments: {len(points)-1}",
-        "- points: " + " -> ".join(f"({x:.3f},{y:.3f})" for x, y in points), "",
+        f"- via start: {actual_start}", f"- start stub: {stub_start}",
+        f"- goal stub: {stub_goal}", f"- via goal: {actual_goal}",
+        f"- A* cells: {len(raw)}", f"- routed segments: {len(points)+1}",
+        "- A* points: " + " -> ".join(f"({x:.3f},{y:.3f})" for x,y in points), "",
     ]
 
-pcbnew.SaveBoard(str(PATH), board)
-report_path = PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md")
-report_path.write_text("\n".join(report) + "\n")
-print("KL_ROUTE_V3_OK", PATH)
+pcbnew.SaveBoard(str(PATH),board)
+report_path=PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md")
+report_path.write_text("\n".join(report)+"\n")
+print("KL_ROUTE_V4_OK",PATH)
 print(report_path)
