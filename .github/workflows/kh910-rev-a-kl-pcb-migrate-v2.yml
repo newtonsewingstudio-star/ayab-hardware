@@ -23,7 +23,13 @@ jobs:
           fetch-depth: 0
 
       - name: Install KiCad
-        run: bash ./scripts/dependencies.sh
+        run: |
+          # GitHub's runner image currently carries the Google Chrome apt source.
+          # A transient Chrome repository hash mismatch must not block this KiCad-only
+          # hardware validation job, so disable that unrelated source for this run.
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          bash ./scripts/dependencies.sh
 
       - name: Require clean Hall-era PCB baseline
         run: |
