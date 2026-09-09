@@ -10,6 +10,7 @@ on:
       - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v4c.py'
       - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_compat.py'
       - 'ayab-esp32/tools/route_rev_a_hall_astar.py'
+      - 'ayab-esp32/tools/cleanup_rev_a_hall_v4c.py'
       - 'ayab-esp32/tools/refill_rev_a_zones.py'
       - '.github/workflows/kh910-rev-a-hall-pcb-migrate.yml'
 
@@ -57,7 +58,13 @@ jobs:
             /tmp/kh910-stage/ayab-esp32.kicad_pcb
           cat /tmp/kh910-stage/KH910_REV_A_HALL_ASTAR_ROUTE.md
 
-      - name: Validate completed v4c serialized board
+      - name: Clean only DRC-proven residual legacy copper
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/cleanup_rev_a_hall_v4c.py \
+            /tmp/kh910-stage/ayab-esp32.kicad_pcb \
+            | tee /tmp/kh910-hall-cleanup.txt
+
+      - name: Validate completed v4c topology
         run: |
           python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v4c.py \
             --validate /tmp/kh910-stage/ayab-esp32.kicad_pcb
@@ -113,6 +120,7 @@ jobs:
           path: |
             /tmp/kh910-baseline-drc.rpt
             /tmp/kh910-hall-migration.txt
+            /tmp/kh910-hall-cleanup.txt
             /tmp/kh910-staged-drc.rpt
             /tmp/kh910-project-drc.rpt
             /tmp/kh910-stage/KH910_REV_A_HALL_ASTAR_ROUTE.md
