@@ -1,0 +1,265 @@
+# KH910 Rev A — Hall Local Copper Audit
+
+Baseline board is DRC-clean. This report enumerates Hall-adjacent copper so v4 can prune/reconnect exact branches rather than broad nets.
+
+## LEFT
+
+Items: **79**
+
+- `GND` #2 — segment `F.Cu` — points `[(95.545, 142.275), (95.54, 142.27)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(91.0628, 139.828), (91.7878, 139.103)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(88.6878, 128.478), (88.1128, 127.903)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(91.0378, 138.353), (91.7878, 139.103)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(93.053, 142.203), (93.07, 142.22)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(91.0628, 141.478), (91.0628, 139.828)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(97.05, 142.275), (95.545, 142.275)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(93.063, 139.103), (93.07, 139.11)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(91.7878, 139.103), (93.063, 139.103)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(91.0378, 137.028), (91.0378, 138.353)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(91.7878, 142.203), (93.053, 142.203)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(91.7878, 142.203), (91.0628, 141.478)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(87.0878, 126.928), (87.0878, 128.428)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(87.0878, 142.203), (87.0878, 143.5522)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(86.3628, 130.528), (86.3628, 129.253)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(87.2278, 131.393), (86.3628, 130.528)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(86.012, 132.078), (85.96, 132.13)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(87.2278, 132.078), (87.2278, 131.393)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(87.0878, 143.5522), (87.08, 143.56)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(93.083, 140.653), (91.7878, 140.653)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(87.2278, 132.078), (86.012, 132.078)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(93.14, 140.71), (93.083, 140.653)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(87.0878, 128.428), (87.1378, 128.478)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(86.3628, 129.253), (87.1378, 128.478)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(87.08, 143.54), (87.08, 143.56)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(91.52, 139.09), (93.14, 140.71)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(91.52, 139.09), (91.52, 139.1)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(87.07, 131.02), (91.52, 135.47)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(85.77, 153.42), (85.77, 144.87)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(87.07, 125.71), (87.07, 131.02)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(85.77, 144.87), (87.08, 143.56)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(91.52, 139.1), (87.08, 143.54)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(87.07, 131.02), (85.96, 132.13)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(91.52, 135.47), (91.52, 139.09)]` — uuid ``
+- `+5V` #5 — segment `B.Cu` — points `[(85.96, 132.13), (83.29, 132.13)]` — uuid ``
+- `+5V` #5 — segment `B.Cu` — points `[(83.29, 132.13), (79.32, 128.16)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(87.0878, 139.103), (86.557, 139.103)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(85.57, 140.09), (85.57, 158.58)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(86.557, 139.103), (85.57, 140.09)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(87.2278, 137.028), (87.2278, 138.963)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(87.2278, 138.963), (87.0878, 139.103)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(85.09, 137.514892), (85.09, 158.82)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(87.0878, 130.028), (88.4978, 131.438)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(88.4978, 132.078), (88.4978, 134.107092)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(88.4978, 134.107092), (85.09, 137.514892)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(88.4978, 131.438), (88.4978, 132.078)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(89.7678, 132.078), (89.7678, 137.028)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(84.46, 147.23), (84.46, 135.91)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(90.1378, 139.103), (90.1378, 140.653)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(84.46, 135.91), (85.38, 134.99)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(86.3, 135.0), (87.19, 134.11)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(89.7678, 138.733), (90.1378, 139.103)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(85.38, 134.99), (85.39, 135.0)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(89.7678, 137.028), (89.7678, 138.733)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `F.Cu` — points `[(85.39, 135.0), (86.3, 135.0)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `B.Cu` — points `[(89.512, 132.078), (89.7678, 132.078)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `B.Cu` — points `[(87.48, 134.11), (89.512, 132.078)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — segment `B.Cu` — points `[(87.19, 134.11), (87.48, 134.11)]` — uuid ``
+- `Net-(U702A--)` #90 — segment `F.Cu` — points `[(88.4978, 138.863), (88.7378, 139.103)]` — uuid ``
+- `Net-(U702A--)` #90 — segment `F.Cu` — points `[(88.7378, 140.653), (88.7378, 139.103)]` — uuid ``
+- `Net-(U702A--)` #90 — segment `F.Cu` — points `[(88.4978, 137.028), (88.4978, 138.863)]` — uuid ``
+- `Net-(U702B-+)` #91 — segment `F.Cu` — points `[(90.1378, 130.028), (91.0378, 130.928)]` — uuid ``
+- `Net-(U702B-+)` #91 — segment `F.Cu` — points `[(88.7378, 130.028), (90.1378, 130.028)]` — uuid ``
+- `Net-(U702B-+)` #91 — segment `F.Cu` — points `[(91.0378, 130.928), (91.0378, 132.078)]` — uuid ``
+- `Net-(R719-Pad2)` #94 — segment `F.Cu` — points `[(88.7378, 142.203), (88.6378, 142.203)]` — uuid ``
+- `Net-(R719-Pad2)` #94 — segment `F.Cu` — points `[(88.6378, 142.203), (87.0878, 140.653)]` — uuid ``
+- `Net-(R719-Pad2)` #94 — segment `F.Cu` — points `[(90.1378, 142.203), (88.7378, 142.203)]` — uuid ``
+- `Net-(R720-Pad1)` #95 — segment `F.Cu` — points `[(90.1378, 128.478), (90.1378, 128.328)]` — uuid ``
+- `Net-(R720-Pad1)` #95 — segment `F.Cu` — points `[(91.6878, 130.028), (90.1378, 128.478)]` — uuid ``
+- `Net-(R720-Pad1)` #95 — segment `F.Cu` — points `[(90.1378, 128.328), (88.7378, 126.928)]` — uuid ``
+- `Net-(R720-Pad1)` #95 — segment `F.Cu` — points `[(91.7878, 130.028), (91.6878, 130.028)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(93.07, 142.22)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(95.54, 142.27)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(93.07, 139.11)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(87.08, 143.56)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(85.96, 132.13)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(93.14, 140.71)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — via `F.Cu-B.Cu` — points `[(89.7678, 132.078)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_L` #63 — via `F.Cu-B.Cu` — points `[(87.19, 134.11)]` — uuid ``
+
+## RIGHT
+
+Items: **61**
+
+- `GND` #2 — segment `F.Cu` — points `[(326.075, 154.17), (328.05, 154.17)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(325.27, 154.975), (326.075, 154.17)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(311.565, 153.37), (311.57, 153.375)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(321.67, 153.495), (322.515, 152.65)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(310.9, 157.28), (310.37, 156.75)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(312.325, 157.28), (310.9, 157.28)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(320.595, 153.495), (321.67, 153.495)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(310.37, 156.75), (310.37, 154.575)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(324.495, 152.65), (325.27, 153.425)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(325.27, 153.425), (326.77, 153.425)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(320.13, 152.3), (320.13, 153.03)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(313.12, 158.075), (312.325, 157.28)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(310.37, 154.575), (311.57, 153.375)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(320.13, 153.03), (320.595, 153.495)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(326.77, 153.425), (326.82, 153.375)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(309.7, 153.37), (311.565, 153.37)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(322.515, 152.65), (324.495, 152.65)]` — uuid ``
+- `+5V` #5 — segment `B.Cu` — points `[(309.73, 153.37), (310.8, 152.3)]` — uuid ``
+- `+5V` #5 — segment `B.Cu` — points `[(310.8, 152.3), (320.13, 152.3)]` — uuid ``
+- `+5V` #5 — segment `B.Cu` — points `[(323.38, 155.55), (338.7025, 155.55)]` — uuid ``
+- `+5V` #5 — segment `B.Cu` — points `[(309.7, 153.37), (309.73, 153.37)]` — uuid ``
+- `+5V` #5 — segment `B.Cu` — points `[(320.13, 152.3), (323.38, 155.55)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(317.245, 156.035), (316.72, 156.035)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(321.66, 160.16), (321.37, 160.16)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(321.37, 160.16), (317.245, 156.035)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(314.925, 156.17), (314.67, 156.425)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(322.45, 160.95), (321.66, 160.16)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(313.12, 156.425), (314.67, 156.425)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(316.72, 156.035), (316.585, 156.17)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(316.585, 156.17), (314.925, 156.17)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(321.67, 156.035), (316.72, 156.035)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R` #64 — segment `F.Cu` — points `[(332.5875, 160.95), (322.45, 160.95)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(309.59, 152.64), (304.35, 147.4)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(314.67, 153.375), (313.935, 152.64)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(313.935, 152.64), (309.59, 152.64)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(314.67, 153.375), (316.6, 153.375)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(316.6, 153.375), (316.72, 153.495)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(318.62, 152.39), (309.82, 152.39)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(322.33, 154.765), (323.72, 153.375)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(321.67, 154.765), (322.33, 154.765)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(309.82, 152.39), (304.45, 147.02)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(321.67, 154.765), (320.995, 154.765)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(320.995, 154.765), (318.62, 152.39)]` — uuid ``
+- `Net-(U703A--)` #92 — segment `F.Cu` — points `[(313.12, 155.025), (314.67, 155.025)]` — uuid ``
+- `Net-(U703A--)` #92 — segment `F.Cu` — points `[(316.72, 154.765), (314.93, 154.765)]` — uuid ``
+- `Net-(U703A--)` #92 — segment `F.Cu` — points `[(314.93, 154.765), (314.67, 155.025)]` — uuid ``
+- `Net-(U703B-+)` #93 — segment `F.Cu` — points `[(323.72, 156.425), (323.72, 155.025)]` — uuid ``
+- `Net-(U703B-+)` #93 — segment `F.Cu` — points `[(322.84, 157.305), (323.72, 156.425)]` — uuid ``
+- `Net-(U703B-+)` #93 — segment `F.Cu` — points `[(321.67, 157.305), (322.84, 157.305)]` — uuid ``
+- `Net-(R721-Pad2)` #96 — segment `F.Cu` — points `[(311.57, 155.025), (311.57, 154.925)]` — uuid ``
+- `Net-(R721-Pad2)` #96 — segment `F.Cu` — points `[(311.57, 154.925), (313.12, 153.375)]` — uuid ``
+- `Net-(R721-Pad2)` #96 — segment `F.Cu` — points `[(311.57, 156.425), (311.57, 155.025)]` — uuid ``
+- `Net-(R722-Pad1)` #97 — segment `F.Cu` — points `[(323.72, 157.975), (325.27, 156.425)]` — uuid ``
+- `Net-(R722-Pad1)` #97 — segment `F.Cu` — points `[(323.72, 158.075), (323.72, 157.975)]` — uuid ``
+- `Net-(R722-Pad1)` #97 — segment `F.Cu` — points `[(325.42, 156.425), (326.82, 155.025)]` — uuid ``
+- `Net-(R722-Pad1)` #97 — segment `F.Cu` — points `[(325.27, 156.425), (325.42, 156.425)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(313.02, 160.16)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(321.66, 158.65)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(312.24, 151.11)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(309.7, 153.37)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(320.13, 152.3)]` — uuid ``
+
+## U701
+
+Items: **81**
+
+- `GND` #2 — segment `F.Cu` — points `[(175.7974, 157.9174), (177.0125, 157.9174)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(182.8126, 157.9174), (182.82, 157.91)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(191.4775, 153.955), (192.395, 153.955)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(190.065, 153.955), (191.4775, 153.955)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(182.809066, 161.159066), (182.81, 161.16)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(189.03, 152.92), (190.065, 153.955)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(181.7125, 161.159066), (182.809066, 161.159066)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(181.7125, 156.296567), (182.806567, 156.296567)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(192.735, 153.615), (192.735, 152.54)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(191.4775, 153.955), (191.4775, 154.605)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(182.81, 159.59), (182.758233, 159.538233)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(182.758233, 159.538233), (181.7125, 159.538233)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(181.7125, 154.675734), (182.765734, 154.675734)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(182.765734, 154.675734), (182.77, 154.68)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(181.7125, 157.9174), (182.8126, 157.9174)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(181.7125, 153.054901), (182.765099, 153.054901)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(182.765099, 153.054901), (182.77, 153.05)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(182.806567, 156.296567), (182.81, 156.3)]` — uuid ``
+- `+5V` #5 — segment `F.Cu` — points `[(192.395, 153.955), (192.735, 153.615)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(181.42, 162.55), (182.81, 161.16)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(166.64, 162.55), (181.42, 162.55)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(204.17, 157.83), (193.89, 157.83)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(182.81, 161.16), (182.81, 153.75)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(184.13, 162.48), (182.81, 161.16)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(189.25, 162.48), (184.13, 162.48)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(193.89, 157.83), (191.63, 160.09)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(182.81, 153.75), (182.81, 151.48)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(191.63, 160.09), (191.63, 160.1)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(191.63, 160.1), (189.25, 162.48)]` — uuid ``
+- `+5V` #5 — segment `In2.Cu` — points `[(182.735, 153.825), (182.81, 153.75)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(178.6625, 156.296567), (180.0625, 156.296567)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(188.29, 155.03), (190.465, 157.205)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(175.493433, 157.096567), (177.8625, 157.096567)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(180.883333, 157.1174), (183.1726, 157.1174)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(180.0625, 156.296567), (180.883333, 157.1174)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(187.19, 155.03), (188.29, 155.03)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(177.8625, 157.096567), (178.6625, 156.296567)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(183.1726, 157.1174), (184.01, 156.28)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(185.94, 156.28), (187.19, 155.03)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(184.01, 156.28), (185.94, 156.28)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_K` #37 — segment `F.Cu` — points `[(190.465, 157.205), (191.4775, 157.205)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(185.65, 156.57), (189.27, 156.57)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(180.0625, 157.9174), (180.8625, 158.7174)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(183.5026, 158.7174), (184.65, 157.57)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(177.8625, 158.7174), (178.6625, 157.9174)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(180.8625, 158.7174), (183.5026, 158.7174)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(178.6625, 157.9174), (180.0625, 157.9174)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(190.555, 157.855), (191.4775, 157.855)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(175.625892, 158.7174), (177.8625, 158.7174)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(184.65, 157.57), (185.65, 156.57)]` — uuid ``
+- `/IO CONDITIONING/EOL_L_L` #38 — segment `F.Cu` — points `[(189.27, 156.57), (190.555, 157.855)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(183.140934, 160.359066), (183.48, 160.02)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(185.9, 158.86), (187.19, 157.57)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(184.12, 158.86), (185.9, 158.86)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(194.71, 157.31), (193.515, 158.505)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(180.883333, 160.359066), (183.140934, 160.359066)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(189.55, 157.57), (190.485, 158.505)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(183.48, 159.5), (184.12, 158.86)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(193.515, 158.505), (191.4775, 158.505)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(180.0625, 159.538233), (180.883333, 160.359066)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(190.485, 158.505), (191.4775, 158.505)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(187.19, 157.57), (189.55, 157.57)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(178.6625, 159.538233), (180.0625, 159.538233)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_N` #69 — segment `F.Cu` — points `[(183.48, 160.02), (183.48, 159.5)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(194.98, 157.69), (193.515, 159.155)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(184.65, 160.11), (185.33, 160.11)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(184.65, 160.67), (184.65, 160.11)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(185.33, 160.11), (186.42, 159.02)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(180.8625, 161.959066), (183.360934, 161.959066)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(186.42, 159.02), (191.3425, 159.02)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(193.515, 159.155), (191.4775, 159.155)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(180.0625, 161.159066), (180.8625, 161.959066)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(191.3425, 159.02), (191.4775, 159.155)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(178.6625, 161.159066), (180.0625, 161.159066)]` — uuid ``
+- `/BROTHER-CONNECTORS/EOL_R_S` #70 — segment `F.Cu` — points `[(183.360934, 161.959066), (184.65, 160.67)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(182.82, 157.91)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(182.81, 156.3)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(182.81, 159.59)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(182.81, 161.16)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(182.77, 154.68)]` — uuid ``
+- `+5V` #5 — via `F.Cu-B.Cu` — points `[(182.77, 153.05)]` — uuid ``
+
+## MCU_ROUTE
+
+Items: **20**
+
+- `GND` #2 — segment `F.Cu` — points `[(221.8, 127.31), (222.475, 127.985)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(213.72, 138.6), (215.57, 136.75)]` — uuid ``
+- `GND` #2 — segment `F.Cu` — points `[(213.575, 138.6), (213.72, 138.6)]` — uuid ``
+- `/ESP32/EOL_L_P` #26 — segment `F.Cu` — points `[(219.55, 128.83), (217.845, 127.125)]` — uuid ``
+- `/ESP32/EOL_L_P` #26 — segment `F.Cu` — points `[(217.845, 127.125), (217.125, 127.125)]` — uuid ``
+- `/ESP32/EOL_L_P` #26 — segment `F.Cu` — points `[(219.55, 134.13), (219.55, 128.83)]` — uuid ``
+- `/ESP32/EOL_L_P` #26 — segment `B.Cu` — points `[(218.72, 135.79), (218.72, 151.464898)]` — uuid ``
+- `/ESP32/EOL_L_P` #26 — segment `B.Cu` — points `[(219.55, 134.96), (218.72, 135.79)]` — uuid ``
+- `/ESP32/EOL_L_P` #26 — segment `B.Cu` — points `[(219.55, 134.13), (219.55, 134.96)]` — uuid ``
+- `/ESP32/EOL_L_N` #27 — segment `F.Cu` — points `[(218.8, 128.93), (217.845, 127.975)]` — uuid ``
+- `/ESP32/EOL_L_N` #27 — segment `F.Cu` — points `[(218.8, 134.13), (218.8, 128.93)]` — uuid ``
+- `/ESP32/EOL_L_N` #27 — segment `F.Cu` — points `[(217.845, 127.975), (217.125, 127.975)]` — uuid ``
+- `/ESP32/EOL_L_N` #27 — segment `B.Cu` — points `[(218.47, 135.63), (218.47, 151.041244)]` — uuid ``
+- `/ESP32/EOL_L_N` #27 — segment `B.Cu` — points `[(218.8, 134.13), (218.8, 135.3)]` — uuid ``
+- `/ESP32/EOL_L_N` #27 — segment `B.Cu` — points `[(218.8, 135.3), (218.47, 135.63)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(209.78, 126.38)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(221.8, 127.31)]` — uuid ``
+- `GND` #2 — via `F.Cu-B.Cu` — points `[(215.57, 136.75)]` — uuid ``
+- `/ESP32/EOL_L_P` #26 — via `F.Cu-B.Cu` — points `[(219.55, 134.13)]` — uuid ``
+- `/ESP32/EOL_L_N` #27 — via `F.Cu-B.Cu` — points `[(218.8, 134.13)]` — uuid ``
+
