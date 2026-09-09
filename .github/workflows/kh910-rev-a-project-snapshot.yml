@@ -1,0 +1,220 @@
+name: KH910 Rev A Project Snapshot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - '.github/workflows/kh910-rev-a-project-snapshot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pinned hardware snapshot
+        uses: actions/checkout@v4
+        with:
+          repository: newtonsewingstudio-star/ayab-hardware
+          ref: bce33d63ab0a492a93a95aaad2622a18e02066e9
+          path: AYAB-ESP32_KH910_RevA_Project_2026-09-08/hardware
+          fetch-depth: 1
+
+      - name: Checkout pinned firmware baseline
+        uses: actions/checkout@v4
+        with:
+          repository: newtonsewingstudio-star/ayab-firmware
+          ref: 33c8dd6909133b070d3e396743a269f7baf1cf49
+          path: AYAB-ESP32_KH910_RevA_Project_2026-09-08/firmware
+          fetch-depth: 1
+
+      - name: Write project handoff
+        shell: bash
+        run: |
+          ROOT=AYAB-ESP32_KH910_RevA_Project_2026-09-08
+          rm -rf "$ROOT/hardware/.git" "$ROOT/firmware/.git"
+
+          cat > "$ROOT/README_PACKAGE.md" <<'EOF'
+          # AYAB-ESP32 KH910 Rev A — Project Snapshot
+
+          Snapshot date: 2026-09-08
+
+          This archive is a self-contained restart point for the Newton Sewing Studio AYAB-ESP32 KH910 Rev A project.
+
+          Contents:
+          - `hardware/` — full hardware repository pinned to the project snapshot commit.
+          - `firmware/` — full firmware repository pinned to the current baseline commit.
+          - `PROJECT_HANDOFF_2026-09-08.md` — current design status, completed work, blocker, and exact next step.
+          - `SOURCE_COMMITS.txt` — authoritative source pins.
+
+          Important: the project remains in architecture/layout review. **Do not fabricate this revision yet.**
+          EOF
+
+          cat > "$ROOT/SOURCE_COMMITS.txt" <<'EOF'
+          PROJECT=AYAB-ESP32 KH910 Rev A
+          SNAPSHOT_DATE=2026-09-08
+
+          HARDWARE_REPO=https://github.com/newtonsewingstudio-star/ayab-hardware
+          HARDWARE_BRANCH=ayab-esp32-kh910-rev-a
+          HARDWARE_COMMIT=bce33d63ab0a492a93a95aaad2622a18e02066e9
+          HARDWARE_UPSTREAM_BASELINE=e16ffd2bc1b3110e265ee568f9de8026007d0b2a
+
+          FIRMWARE_REPO=https://github.com/newtonsewingstudio-star/ayab-firmware
+          FIRMWARE_BRANCH=main
+          FIRMWARE_COMMIT=33c8dd6909133b070d3e396743a269f7baf1cf49
+          EOF
+
+          cat > "$ROOT/PROJECT_HANDOFF_2026-09-08.md" <<'EOF'
+          # AYAB-ESP32 KH910 Rev A — Project Handoff
+
+          **Snapshot date:** 2026-09-08  
+          **Status:** Architecture/layout redesign in progress. **Do not fabricate.**
+
+          ## Source pins
+
+          - Hardware: `newtonsewingstudio-star/ayab-hardware`
+          - Hardware branch: `ayab-esp32-kh910-rev-a`
+          - Hardware snapshot commit: `bce33d63ab0a492a93a95aaad2622a18e02066e9`
+          - Firmware: `newtonsewingstudio-star/ayab-firmware`
+          - Firmware baseline commit: `33c8dd6909133b070d3e396743a269f7baf1cf49`
+
+          ## Project target
+
+          A production-capable modernization of the AYAB ESP32 prototype, with KH-910 correctness as the primary validation target and sensible compatibility with other electronic Brother machines retained wherever it does not compromise KH-910.
+
+          Target characteristics include ESP32-S3, USB-C, Wi-Fi, AYAB compatibility, factory SMD assembly, serviceable/testable hardware, hardware-default-safe solenoid control, and an eventual drop-in KH910 console/front-panel option using the original physical controls and enclosure where practical.
+
+          ## Major work completed so far
+
+          1. **U602 regulator metadata corrected**
+             - 3.3 V regulator corrected to `XL1509-3.3E1`.
+             - LCSC corrected to `C74193`.
+
+          2. **Native ESP32-S3 USB routing corrected**
+             - USB routed to the appropriate native ESP32-S3 USB GPIOs (GPIO19/GPIO20).
+
+          3. **KH910 right-side K/L sensing redesigned**
+             - K and L remain separate digital signals.
+             - Comparator normalization is bypassed for KH910 K/L.
+             - External 3.3 V pull-ups and dedicated MCU inputs are used.
+             - Native K/L polarity is preserved in hardware; firmware interprets it.
+
+          4. **Analog Hall path modernized**
+             - Analog Hall signals use passive scaling into ADC-capable ESP32 inputs rather than unnecessary comparator normalization.
+
+          5. **Machine-power sensing added to architecture**
+             - GPIO4 is allocated for machine-power sense.
+
+          6. **5 V reverse-current isolation architecture established**
+             - LM66100-based isolation is used to prevent unwanted reverse powering/backfeed behavior.
+             - USB-only machine-power backfeed remains a mandatory hardware regression test.
+
+          7. **Hardware-default-OFF solenoid power gate schematic completed**
+             - GPIO21 is `SOLENOID_PWR_EN`.
+             - High-side P-channel MOSFET controls the solenoid 12 V rail.
+             - AO3400A pull-down/control stage orientation was corrected after body-diode review.
+             - The solenoid rail defaults OFF during MCU reset/boot or missing control.
+             - TP703 / `SOL12_SW` was added for switched-rail verification.
+
+          8. **Architecture, power, I/O, verification, mechanical/front-panel, and layout audit documentation added**
+             - See the `hardware/ayab-esp32/KH910_REV_A_*.md` files.
+             - Patch/audit tooling is in `hardware/ayab-esp32/tools/`.
+             - Project-specific validation workflows are in `hardware/.github/workflows/`.
+
+          ## Current blocker: solenoid fail-safe PCB routing serialization
+
+          The fail-safe circuit is present in the schematic, but the final routed PCB migration has **not** been committed because KiCad rejects the generated routed board.
+
+          The parser-isolation workflow narrowed the failure precisely:
+
+          | Isolation stage | KiCad board load / direct DRC |
+          |---|---|
+          | `00_original` | Loads; direct DRC runs; 731 baseline violations |
+          | `10_netdefs_only` | Loads; 731 violations |
+          | `20_migration_only` | Loads; 753 violations |
+          | `30_with_footprints` | Loads; 813 violations |
+          | `40_full` | **Fails to load board** |
+
+          Therefore:
+          - adding the switched-net definitions is syntactically valid;
+          - migrating the intended solenoid pads to the switched rail is syntactically valid;
+          - adding Q805, Q806, R820-R822, and TP703 footprints is syntactically valid;
+          - the serialization failure is introduced by the **routing section** generated by `patch_rev_a_solenoid_pcb.py`.
+
+          The rejected routed PCB was never committed. The committed PCB at the snapshot commit remains the valid pre-solenoid-layout board.
+
+          ### Important DRC clarification
+
+          Direct KiCad DRC shows the upstream/current board already has a substantial baseline violation count (731 in the parser-isolation run). Earlier workflow success meant the job completed, not that the board had zero DRC findings. From this point onward, use direct DRC output and compare deltas; do not treat a successful command alone as a clean board.
+
+          ## Exact restart point for the next session
+
+          Start with:
+
+          `hardware/ayab-esp32/tools/patch_rev_a_solenoid_pcb.py`
+
+          Goal: identify and repair the syntax/serialization of the routing primitives only. Do not redesign the already validated schematic unless new evidence requires it.
+
+          Recommended sequence:
+          1. Reuse `probe_rev_a_solenoid_pcb_serialization.py` and the serialization workflow.
+          2. Split the routing contribution into smaller classes (control traces, switched-rail trunk, branch traces/vias, etc.).
+          3. Run a direct KiCad board-load/DRC probe after each class.
+          4. Find the first routing primitive that causes `Failed to load board`.
+          5. Correct its KiCad serialization.
+          6. Once the full board loads, inspect actual DRC deltas and fix new violations rather than weakening rules.
+          7. Commit the PCB only after it is parseable and its new routing has been reviewed.
+
+          ## Major work remaining before fabrication
+
+          - Complete and review solenoid fail-safe PCB placement/routing.
+          - Verify all power states: machine-only, USB-only, both powered, plug/unplug transients, reset, brownout, and fault conditions.
+          - Confirm USB cannot partially energize machine/solenoid power domains.
+          - Review all machine-facing connectors for ESD/transient protection.
+          - Complete boot/reset/failure-mode analysis: solenoids must remain OFF until deliberately enabled.
+          - Review test points, silkscreen, service access, connector orientation/keying, and board mechanical fit.
+          - Review JLC/LCSC availability and generate/review BOM, CPL, Gerbers, and fabrication plots.
+          - Triage and ultimately resolve/justify the board's DRC baseline before fabrication.
+          - Begin/continue diagnostic firmware for MCP23017 enumeration, encoder signals, KH910 K/L transitions, Hall ADC readings, machine-power sense, and safe single-solenoid testing.
+          - Continue documentation-first front-panel/mechanical reverse engineering; request physical measurements from the KH910 only for dimensions that cannot be established reliably from documentation.
+
+          ## Design principles that remain locked unless evidence changes them
+
+          - Keep ESP32-S3-MINI-1-N4R2.
+          - Keep USB-C and Wi-Fi.
+          - Keep MCP23017 architecture.
+          - Keep ULN2003A solenoid drivers, with the added fail-safe switched 12 V rail.
+          - Preserve separate KH910 K and L digital inputs.
+          - Preserve native K/L polarity in hardware.
+          - Prefer passive analog level scaling where active comparators are unnecessary.
+          - Factory SMD assembly is preferred.
+          - Avoid feature creep that interferes with getting a correct, manufacturable KH910 controller built and tested.
+
+          ## Safety/fabrication gate
+
+          **Do not send this snapshot to fabrication.** It is a development snapshot intended to preserve the current work and allow an exact restart.
+          EOF
+
+          printf 'Package assembled by GitHub Actions from pinned source commits.\n' > "$ROOT/PACKAGE_NOTE.txt"
+
+      - name: Verify package contents
+        shell: bash
+        run: |
+          ROOT=AYAB-ESP32_KH910_RevA_Project_2026-09-08
+          test -f "$ROOT/PROJECT_HANDOFF_2026-09-08.md"
+          test -f "$ROOT/hardware/ayab-esp32/KH910_REV_A_SOLENOID_PCB_SERIALIZATION.md"
+          test -f "$ROOT/hardware/ayab-esp32/tools/patch_rev_a_solenoid_pcb.py"
+          test -f "$ROOT/hardware/ayab-esp32/ayab-esp32.kicad_pcb"
+          test -d "$ROOT/firmware"
+          find "$ROOT" -maxdepth 2 -type f | sort | sed -n '1,120p'
+
+      - name: Upload single project archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: AYAB-ESP32_KH910_RevA_Project_2026-09-08
+          path: AYAB-ESP32_KH910_RevA_Project_2026-09-08
+          include-hidden-files: true
+          compression-level: 6
+          retention-days: 30
