@@ -136,11 +136,12 @@ remove.append(final_via)
 final_bcu=unique_track(P5,(309.7300,153.3700),1.5132,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(final_bcu)
 
-# Removing those remnants exposes the last comparator-era +5V B.Cu trunk.
-# KiCad identifies it uniquely by endpoint and length; no other B.Cu power
-# route is touched.
+# Removing those remnants exposes the two final comparator-era +5V B.Cu
+# branches. Both are uniquely identified by a DRC endpoint and length.
 final_trunk=unique_track(P5,(310.8000,152.3000),9.3300,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(final_trunk)
+final_symmetric=unique_track(P5,(320.1300,152.3000),4.5962,layer=pcbnew.B_Cu,excluded=remove)
+remove.append(final_symmetric)
 
 for item in remove: board.Remove(item)
 
@@ -165,4 +166,5 @@ print("REMOVED_LEFT_BCU_REMNANT",P5,(309.7000,153.3700),0.0300)
 print("REMOVED_FINAL_DEAD_VIA",P5,(320.1300,152.3000))
 print("REMOVED_FINAL_BCU_REMNANT",P5,(309.7300,153.3700),1.5132)
 print("REMOVED_LAST_BCU_TRUNK",P5,(310.8000,152.3000),9.3300)
+print("REMOVED_FINAL_SYMMETRIC_BCU",P5,(320.1300,152.3000),4.5962)
 print("ADDED_U701_GND_LINK",p11,p12)
