@@ -12,6 +12,7 @@ on:
       - 'ayab-esp32/ioconditioning.kicad_sch'
       - '.github/workflows/kh910-rev-a-kl-netlist-audit.yml'
 
+# Rev A parity refresh marker: run against the Hall-migrated board era.
 permissions:
   contents: read
 
