@@ -1,0 +1,47 @@
+name: KH910 Rev A Solenoid Bus Inspect
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/inspect_rev_a_solenoid_bus.py'
+      - '.github/workflows/kh910-rev-a-solenoid-bus-inspect.yml'
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+
+      - name: Install KiCad
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          bash ./scripts/dependencies.sh
+
+      - name: Require clean validated PCB baseline
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/solenoid-inspect-baseline-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/solenoid-inspect-baseline-drc.rpt
+
+      - name: Inspect solenoid and raw +12V copper
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/inspect_rev_a_solenoid_bus.py \
+            ayab-esp32/ayab-esp32.kicad_pcb \
+            | tee /tmp/solenoid-bus-inspect.txt
+
+      - name: Upload inspection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-solenoid-bus-inspect
+          path: |
+            /tmp/solenoid-inspect-baseline-drc.rpt
+            /tmp/solenoid-bus-inspect.txt
+          if-no-files-found: ignore
