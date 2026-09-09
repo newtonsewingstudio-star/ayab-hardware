@@ -87,11 +87,13 @@ REMOVE_SEGMENTS = {
     },
     core.LOCAL_K: {
         frozenset(((194.71, 157.31), (193.515, 158.505))),
-        frozenset(((193.515, 158.505), (191.4775, 158.505))),
+        # pair_key normalizes coordinates to 0.001 mm, so KiCad 191.4775
+        # serializes into the comparison key as 191.478.
+        frozenset(((193.515, 158.505), (191.478, 158.505))),
     },
     core.LOCAL_L: {
         frozenset(((194.98, 157.69), (193.515, 159.155))),
-        frozenset(((193.515, 159.155), (191.4775, 159.155))),
+        frozenset(((193.515, 159.155), (191.478, 159.155))),
     },
 }
 
