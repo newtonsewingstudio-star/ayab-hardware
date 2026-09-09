@@ -29,157 +29,100 @@ P5 = "+5V"
 TOL = 0.004
 
 
-def mm(p):
-    return (pcbnew.ToMM(p.x), pcbnew.ToMM(p.y))
-
-
-def near(a, b, tol=TOL):
-    return math.hypot(a[0] - b[0], a[1] - b[1]) <= tol
-
-
-def endpoints(item):
-    return mm(item.GetStart()), mm(item.GetEnd())
-
-
-def same_ends(item, a, b):
-    p, q = endpoints(item)
-    return (near(p, a) and near(q, b)) or (near(p, b) and near(q, a))
-
-
-def touches(item, point):
-    p, q = endpoints(item)
-    return near(p, point) or near(q, point)
-
-
+def mm(p): return (pcbnew.ToMM(p.x), pcbnew.ToMM(p.y))
+def near(a,b,tol=TOL): return math.hypot(a[0]-b[0],a[1]-b[1]) <= tol
+def endpoints(item): return mm(item.GetStart()), mm(item.GetEnd())
+def same_ends(item,a,b):
+    p,q=endpoints(item); return (near(p,a) and near(q,b)) or (near(p,b) and near(q,a))
+def touches(item,point):
+    p,q=endpoints(item); return near(p,point) or near(q,point)
 def length_mm(item):
-    p, q = endpoints(item)
-    return math.hypot(p[0] - q[0], p[1] - q[1])
-
+    p,q=endpoints(item); return math.hypot(p[0]-q[0],p[1]-q[1])
 
 def net_obj(name):
     for fp in board.GetFootprints():
         for pad in fp.Pads():
-            if pad.GetNetname() == name and hasattr(pad, "GetNet"):
-                return pad.GetNet()
+            if pad.GetNetname()==name and hasattr(pad,"GetNet"): return pad.GetNet()
     for item in board.GetTracks():
-        if item.GetNetname() == name and hasattr(item, "GetNet"):
-            return item.GetNet()
+        if item.GetNetname()==name and hasattr(item,"GetNet"): return item.GetNet()
     raise RuntimeError(f"cannot resolve net object for {name}")
 
+def add_track(a,b,net_name,layer=pcbnew.F_Cu,width_mm=0.25):
+    tr=pcbnew.PCB_TRACK(board)
+    tr.SetStart(pcbnew.VECTOR2I(pcbnew.FromMM(a[0]),pcbnew.FromMM(a[1])))
+    tr.SetEnd(pcbnew.VECTOR2I(pcbnew.FromMM(b[0]),pcbnew.FromMM(b[1])))
+    tr.SetLayer(layer); tr.SetWidth(pcbnew.FromMM(width_mm)); tr.SetNet(net_obj(net_name)); board.Add(tr)
 
-def add_track(a, b, net_name, layer=pcbnew.F_Cu, width_mm=0.25):
-    tr = pcbnew.PCB_TRACK(board)
-    tr.SetStart(pcbnew.VECTOR2I(pcbnew.FromMM(a[0]), pcbnew.FromMM(a[1])))
-    tr.SetEnd(pcbnew.VECTOR2I(pcbnew.FromMM(b[0]), pcbnew.FromMM(b[1])))
-    tr.SetLayer(layer)
-    tr.SetWidth(pcbnew.FromMM(width_mm))
-    tr.SetNet(net_obj(net_name))
-    board.Add(tr)
-
-
-def unique_track(name, point, expected_len, layer=pcbnew.F_Cu, excluded=()):
-    matches = [
-        item for item in board.GetTracks()
-        if not isinstance(item, pcbnew.PCB_VIA)
-        and item.GetLayer() == layer
-        and item.GetNetname() == name
-        and touches(item, point)
-        and abs(length_mm(item) - expected_len) <= 0.01
-        and item not in excluded
-    ]
-    if len(matches) != 1:
-        candidates = [
-            (endpoints(item), round(length_mm(item), 4))
-            for item in board.GetTracks()
-            if not isinstance(item, pcbnew.PCB_VIA)
-            and item.GetLayer() == layer
-            and item.GetNetname() == name
-            and touches(item, point)
-            and item not in excluded
-        ]
-        raise RuntimeError(
-            f"expected one track at {name} {point} len {expected_len}; "
-            f"found {len(matches)}; candidates={candidates}"
-        )
+def unique_track(name,point,expected_len,layer=pcbnew.F_Cu,excluded=()):
+    matches=[item for item in board.GetTracks()
+             if not isinstance(item,pcbnew.PCB_VIA) and item.GetLayer()==layer
+             and item.GetNetname()==name and touches(item,point)
+             and abs(length_mm(item)-expected_len)<=0.01 and item not in excluded]
+    if len(matches)!=1:
+        candidates=[(endpoints(item),round(length_mm(item),4)) for item in board.GetTracks()
+                    if not isinstance(item,pcbnew.PCB_VIA) and item.GetLayer()==layer
+                    and item.GetNetname()==name and touches(item,point) and item not in excluded]
+        raise RuntimeError(f"expected one track at {name} {point} len {expected_len}; found {len(matches)}; candidates={candidates}")
     return matches[0]
 
-
-removed_adc = {ADC_L: 0, ADC_R: 0}
-remove = []
-
-# The new A* In1 routes terminate at the existing MCU Hall vias. All non-via
-# B.Cu ADC segments are therefore obsolete legacy tails.
+removed_adc={ADC_L:0,ADC_R:0}; remove=[]
 for item in board.GetTracks():
-    if isinstance(item, pcbnew.PCB_VIA):
-        continue
-    if item.GetLayer() == pcbnew.B_Cu and item.GetNetname() in removed_adc:
-        remove.append(item)
-        removed_adc[item.GetNetname()] += 1
-if removed_adc[ADC_L] < 1 or removed_adc[ADC_R] < 1:
+    if isinstance(item,pcbnew.PCB_VIA): continue
+    if item.GetLayer()==pcbnew.B_Cu and item.GetNetname() in removed_adc:
+        remove.append(item); removed_adc[item.GetNetname()]+=1
+if removed_adc[ADC_L]<1 or removed_adc[ADC_R]<1:
     raise RuntimeError(f"expected legacy ADC B.Cu tails on both nets, found {removed_adc}")
 
 # First DRC wave: exact dead comparator-era supply segments.
-exact_remove = [
-    (GND, (91.7878, 142.2030), (91.0628, 141.4780)),
-    (GND, (91.0628, 141.4780), (91.0628, 139.8280)),
-    (P5,  (87.0878, 142.2030), (87.0878, 143.5522)),
-    (P5,  (312.3250, 157.2800), (310.9000, 157.2800)),
-    (P5,  (326.7700, 153.4250), (326.8200, 153.3750)),
+exact_remove=[
+    (GND,(91.7878,142.2030),(91.0628,141.4780)),
+    (GND,(91.0628,141.4780),(91.0628,139.8280)),
+    (P5,(87.0878,142.2030),(87.0878,143.5522)),
+    (P5,(312.3250,157.2800),(310.9000,157.2800)),
+    (P5,(326.7700,153.4250),(326.8200,153.3750)),
 ]
-found = {i: 0 for i in range(len(exact_remove))}
+found={i:0 for i in range(len(exact_remove))}
 for item in board.GetTracks():
-    if isinstance(item, pcbnew.PCB_VIA):
-        continue
-    for i, (name, a, b) in enumerate(exact_remove):
-        if item.GetNetname() == name and same_ends(item, a, b):
-            if item not in remove:
-                remove.append(item)
-            found[i] += 1
-missing = [exact_remove[i] for i, count in found.items() if count != 1]
-if missing:
-    raise RuntimeError(f"expected exact residual segments once each; mismatches: {missing} counts={found}")
+    if isinstance(item,pcbnew.PCB_VIA): continue
+    for i,(name,a,b) in enumerate(exact_remove):
+        if item.GetNetname()==name and same_ends(item,a,b):
+            if item not in remove: remove.append(item)
+            found[i]+=1
+missing=[exact_remove[i] for i,count in found.items() if count!=1]
+if missing: raise RuntimeError(f"expected exact residual segments once each; mismatches: {missing} counts={found}")
 
-# Subsequent DRC passes expose the next dead segment in a branch after its leaf
-# is removed. Match both endpoint and DRC-reported length so a live neighboring
-# segment sharing the junction cannot be selected accidentally.
-wave_specs = [
-    # second DRC wave
-    (P5, (310.9000, 157.2800), 0.7495),
-    (P5, (325.2700, 153.4250), 1.5000),
-    # third DRC wave
-    (GND, (90.1378, 140.6530), 0.9250),
-    (P5, (310.3700, 156.7500), 2.1750),
-    (P5, (324.4950, 152.6500), 1.0960),
+# Later DRC waves expose the next dead segment after the previous leaf is
+# removed. Endpoint + KiCad-reported length uniquely identifies each branch.
+wave_specs=[
+    (P5,(310.9000,157.2800),0.7495),
+    (P5,(325.2700,153.4250),1.5000),
+    (GND,(90.1378,140.6530),0.9250),
+    (P5,(310.3700,156.7500),2.1750),
+    (P5,(324.4950,152.6500),1.0960),
+    (P5,(310.3700,154.5750),1.6971),
+    (P5,(322.5150,152.6500),1.9800),
 ]
-wave_found = []
-for name, point, expected_len in wave_specs:
-    item = unique_track(name, point, expected_len, excluded=remove)
-    remove.append(item)
-    wave_found.append((name, point, endpoints(item), round(length_mm(item), 4)))
+wave_found=[]
+for name,point,expected_len in wave_specs:
+    item=unique_track(name,point,expected_len,excluded=remove)
+    remove.append(item); wave_found.append((name,point,endpoints(item),round(length_mm(item),4)))
 
-for item in remove:
-    board.Remove(item)
+for item in remove: board.Remove(item)
 
-# U701 pads 11 and 12 are adjacent GND pins. Comparator cleanup exposed the
-# missing local bridge, so preserve the shortest same-net F.Cu connection.
-fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
-u701 = fps.get("U701")
-if u701 is None:
-    raise RuntimeError("U701 missing")
-pads = {str(p.GetNumber()): p for p in u701.Pads()}
-for pn in ("11", "12"):
-    if pn not in pads or pads[pn].GetNetname() != GND:
-        raise RuntimeError(f"U701 pad {pn} is not present on GND")
-p11 = mm(pads["11"].GetPosition())
-p12 = mm(pads["12"].GetPosition())
-if not near(p11, (191.4775, 160.4550)) or not near(p12, (191.4775, 161.1050)):
+# U701 pads 11/12 are adjacent GND pins; preserve the shortest local bridge.
+fps={fp.GetReference():fp for fp in board.GetFootprints()}; u701=fps.get("U701")
+if u701 is None: raise RuntimeError("U701 missing")
+pads={str(p.GetNumber()):p for p in u701.Pads()}
+for pn in ("11","12"):
+    if pn not in pads or pads[pn].GetNetname()!=GND: raise RuntimeError(f"U701 pad {pn} is not present on GND")
+p11=mm(pads["11"].GetPosition()); p12=mm(pads["12"].GetPosition())
+if not near(p11,(191.4775,160.4550)) or not near(p12,(191.4775,161.1050)):
     raise RuntimeError(f"U701 GND pad coordinates changed: p11={p11} p12={p12}")
-add_track(p11, p12, GND)
+add_track(p11,p12,GND)
 
-board.BuildConnectivity()
-pcbnew.SaveBoard(str(PATH), board)
-print("HALL_V4C_CLEANUP_OK", PATH)
-print("REMOVED_ADC_BCU", removed_adc)
-print("REMOVED_EXACT_SUPPLY_SEGMENTS", len(exact_remove))
-print("REMOVED_DRC_WAVE_SEGMENTS", wave_found)
-print("ADDED_U701_GND_LINK", p11, p12)
+board.BuildConnectivity(); pcbnew.SaveBoard(str(PATH),board)
+print("HALL_V4C_CLEANUP_OK",PATH)
+print("REMOVED_ADC_BCU",removed_adc)
+print("REMOVED_EXACT_SUPPLY_SEGMENTS",len(exact_remove))
+print("REMOVED_DRC_WAVE_SEGMENTS",wave_found)
+print("ADDED_U701_GND_LINK",p11,p12)
