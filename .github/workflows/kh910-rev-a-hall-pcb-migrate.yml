@@ -9,6 +9,7 @@ on:
       - 'ayab-esp32/tools/prepare_rev_a_hall_nets.py'
       - 'ayab-esp32/tools/migrate_rev_a_hall_pcb.py'
       - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py'
+      - 'ayab-esp32/tools/inspect_rev_a_hall_serialized.py'
       - '.github/workflows/kh910-rev-a-hall-pcb-migrate.yml'
 
 permissions:
@@ -39,6 +40,13 @@ jobs:
             ayab-esp32/ayab-esp32.kicad_pcb \
             /tmp/ayab-esp32-hall-nets.kicad_pcb
           test -s /tmp/ayab-esp32-hall-nets.kicad_pcb
+
+      - name: Audit serialized Hall targets
+        run: |
+          python3 ayab-esp32/tools/inspect_rev_a_hall_serialized.py \
+            /tmp/ayab-esp32-hall-nets.kicad_pcb \
+            > /tmp/kh910-hall-serialized-audit.txt
+          cat /tmp/kh910-hall-serialized-audit.txt
 
       - name: Stage native pcbnew Hall migration after reload
         run: |
@@ -89,6 +97,7 @@ jobs:
           name: kh910-hall-pcb-drc
           path: |
             /tmp/kh910-baseline-drc.rpt
+            /tmp/kh910-hall-serialized-audit.txt
             /tmp/kh910-staged-drc.rpt
             /tmp/kh910-project-drc.rpt
           if-no-files-found: ignore
