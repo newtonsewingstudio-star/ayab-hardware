@@ -6,10 +6,7 @@ on:
     branches:
       - ayab-esp32-kh910-rev-a
     paths:
-      - 'ayab-esp32/tools/prepare_rev_a_hall_nets.py'
-      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb.py'
-      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py'
-      - 'ayab-esp32/tools/inspect_rev_a_hall_serialized.py'
+      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized.py'
       - '.github/workflows/kh910-rev-a-hall-pcb-migrate.yml'
 
 permissions:
@@ -34,30 +31,17 @@ jobs:
             ayab-esp32/ayab-esp32.kicad_pcb
           cat /tmp/kh910-baseline-drc.rpt
 
-      - name: Create Hall nets in isolated KiCad pass
+      - name: Stage deterministic serialized Hall migration
         run: |
-          python3 ayab-esp32/tools/prepare_rev_a_hall_nets.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized.py \
             ayab-esp32/ayab-esp32.kicad_pcb \
-            /tmp/ayab-esp32-hall-nets.kicad_pcb
-          test -s /tmp/ayab-esp32-hall-nets.kicad_pcb
-
-      - name: Audit serialized Hall targets
-        run: |
-          python3 ayab-esp32/tools/inspect_rev_a_hall_serialized.py \
-            /tmp/ayab-esp32-hall-nets.kicad_pcb \
-            > /tmp/kh910-hall-serialized-audit.txt
-          cat /tmp/kh910-hall-serialized-audit.txt
-
-      - name: Stage native pcbnew Hall migration after reload
-        run: |
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py \
-            /tmp/ayab-esp32-hall-nets.kicad_pcb \
-            /tmp/ayab-esp32-hall-migrated.kicad_pcb
+            /tmp/ayab-esp32-hall-migrated.kicad_pcb \
+            | tee /tmp/kh910-hall-migration.txt
           test -s /tmp/ayab-esp32-hall-migrated.kicad_pcb
 
       - name: Validate serialized migrated board
         run: |
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized.py \
             --validate /tmp/ayab-esp32-hall-migrated.kicad_pcb
 
       - name: Require zero staged PCB DRC violations
@@ -70,7 +54,7 @@ jobs:
       - name: Install validated PCB and recheck in project path
         run: |
           cp /tmp/ayab-esp32-hall-migrated.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized.py \
             --validate ayab-esp32/ayab-esp32.kicad_pcb
           kicad-cli pcb drc --exit-code-violations \
             -o /tmp/kh910-project-drc.rpt \
@@ -97,7 +81,7 @@ jobs:
           name: kh910-hall-pcb-drc
           path: |
             /tmp/kh910-baseline-drc.rpt
-            /tmp/kh910-hall-serialized-audit.txt
+            /tmp/kh910-hall-migration.txt
             /tmp/kh910-staged-drc.rpt
             /tmp/kh910-project-drc.rpt
           if-no-files-found: ignore
