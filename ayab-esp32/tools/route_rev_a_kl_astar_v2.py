@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Route Rev A KH-910 K/L parity using existing DRC-clean vias.
 
-Unlike the first prototype, this router does not place vias on the tightly
-spaced K/L or GPIO corridor traces. The staged board already contains suitable
-through-vias on each machine net and on each retagged GPIO corridor. R213/R214
-retain one new launch via each because those pull-ups are newly added circuitry.
+Machine K/L and the R213 pull-up route on In1.Cu between existing/new vias.
+R214 is locally congested on In1.Cu, so its existing launch via routes on B.Cu
+directly into the already DRC-clean horizontal L corridor at y=130.71. This
+avoids adding another via or disturbing the three routes already proven by CI.
 
 KiCad DRC after zone refill remains authoritative.
 """
@@ -23,17 +23,18 @@ board = pcbnew.LoadBoard(str(PATH))
 if board is None:
     raise RuntimeError(f"could not load {PATH}")
 
-LAYER = pcbnew.In1_Cu
 STEP = 0.20
 TRACK_W = 0.25
 CLEAR = 0.22
 EDGE_CLEAR = 0.45
 ENDPOINT_ESCAPE_CELLS = 4
 ROUTES = [
-    ("/BROTHER-CONNECTORS/EOL_R_N", (239.22, 145.65), (220.97, 134.15), "machine-k"),
-    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45, 145.63), (221.67, 134.14), "machine-l"),
-    ("/BROTHER-CONNECTORS/EOL_R_N", (207.5, 132.025), (220.97, 134.15), "pullup-k"),
-    ("/BROTHER-CONNECTORS/EOL_R_S", (207.5, 135.325), (221.67, 134.14), "pullup-l"),
+    ("/BROTHER-CONNECTORS/EOL_R_N", (239.22, 145.65), (220.97, 134.15), "machine-k", pcbnew.In1_Cu, True),
+    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45, 145.63), (221.67, 134.14), "machine-l", pcbnew.In1_Cu, True),
+    ("/BROTHER-CONNECTORS/EOL_R_N", (207.5, 132.025), (220.97, 134.15), "pullup-k", pcbnew.In1_Cu, True),
+    # The B.Cu goal is a point on the pre-existing retagged GPIO18 corridor,
+    # which spans through x=207.5 at y=130.71. No extra goal via is needed.
+    ("/BROTHER-CONNECTORS/EOL_R_S", (207.5, 135.325), (207.5, 130.71), "pullup-l", pcbnew.B_Cu, False),
 ]
 
 
@@ -82,9 +83,28 @@ def require_endpoint_via(name, xy, tol=0.02):
         raise RuntimeError(f"expected exactly one {name} via at {xy}, got {matches}")
 
 
-for name, start, goal, _label in ROUTES:
+def point_on_same_net_track(name, goal, layer, tol=0.02):
+    code = net_code(name)
+    gx, gy = goal
+    for item in board.GetTracks():
+        if isinstance(item, pcbnew.PCB_VIA) or item.GetNetCode() != code or item.GetLayer() != layer:
+            continue
+        a = item.GetStart(); b = item.GetEnd()
+        ax, ay = mm(a.x), mm(a.y); bx, by = mm(b.x), mm(b.y)
+        # Goal is intentionally on a horizontal/vertical existing segment.
+        if abs(ay - by) <= tol and abs(gy - ay) <= tol and min(ax, bx) - tol <= gx <= max(ax, bx) + tol:
+            return True
+        if abs(ax - bx) <= tol and abs(gx - ax) <= tol and min(ay, by) - tol <= gy <= max(ay, by) + tol:
+            return True
+    return False
+
+
+for name, start, goal, _label, layer, goal_is_via in ROUTES:
     require_endpoint_via(name, start)
-    require_endpoint_via(name, goal)
+    if goal_is_via:
+        require_endpoint_via(name, goal)
+    elif not point_on_same_net_track(name, goal, layer):
+        raise RuntimeError(f"goal {goal} is not on existing {name} copper on layer {layer}")
 
 bb = board.GetBoardEdgesBoundingBox()
 X0 = math.floor(mm(bb.GetX()) / STEP) * STEP
@@ -109,7 +129,7 @@ def raster_box(blocked, box, expand):
             blocked.add((i, j))
 
 
-def build_blocked(route_net):
+def build_blocked(route_net, layer):
     blocked = set(); own = net_code(route_net)
     for item in board.GetTracks():
         same = item.GetNetCode() == own
@@ -117,14 +137,14 @@ def build_blocked(route_net):
         if is_via:
             if not same:
                 raster_box(blocked, bbox_mm(item), CLEAR)
-        elif item.GetLayer() == LAYER and not same:
+        elif item.GetLayer() == layer and not same:
             raster_box(blocked, bbox_mm(item), CLEAR)
     for fp in board.GetFootprints():
         for pad in fp.Pads():
             if pad.GetNetCode() == own:
                 continue
             try:
-                on_layer = pad.IsOnLayer(LAYER)
+                on_layer = pad.IsOnLayer(layer)
             except Exception:
                 on_layer = True
             if on_layer:
@@ -196,9 +216,9 @@ def simplify(cells, start, goal):
     return out
 
 
-def add_track(a, b, name):
+def add_track(a, b, name, layer):
     tr = pcbnew.PCB_TRACK(board)
-    tr.SetStart(pt(*a)); tr.SetEnd(pt(*b)); tr.SetLayer(LAYER); tr.SetWidth(iu(TRACK_W))
+    tr.SetStart(pt(*a)); tr.SetEnd(pt(*b)); tr.SetLayer(layer); tr.SetWidth(iu(TRACK_W))
     n = net_obj(name)
     if hasattr(tr, "SetNet"):
         tr.SetNet(n)
@@ -207,21 +227,26 @@ def add_track(a, b, name):
     board.Add(tr)
 
 
+def layer_name(layer):
+    return board.GetLayerName(layer)
+
+
 report = [
     "# KH910 Rev A K/L A* route report v2", "",
-    f"layer In1.Cu; grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm; endpoint escape {ENDPOINT_ESCAPE_CELLS} cells",
-    "", "All machine/GPIO endpoints are pre-existing DRC-clean vias; only the two pull-up launch vias are new.", "",
+    f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm; endpoint escape {ENDPOINT_ESCAPE_CELLS} cells",
+    "", "Machine/GPIO endpoints reuse DRC-clean vias. R214 terminates directly on the existing B.Cu L corridor.", "",
 ]
 
-for name, start, goal, label in ROUTES:
-    raw = astar(start, goal, build_blocked(name))
+for name, start, goal, label, layer, _goal_is_via in ROUTES:
+    raw = astar(start, goal, build_blocked(name, layer))
     points = simplify(raw, start, goal)
     for a, b in zip(points, points[1:]):
-        add_track(a, b, name)
+        add_track(a, b, name, layer)
     board.BuildConnectivity()
     report += [
-        f"## {label}", f"- net: `{name}`", f"- start: {start}", f"- goal: {goal}",
-        f"- cells: {len(raw)}", f"- segments: {len(points)-1}",
+        f"## {label}", f"- net: `{name}`", f"- layer: `{layer_name(layer)}`",
+        f"- start: {start}", f"- goal: {goal}", f"- cells: {len(raw)}",
+        f"- segments: {len(points)-1}",
         "- points: " + " -> ".join(f"({x:.3f},{y:.3f})" for x, y in points), "",
     ]
 
