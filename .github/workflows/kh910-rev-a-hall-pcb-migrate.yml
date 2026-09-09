@@ -7,6 +7,7 @@ on:
       - ayab-esp32-kh910-rev-a
     paths:
       - 'ayab-esp32/tools/migrate_rev_a_hall_pcb.py'
+      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py'
       - '.github/workflows/kh910-rev-a-hall-pcb-migrate.yml'
 
 permissions:
@@ -33,14 +34,14 @@ jobs:
 
       - name: Stage native pcbnew Hall migration
         run: |
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py \
             ayab-esp32/ayab-esp32.kicad_pcb \
             /tmp/ayab-esp32-hall-migrated.kicad_pcb
           test -s /tmp/ayab-esp32-hall-migrated.kicad_pcb
 
       - name: Validate serialized migrated board
         run: |
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py \
             --validate /tmp/ayab-esp32-hall-migrated.kicad_pcb
 
       - name: Require zero staged PCB DRC violations
@@ -53,7 +54,7 @@ jobs:
       - name: Install validated PCB and recheck in project path
         run: |
           cp /tmp/ayab-esp32-hall-migrated.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_safe.py \
             --validate ayab-esp32/ayab-esp32.kicad_pcb
           kicad-cli pcb drc --exit-code-violations \
             -o /tmp/kh910-project-drc.rpt \
