@@ -117,16 +117,20 @@ wave_specs=[
     (P5,(320.5950,153.4950),1.0750),
     (P5,(309.7000,153.3700),1.8650),
     (P5,(320.1300,153.0300),0.6576),
+    (P5,(320.1300,152.3000),0.7300),
 ]
 wave_found=[]
 for name,point,expected_len in wave_specs:
     item=unique_track(name,point,expected_len,excluded=remove)
     remove.append(item); wave_found.append((name,point,endpoints(item),round(length_mm(item),4)))
 
-# Final DRC pass exposed the now-isolated via at the root of the removed left
-# +5V comparator branch. Remove only that exact via.
+# The left branch is now fully isolated: remove its exact dangling via and the
+# 0.03 mm B.Cu remnant exposed after that via disappears. Keep the analogous
+# right-side via until KiCad explicitly proves it is dangling.
 dead_via=unique_via(P5,(309.7000,153.3700),excluded=remove)
 remove.append(dead_via)
+dead_bcu=unique_track(P5,(309.7000,153.3700),0.0300,layer=pcbnew.B_Cu,excluded=remove)
+remove.append(dead_bcu)
 
 for item in remove: board.Remove(item)
 
@@ -147,4 +151,5 @@ print("REMOVED_ADC_BCU",removed_adc)
 print("REMOVED_EXACT_SUPPLY_SEGMENTS",len(exact_remove))
 print("REMOVED_DRC_WAVE_SEGMENTS",wave_found)
 print("REMOVED_FINAL_DEAD_VIA",P5,(309.7000,153.3700))
+print("REMOVED_FINAL_BCU_REMNANT",P5,(309.7000,153.3700),0.0300)
 print("ADDED_U701_GND_LINK",p11,p12)
