@@ -2,17 +2,22 @@
 """KiCad 9 compatibility wrapper for the Rev A solenoid partition stage.
 
 The v1 stage remains the source of electrical and geometry intent. This wrapper
-only adapts that fail-closed migration to KiCad 9's SWIG behavior:
+only adapts that fail-closed migration to KiCad 9 and the validated baseline:
 
 1. GetNetcodeFromNetname() raises IndexError when a net is absent.
 2. GetTracks() may become non-iterable after board.Remove().
 3. Wrappers for removed tracks may be recycled, so an old track snapshot must
    not be queried after mutation.
+4. The clean baseline contains at least one pair of coincident, same-net track
+   objects. Exact geometry is authoritative; every coincident object at a
+   REMOVE/RETAG geometry must be edited together.
 
-All exact REMOVE/RETAG objects are therefore resolved and uniqueness-checked
-before the first mutation. After those edits and pad retagging, the staged board
-is saved and reloaded before any new routing so A* sees a fresh KiCad object
-container and connectivity graph.
+All exact REMOVE/RETAG objects are resolved before the first mutation. Each
+specification must match one or more tracks, all already constrained by
+exact_tracks() to the expected layer/geometry/raw net. No physical track object
+may belong to both a REMOVE and RETAG specification. After those edits and pad
+retagging, the staged board is saved and reloaded before routing so A* sees a
+fresh KiCad object container and connectivity graph.
 """
 from pathlib import Path
 
@@ -32,7 +37,7 @@ patches = [
     ),
     (
         '''removed = []\nfor spec in REMOVE:\n    rows = exact_tracks(spec)\n    if len(rows) != 1:\n        raise RuntimeError(f"expected one raw removal {layer_name(spec[0])} {spec[1]}->{spec[2]}, got {len(rows)}")\n    item = rows[0]\n    removed.append((layer_name(item.GetLayer()), endpoints(item)))\n    board.Remove(item)\n\nretagged = []\nfor spec in RETAG:\n    rows = exact_tracks(spec)\n    if len(rows) != 1:\n        raise RuntimeError(f"expected one raw retag {layer_name(spec[0])} {spec[1]}->{spec[2]}, got {len(rows)}")\n    item = rows[0]\n    item.SetNet(sw_net)\n    retagged.append((layer_name(item.GetLayer()), endpoints(item)))''',
-        '''# Resolve and validate every exact edit against one immutable board state\n# before the first mutation. KiCad 9 may recycle SWIG wrappers after Remove().\n_remove_items = []\nfor spec in REMOVE:\n    rows = exact_tracks(spec)\n    if len(rows) != 1:\n        raise RuntimeError(f"expected one raw removal {layer_name(spec[0])} {spec[1]}->{spec[2]}, got {len(rows)}")\n    _remove_items.append(rows[0])\n\n_retag_items = []\nfor spec in RETAG:\n    rows = exact_tracks(spec)\n    if len(rows) != 1:\n        raise RuntimeError(f"expected one raw retag {layer_name(spec[0])} {spec[1]}->{spec[2]}, got {len(rows)}")\n    _retag_items.append(rows[0])\n\nif len({id(x) for x in _remove_items + _retag_items}) != len(_remove_items) + len(_retag_items):\n    raise RuntimeError("same PCB track matched more than one REMOVE/RETAG specification")\n\nremoved = []\nfor item in _remove_items:\n    removed.append((layer_name(item.GetLayer()), endpoints(item)))\n    board.Remove(item)\n\nretagged = []\nfor item in _retag_items:\n    item.SetNet(sw_net)\n    retagged.append((layer_name(item.GetLayer()), endpoints(item)))''',
+        '''# Resolve every exact edit against one immutable board state before the\n# first mutation. The validated baseline contains coincident same-net track\n# duplicates, so a geometry specification may legitimately match >1 object.\n_remove_groups = []\nfor spec in REMOVE:\n    rows = exact_tracks(spec)\n    if not rows:\n        raise RuntimeError(f"expected raw removal {layer_name(spec[0])} {spec[1]}->{spec[2]}, got 0")\n    _remove_groups.append((spec, rows))\n    if len(rows) > 1:\n        print(f"PARTITION_COINCIDENT_REMOVE count={len(rows)} layer={layer_name(spec[0])} a={spec[1]} b={spec[2]}")\n\n_retag_groups = []\nfor spec in RETAG:\n    rows = exact_tracks(spec)\n    if not rows:\n        raise RuntimeError(f"expected raw retag {layer_name(spec[0])} {spec[1]}->{spec[2]}, got 0")\n    _retag_groups.append((spec, rows))\n    if len(rows) > 1:\n        print(f"PARTITION_COINCIDENT_RETAG count={len(rows)} layer={layer_name(spec[0])} a={spec[1]} b={spec[2]}")\n\n_remove_items = []\n_remove_ids = set()\nfor _spec, rows in _remove_groups:\n    for item in rows:\n        if id(item) not in _remove_ids:\n            _remove_ids.add(id(item)); _remove_items.append(item)\n\n_retag_items = []\n_retag_ids = set()\nfor _spec, rows in _retag_groups:\n    for item in rows:\n        if id(item) not in _retag_ids:\n            _retag_ids.add(id(item)); _retag_items.append(item)\n\nif _remove_ids & _retag_ids:\n    raise RuntimeError("same PCB track matched both REMOVE and RETAG specifications")\n\nremoved = []\nfor item in _remove_items:\n    removed.append((layer_name(item.GetLayer()), endpoints(item)))\n    board.Remove(item)\n\nretagged = []\nfor item in _retag_items:\n    item.SetNet(sw_net)\n    retagged.append((layer_name(item.GetLayer()), endpoints(item)))''',
         "pre-resolve all exact edits",
     ),
     (
