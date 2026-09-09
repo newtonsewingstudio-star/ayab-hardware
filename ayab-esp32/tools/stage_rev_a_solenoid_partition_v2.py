@@ -11,6 +11,9 @@ only adapts that fail-closed migration to KiCad 9 and the validated baseline:
 4. The clean baseline contains at least one pair of coincident, same-net track
    objects. Exact geometry is authoritative; every coincident object at a
    REMOVE/RETAG geometry must be edited together.
+5. The 1.0 mm route uses a 0.65 mm obstacle expansion. This equals the 0.50 mm
+   route half-width plus 0.15 mm margin and remains more conservative than the
+   board's 0.10 mm copper-clearance rule; KiCad DRC remains authoritative.
 
 All exact REMOVE/RETAG objects are resolved before the first mutation. Each
 specification must match one or more tracks, all already constrained by
@@ -25,6 +28,11 @@ SRC = Path(__file__).with_name("stage_rev_a_solenoid_partition.py")
 text = SRC.read_text(encoding="utf-8")
 
 patches = [
+    (
+        'CLEAR = 0.75',
+        'CLEAR = 0.65',
+        "power-route clearance raster",
+    ),
     (
         '''if board.GetNetcodeFromNetname(SW) > 0:\n    raise RuntimeError(f"{SW} already exists; refusing partial-state migration")''',
         '''try:\n    _existing_sw = board.GetNetcodeFromNetname(SW)\nexcept (IndexError, KeyError):\n    _existing_sw = 0\nif _existing_sw > 0:\n    raise RuntimeError(f"{SW} already exists; refusing partial-state migration")''',
