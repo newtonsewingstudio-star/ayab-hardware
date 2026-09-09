@@ -171,7 +171,6 @@ def retimestamp(block: str) -> str:
 def clone_fp(template: str, new_ref: str, value: str, x: float, y: float, angle: float,
              path: str, lcsc: str, padmap: dict[str, tuple[int, str]]) -> str:
     out = retimestamp(template)
-    # Replace first top-level footprint placement only.
     out, n = re.subn(
         r'(^\(footprint.*?\n\s*\(tstamp [^)]+\)\n\s*)\(at\s+[-\d.]+\s+[-\d.]+(?:\s+[-\d.]+)?\)',
         lambda m: m.group(1) + f'(at {x:g} {y:g} {angle:g})', out, count=1, flags=re.S,
@@ -184,7 +183,6 @@ def clone_fp(template: str, new_ref: str, value: str, x: float, y: float, angle:
     if '(property "LCSC ID"' in out:
         out = re.sub(r'\(property "LCSC ID" "[^"]*"\)', f'(property "LCSC ID" "{lcsc}")', out, count=1)
     else:
-        # Add LCSC property after placement.
         anchor = re.search(r'\n\s*\(path "[^"]+"\)', out)
         if not anchor:
             raise RuntimeError(f"path anchor missing in {new_ref}")
@@ -229,7 +227,6 @@ def remove_raw_tracks_touching(text: str, points: list[tuple[float, float]]) -> 
             continue
         if any(close(d[0], p) or close(d[1], p) for p in points):
             removals.append((start, end))
-    # Remove raw vias centered on a migrated pad as well.
     for start, end, vb in blocks(text, '(via '):
         n = re.search(r'\(net\s+(\d+)\)', vb)
         a = re.search(r'\(at\s+([-\d.]+)\s+([-\d.]+)\)', vb)
@@ -244,9 +241,11 @@ def remove_raw_tracks_touching(text: str, points: list[tuple[float, float]]) -> 
 
 
 def insert_before_first(text: str, token: str, payload: str) -> str:
-    p = text.find(token)
-    if p < 0:
-        p = text.rfind('\n)')
+    # Match the requested KiCad item only at root indentation. A plain
+    # substring search can match nested items (notably footprint keepout zones),
+    # which makes subsequently inserted route primitives invalid PCB syntax.
+    m = re.search(rf'(?m)^{re.escape(token)}', text)
+    p = m.start() if m else text.rfind('\n)')
     if p < 0:
         raise RuntimeError(f"insert anchor missing: {token}")
     return text[:p] + payload + '\n' + text[p:]
@@ -273,10 +272,7 @@ def main() -> None:
     ng_name = 'Net-(Q806-G)'
     en_net, en_name = 148, 'SOLENOID_PWR_EN'
 
-    # Rename the already-routed GPIO21 board net to the intentional safety function.
     pcb = pcb.replace('/ESP32/ESP21', en_name)
-
-    # Add new nets immediately before the first footprint.
     new_net_text = (
         f'  (net {sw_net} "{sw_name}")\n'
         f'  (net {pg_net} "{pg_name}")\n'
@@ -284,7 +280,6 @@ def main() -> None:
     )
     pcb = insert_before_first(pcb, '  (footprint ', new_net_text.rstrip())
 
-    # Capture target pad coordinates while they are still on raw +12V.
     targets: dict[str, tuple[str, ...]] = {
         'J401': ('9','10'), 'J403': ('9','10'), 'J406': ('9','10'),
         'U302': ('9',), 'U303': ('9',), 'U304': ('9',),
@@ -296,18 +291,15 @@ def main() -> None:
         for pn in pads:
             target_points.append(pad_global(fb, pn))
 
-    # Remove only raw copper that actually terminates on a pad being migrated.
     pcb, removed = remove_raw_tracks_touching(pcb, target_points)
     print(f'Removed {removed} raw +12V segment/via blocks touching migrated solenoid pads')
 
-    # Move known solenoid common/clamp loads to the switched net.
     for ref, pads in targets.items():
         _, _, fb = find_fp(pcb, ref)
         for pn in pads:
             fb = replace_pad_net(fb, pn, sw_net, sw_name)
         pcb = replace_fp(pcb, ref, fb)
 
-    # Clone repository-native footprints and bind them to exact schematic UUIDs.
     _, _, q502 = find_fp(pcb, 'Q502')
     _, _, q201 = find_fp(pcb, 'Q201')
     _, _, r809 = find_fp(pcb, 'R809')
@@ -332,7 +324,6 @@ def main() -> None:
     ]
     pcb = insert_before_first(pcb, '  (segment ', '\n'.join(newfps))
 
-    # Coordinates from repository-native footprint geometry at the placements above.
     q805_gate = (300.05, 150.9375)
     q805_source = (301.95, 150.9375)
     q805_drain = (301.0, 149.0625)
@@ -347,25 +338,21 @@ def main() -> None:
     r822_ng = (292.825, 153.0)
 
     routing: list[str] = []
-    # Q805 raw source: connect into an existing heavy raw +12V node, not TP601's thin spur.
     routing += [
         segment(*q805_source, 303.43, 152.42, 1.0, 'F.Cu', 4),
         segment(303.43, 152.42, 303.43, 153.36, 1.0, 'F.Cu', 4),
         segment(*q805_source, *r820_raw, 0.5, 'F.Cu', 4),
     ]
-    # P-MOS gate default-OFF network.
     routing += [
         segment(*q805_gate, *r820_pg, 0.25, 'F.Cu', pg_net),
         segment(*q805_gate, *q806_drain, 0.25, 'F.Cu', pg_net),
     ]
-    # N-MOS gate: series enable plus hard pulldown.
     routing += [
         segment(*r821_ng, *q806_gate, 0.25, 'F.Cu', ng_net),
         segment(*r821_ng, 294.3, 151.2, 0.25, 'F.Cu', ng_net),
         segment(294.3, 151.2, 294.3, 153.0, 0.25, 'F.Cu', ng_net),
         segment(294.3, 153.0, *r822_ng, 0.25, 'F.Cu', ng_net),
     ]
-    # Q806 source and R822 return to ground through a local via.
     gvia = (290.8, 154.5)
     routing += [
         segment(*q806_source, 296.5625, 154.0, 0.35, 'F.Cu', 2),
@@ -374,7 +361,6 @@ def main() -> None:
         segment(291.175, 154.0, *gvia, 0.35, 'F.Cu', 2),
         via(*gvia, 2),
     ]
-    # GPIO21 enable route on In1.Cu to keep the long control trace away from the switch power path.
     en_via_mcu = (227.2, 138.1)
     en_via_gate = (292.0, 147.5)
     routing += [
@@ -387,7 +373,6 @@ def main() -> None:
         segment(*en_via_gate, *r821_en, 0.25, 'F.Cu', en_net),
     ]
 
-    # Q805 drain and TP703 enter the dedicated switched rail.
     sw_via = (301.0, 146.8)
     bus_y = 162.5
     routing += [
@@ -398,12 +383,10 @@ def main() -> None:
         segment(95.65, bus_y, 310.91, bus_y, 1.27, 'In1.Cu', sw_net),
     ]
 
-    # Through-hole Brother solenoid commons can join the internal rail directly.
     for x, y in ((116.84,153.7852),(114.84,153.7852),(119.24,146.28),(116.74,146.28),
                  (310.91,138.83),(308.41,138.83)):
         routing.append(segment(x, y, x, bus_y, 1.0, 'In1.Cu', sw_net))
 
-    # ULN2003 COM pins and local solenoid 12V capacitors are SMD; fan each to a nearby via.
     smd_vias = [
         ((132.895,136.85),(134.295,136.85)),
         ((120.345,136.85),(121.745,136.85)),
@@ -419,7 +402,6 @@ def main() -> None:
 
     pcb = insert_before_first(pcb, '  (zone ', '\n'.join(routing))
 
-    # Structural postconditions before KiCad DRC.
     for ref in ('Q805','Q806','R820','R821','R822','TP703'):
         if not re.search(rf'\(fp_text reference "{ref}"', pcb):
             raise RuntimeError(f"new PCB footprint missing: {ref}")
@@ -427,7 +409,6 @@ def main() -> None:
         raise RuntimeError('switched net definition missing')
     if '/ESP32/ESP21' in pcb:
         raise RuntimeError('legacy GPIO21 PCB net name remains')
-    # Confirm all migrated pad blocks now carry the switched net.
     for ref, pads in targets.items():
         _, _, fb = find_fp(pcb, ref)
         for pn in pads:
