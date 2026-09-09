@@ -13,6 +13,9 @@ on:
       - 'ayab-esp32/tools/stage_rev_a_solenoid_partition_v5.py'
       - '.github/workflows/kh910-rev-a-solenoid-partition-stage.yml'
 
+permissions:
+  contents: write
+
 jobs:
   stage-validate:
     runs-on: ubuntu-latest
@@ -68,6 +71,26 @@ jobs:
           cat /tmp/solenoid-partition-drc.rpt
           exit $rc
 
+      - name: Install validated PCB at repository path
+        run: |
+          cp /tmp/solenoid-partition-stage/ayab-esp32.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/solenoid-partition-repo-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/solenoid-partition-repo-drc.rpt
+
+      - name: Commit validated partition
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ayab-esp32/ayab-esp32.kicad_pcb
+          if git diff --cached --quiet; then
+            echo "No PCB change to commit"
+          else
+            git commit -m "Apply validated KH910 solenoid power partition"
+            git push origin HEAD:ayab-esp32-kh910-rev-a
+          fi
+
       - name: Upload partition evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -77,5 +100,6 @@ jobs:
             /tmp/solenoid-partition-baseline-drc.rpt
             /tmp/solenoid-partition-stage.txt
             /tmp/solenoid-partition-drc.rpt
+            /tmp/solenoid-partition-repo-drc.rpt
             /tmp/solenoid-partition-stage/ayab-esp32.kicad_pcb
           if-no-files-found: ignore
