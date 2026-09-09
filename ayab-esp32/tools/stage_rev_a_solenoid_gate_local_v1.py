@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Stage the Rev A solenoid high-side fail-safe gate on the clean partition PCB.
 
-This first gate stage deliberately uses KiCad to resolve the *actual* pad
-centres after footprint placement. It therefore does not reuse the incorrect
-manual footprint-rotation transform from the rejected historical patch.
+This first gate stage deliberately uses KiCad to resolve the actual pad centres
+after footprint placement. It does not reuse the incorrect historical manual
+footprint-rotation transform.
 
 Scope v1:
 - place Q805/Q806/R820/R821/R822 below J401;
@@ -14,6 +14,7 @@ The workflow runs KiCad DRC and treats its report as authoritative.
 """
 from pathlib import Path
 import sys
+import re
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import patch_rev_a_solenoid_pcb as u
 import pcbnew
@@ -24,15 +25,16 @@ pcb=PATH.read_text(encoding="utf-8")
 sch=SCH.read_text(encoding="utf-8")
 
 for ref in ("Q805","Q806","R820","R821","R822"):
-    if f'fp_text reference "{ref}"' in pcb:
+    if f'fp_text reference "{ref}"' in pcb or f'property "Reference" "{ref}"' in pcb:
         raise RuntimeError(f"refusing partial gate state: {ref} already on PCB")
 
 defs=u.net_defs(pcb)
 raw_net=next((n for n,s in defs.items() if s=="+12V"),0)
 sw_net=next((n for n,s in defs.items() if s=="SOLENOID_12V_SW"),0)
 en_net=next((n for n,s in defs.items() if s=="/ESP32/ESP21"),0)
-if raw_net<=0 or sw_net<=0 or en_net<=0:
-    raise RuntimeError(f"expected RAW/SW/ESP21 nets missing: raw={raw_net} sw={sw_net} en={en_net}")
+gnd_net=next((n for n,s in defs.items() if s=="GND"),0)
+if raw_net<=0 or sw_net<=0 or en_net<=0 or gnd_net<=0:
+    raise RuntimeError(f"expected RAW/SW/ESP21/GND nets missing: raw={raw_net} sw={sw_net} en={en_net} gnd={gnd_net}")
 maxnet=max(defs)
 pg_net,ng_net=maxnet+1,maxnet+2
 pg_name="Net-(Q805-G)"
@@ -51,19 +53,53 @@ prefix=u.sheet_prefix_from_existing(pcb)
 su={r:u.symbol_uuid_by_ref(sch,r) for r in ("Q805","Q806","R820","R821","R822")}
 path=lambda r:prefix+'/'+su[r]
 
+# clone_fp in the historical patch assumes an older KiCad ordering where
+# (tstamp ...) immediately precedes the footprint (at ...).  KiCad 9 reorders
+# those fields, so use a format-tolerant clone that rewrites the first top-level
+# footprint (at ...) and regenerates every UUID/tstamp in the cloned block.
+def clone9(template,new_ref,value,x,y,angle,new_path,lcsc,padmap):
+    out=re.sub(r'\((uuid|tstamp) [0-9a-f-]+\)',lambda m:f'({m.group(1)} {u.uid()})',template)
+    out,n=re.subn(
+        r'^(\(footprint.*?)(\(at\s+[-\d.]+\s+[-\d.]+(?:\s+[-\d.]+)?\))',
+        lambda m:m.group(1)+f'(at {x:g} {y:g} {angle:g})',out,count=1,flags=re.S)
+    if n!=1:
+        raise RuntimeError(f"could not relocate cloned footprint {new_ref}")
+    out,npath=re.subn(r'\(path "[^"]+"\)',f'(path "{new_path}")',out,count=1)
+    if npath!=1:
+        raise RuntimeError(f"path anchor missing in {new_ref}")
+    if re.search(r'\(fp_text reference "[^"]+"',out):
+        out=re.sub(r'\(fp_text reference "[^"]+"',f'(fp_text reference "{new_ref}"',out,count=1)
+    else:
+        out,nref=re.subn(r'\(property "Reference" "[^"]+"',f'(property "Reference" "{new_ref}"',out,count=1)
+        if nref!=1: raise RuntimeError(f"reference field missing in {new_ref}")
+    if re.search(r'\(fp_text value "[^"]+"',out):
+        out=re.sub(r'\(fp_text value "[^"]+"',f'(fp_text value "{value}"',out,count=1)
+    else:
+        out,nval=re.subn(r'\(property "Value" "[^"]+"',f'(property "Value" "{value}"',out,count=1)
+        if nval!=1: raise RuntimeError(f"value field missing in {new_ref}")
+    if '(property "LCSC ID"' in out:
+        out=re.sub(r'\(property "LCSC ID" "[^"]*"\)',f'(property "LCSC ID" "{lcsc}")',out,count=1)
+    else:
+        anchor=re.search(r'\n\s*\(path "[^"]+"\)',out)
+        if not anchor: raise RuntimeError(f"LCSC insertion anchor missing in {new_ref}")
+        out=out[:anchor.start()]+f'\n  (property "LCSC ID" "{lcsc}")'+out[anchor.start():]
+    for pn,(ni,nn) in padmap.items():
+        out=u.replace_pad_net(out,pn,ni,nn)
+    return out
+
 # Compact pocket below J401. Graphics-only G*** labels in this pocket are
-# movable and are not part of the electrical/courtyard placement decision.
+# movable and are not part of the electrical placement decision.
 newfps=[
-    u.clone_fp(q502,"Q805","LP9435LT1G",117.0,160.25,0,path("Q805"),"C383257",
-               {"1":(pg_net,pg_name),"2":(raw_net,"+12V"),"3":(sw_net,"SOLENOID_12V_SW")}),
-    u.clone_fp(q201,"Q806","AO3400A",121.0,160.25,0,path("Q806"),"C20917",
-               {"1":(ng_net,ng_name),"2":(2,"GND"),"3":(pg_net,pg_name)}),
-    u.clone_fp(r809,"R820","100k",113.0,161.9,0,path("R820"),"C25803",
-               {"1":(raw_net,"+12V"),"2":(pg_net,pg_name)}),
-    u.clone_fp(r809,"R821","10k",125.0,159.2,0,path("R821"),"C25804",
-               {"1":(en_net,en_name),"2":(ng_net,ng_name)}),
-    u.clone_fp(r809,"R822","100k",128.0,161.5,0,path("R822"),"C25803",
-               {"1":(2,"GND"),"2":(ng_net,ng_name)}),
+    clone9(q502,"Q805","LP9435LT1G",117.0,160.25,0,path("Q805"),"C383257",
+           {"1":(pg_net,pg_name),"2":(raw_net,"+12V"),"3":(sw_net,"SOLENOID_12V_SW")}),
+    clone9(q201,"Q806","AO3400A",121.0,160.25,0,path("Q806"),"C20917",
+           {"1":(ng_net,ng_name),"2":(gnd_net,"GND"),"3":(pg_net,pg_name)}),
+    clone9(r809,"R820","100k",113.0,161.9,0,path("R820"),"C25803",
+           {"1":(raw_net,"+12V"),"2":(pg_net,pg_name)}),
+    clone9(r809,"R821","10k",125.0,159.2,0,path("R821"),"C25804",
+           {"1":(en_net,en_name),"2":(ng_net,ng_name)}),
+    clone9(r809,"R822","100k",128.0,161.5,0,path("R822"),"C25803",
+           {"1":(gnd_net,"GND"),"2":(ng_net,ng_name)}),
 ]
 pcb=u.insert_before_first(pcb,'  (segment ','\n'.join(newfps))
 PATH.write_text(pcb,encoding="utf-8")
@@ -98,13 +134,13 @@ expect={
 for k,v in expect.items():
     if net(*k)!=v: raise RuntimeError(f"net mismatch {k}: {net(*k)!r} != {v!r}")
 
-pos={f"{r}.{p}":pad(r,p)[1] for r in ("Q805","Q806","R820","R821","R822") for p in ({"Q805":("1","2","3"),"Q806":("1","2","3"),"R820":("1","2"),"R821":("1","2"),"R822":("1","2")}[r])}
+pins={"Q805":("1","2","3"),"Q806":("1","2","3"),"R820":("1","2"),"R821":("1","2"),"R822":("1","2")}
+pos={f"{r}.{p}":pad(r,p)[1] for r in pins for p in pins[r]}
 for k in sorted(pos): print("GATE_PAD",k,*(round(x,4) for x in pos[k]),net(*k.split('.')))
 
 # High-current drain -> existing switched J401 common.
 j401p9=pad("J401","9")[1]
 q805d=pos["Q805.3"]
-# Use an orthogonal dogleg just below the connector footprint.
 addseg(q805d,(q805d[0],158.0),sw_net,1.0)
 addseg((q805d[0],158.0),(j401p9[0],158.0),sw_net,1.0)
 addseg((j401p9[0],158.0),j401p9,sw_net,1.0)
@@ -127,9 +163,9 @@ addseg(pos["Q806.1"],pos["R822.2"],ng_net,0.25)
 
 # Local ground via for Q806 source + R822.
 gvia=(124.0,162.45)
-addseg(pos["Q806.2"],gvia,2,0.35)
-addseg(pos["R822.1"],gvia,2,0.35)
-addvia(gvia,2,0.8,0.4)
+addseg(pos["Q806.2"],gvia,gnd_net,0.35)
+addseg(pos["R822.1"],gvia,gnd_net,0.35)
+addvia(gvia,gnd_net,0.8,0.4)
 
 # R821.1 intentionally remains the only gate-stage endpoint not locally joined;
 # the next stage routes SOLENOID_PWR_EN from GPIO21 to this pad.
