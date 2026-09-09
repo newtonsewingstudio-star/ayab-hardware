@@ -1,0 +1,22 @@
+name: KH910 Rev A pcbnew Edit API Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/probe_pcbnew_edit_api.py'
+      - '.github/workflows/kh910-rev-a-pcbnew-edit-api.yml'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+      - name: Probe native edit APIs
+        run: python3 ayab-esp32/tools/probe_pcbnew_edit_api.py
