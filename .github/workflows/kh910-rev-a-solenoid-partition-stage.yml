@@ -9,6 +9,7 @@ on:
       - 'ayab-esp32/tools/stage_rev_a_solenoid_partition.py'
       - 'ayab-esp32/tools/stage_rev_a_solenoid_partition_v2.py'
       - 'ayab-esp32/tools/stage_rev_a_solenoid_partition_v3.py'
+      - 'ayab-esp32/tools/stage_rev_a_solenoid_partition_v4.py'
       - '.github/workflows/kh910-rev-a-solenoid-partition-stage.yml'
 
 jobs:
@@ -43,7 +44,7 @@ jobs:
       - name: Stage raw-switched solenoid partition
         run: |
           set -o pipefail
-          /usr/bin/python3 ayab-esp32/tools/stage_rev_a_solenoid_partition_v3.py \
+          /usr/bin/python3 ayab-esp32/tools/stage_rev_a_solenoid_partition_v4.py \
             /tmp/solenoid-partition-stage/ayab-esp32.kicad_pcb \
             | tee /tmp/solenoid-partition-stage.txt
 
