@@ -7,6 +7,7 @@ on:
       - ayab-esp32-kh910-rev-a
     paths:
       - 'ayab-esp32/tools/inspect_rev_a_solenoid_gate_left.py'
+      - 'ayab-esp32/tools/inspect_rev_a_solenoid_gate_candidates.py'
       - '.github/workflows/kh910-rev-a-solenoid-gate-probe.yml'
 
 jobs:
@@ -30,6 +31,9 @@ jobs:
       - name: Probe lower-left gate corridor
         run: |
           /usr/bin/python3 ayab-esp32/tools/inspect_rev_a_solenoid_gate_left.py ayab-esp32/ayab-esp32.kicad_pcb | tee /tmp/gate-left-probe.txt
+      - name: Audit compact gate candidate pockets
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/inspect_rev_a_solenoid_gate_candidates.py ayab-esp32/ayab-esp32.kicad_pcb | tee /tmp/gate-candidates.txt
       - name: Upload probe evidence
         uses: actions/upload-artifact@v4
         with:
@@ -37,3 +41,4 @@ jobs:
           path: |
             /tmp/gate-probe-baseline.rpt
             /tmp/gate-left-probe.txt
+            /tmp/gate-candidates.txt
