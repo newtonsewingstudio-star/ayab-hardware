@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Route Rev A KH-910 K/L parity with controlled endpoint approaches.
 
-Machine K/L share the relatively open In2.Cu region below the ESP32.  Their
-pull-ups route on sparse In1.Cu to the already-established machine-side vias,
-which avoids the crowded GPIO-via cluster and the In2 +3V3 trunk near y=125.94.
+Machine K uses the open In2.Cu region below the ESP32. Machine L uses In1.Cu,
+where its retagged legacy GPIO18 corridor already exists and same-net copper is
+not an obstacle. The two pull-ups also use sparse In1.Cu to reach the existing
+machine-side vias without crossing the In2 +3V3 trunk.
 
 Close K/L via pairs use fixed outward-facing stubs; A* only routes between safe
 interior stub points. KiCad DRC after zone refill remains authoritative.
@@ -29,11 +30,10 @@ CLEAR = 0.22
 EDGE_CLEAR = 0.45
 
 # name, actual start via, safe start stub, safe goal stub, actual goal via,
-# label, layer. Machine K/L stay below the In2 power trunk. Pull-up routes use
-# In1 and terminate at the machine-side vias on the far-right open corridor.
+# label, layer. K and L machine runs are intentionally on different layers.
 ROUTES = [
     ("/BROTHER-CONNECTORS/EOL_R_N", (239.22,145.65), (240.20,144.40), (220.00,133.20), (220.97,134.15), "machine-k", pcbnew.In2_Cu),
-    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45,145.63), (237.20,146.40), (222.60,133.20), (221.67,134.14), "machine-l", pcbnew.In2_Cu),
+    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45,145.63), (237.20,146.40), (222.60,133.20), (221.67,134.14), "machine-l", pcbnew.In1_Cu),
     ("/BROTHER-CONNECTORS/EOL_R_N", (241.60,118.00), (243.00,118.00), (240.20,144.40), (239.22,145.65), "pullup-k", pcbnew.In1_Cu),
     ("/BROTHER-CONNECTORS/EOL_R_S", (241.60,120.00), (244.00,120.00), (237.20,146.40), (238.45,145.63), "pullup-l", pcbnew.In1_Cu),
 ]
@@ -199,9 +199,9 @@ def layer_name(layer): return board.GetLayerName(layer)
 
 
 report=[
-    "# KH910 Rev A K/L route report v5", "",
+    "# KH910 Rev A K/L route report v6", "",
     f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm", "",
-    "Machine K/L use In2.Cu below the power trunk; pull-ups use In1.Cu to the machine-side vias.", "",
+    "Machine K uses In2.Cu; machine L and pull-ups use In1.Cu with controlled endpoint stubs.", "",
 ]
 
 for name, actual_start, stub_start, stub_goal, actual_goal, label, layer in ROUTES:
@@ -223,5 +223,5 @@ for name, actual_start, stub_start, stub_goal, actual_goal, label, layer in ROUT
 pcbnew.SaveBoard(str(PATH),board)
 report_path=PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md")
 report_path.write_text("\n".join(report)+"\n")
-print("KL_ROUTE_V5_OK",PATH)
+print("KL_ROUTE_V6_OK",PATH)
 print(report_path)
