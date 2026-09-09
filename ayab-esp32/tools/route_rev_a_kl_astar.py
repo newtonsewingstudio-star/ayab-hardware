@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Route the four short Rev A KH-910 K/L staged connections on In1.Cu.
 
-The electrical stage creates same-net vias at both ends.  This router uses the
+The electrical stage creates same-net vias at both ends. This router uses the
 actual staged board as its obstacle map; KiCad DRC remains authoritative.
 """
 from __future__ import annotations
@@ -24,6 +24,7 @@ STEP = 0.20
 TRACK_W = 0.25
 CLEAR = 0.22
 EDGE_CLEAR = 0.45
+ENDPOINT_ESCAPE_CELLS = 4
 ROUTES = [
     ("/BROTHER-CONNECTORS/EOL_R_N", (194.71, 151.86), (194.71, 130.91), "machine-k"),
     ("/BROTHER-CONNECTORS/EOL_R_S", (194.98, 151.99), (194.98, 130.71), "machine-l"),
@@ -68,6 +69,9 @@ def raster_box(blocked,box,expand):
     x0,y0,x1,y1=box; x0-=expand; y0-=expand; x1+=expand; y1+=expand
     i0,j0=cell(x0,y0); i1,j1=cell(x1,y1)
     for i in range(max(0,min(i0,i1)),min(NX-1,max(i0,i1))+1):
+        for j in range(max(0,min(j0,j1)),min(NY-1,max(i0,i1))+1):
+            pass
+    for i in range(max(0,min(i0,i1)),min(NX-1,max(i0,i1))+1):
         for j in range(max(0,min(j0,j1)),min(NY-1,max(j0,j1))+1): blocked.add((i,j))
 
 def build_blocked(route_net):
@@ -90,9 +94,15 @@ def build_blocked(route_net):
 DIRS=[(1,0,1.0),(-1,0,1.0),(0,1,1.0),(0,-1,1.0),(1,1,math.sqrt(2)),(1,-1,math.sqrt(2)),(-1,1,math.sqrt(2)),(-1,-1,math.sqrt(2))]
 def astar(start_xy,goal_xy,blocked):
     start=cell(*start_xy); goal=cell(*goal_xy)
+    # The obstacle raster expands all foreign through-vias/pads by electrical
+    # clearance. A one-cell opening is too small for a new route to leave its
+    # own endpoint when that endpoint sits in a dense via field. Clear only a
+    # small square around each same-net endpoint; final KiCad DRC remains the
+    # authority on whether the resulting escape geometry is actually legal.
     for q in (start,goal):
-        for di in (-1,0,1):
-            for dj in (-1,0,1): blocked.discard((q[0]+di,q[1]+dj))
+        for di in range(-ENDPOINT_ESCAPE_CELLS,ENDPOINT_ESCAPE_CELLS+1):
+            for dj in range(-ENDPOINT_ESCAPE_CELLS,ENDPOINT_ESCAPE_CELLS+1):
+                blocked.discard((q[0]+di,q[1]+dj))
     def h(c):return math.hypot(c[0]-goal[0],c[1]-goal[1])
     pq=[(h(start),0.0,start,None)]; best={start:0.0}; parent={}
     while pq:
@@ -130,7 +140,7 @@ def add_track(a,b,name):
     else:tr.SetNetCode(net_code(name))
     board.Add(tr)
 
-report=["# KH910 Rev A K/L A* route report","",f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm",""]
+report=["# KH910 Rev A K/L A* route report","",f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm; endpoint escape {ENDPOINT_ESCAPE_CELLS} cells",""]
 for name,start,goal,label in ROUTES:
     raw=astar(start,goal,build_blocked(name)); points=simplify(raw,start,goal)
     for a,b in zip(points,points[1:]):add_track(a,b,name)
