@@ -6,8 +6,8 @@ on:
     branches:
       - ayab-esp32-kh910-rev-a
     paths:
-      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized.py'
-      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_compat.py'
+      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v2.py'
+      - 'ayab-esp32/tools/refill_rev_a_zones.py'
       - '.github/workflows/kh910-rev-a-hall-pcb-migrate.yml'
 
 permissions:
@@ -40,30 +40,42 @@ jobs:
           test -s /tmp/kh910-stage/ayab-esp32.kicad_pro
           test -s /tmp/kh910-stage/ayab-esp32.kicad_pcb
 
-      - name: Stage deterministic serialized Hall migration
+      - name: Stage Hall migration v2
         run: |
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_compat.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v2.py \
             ayab-esp32/ayab-esp32.kicad_pcb \
             /tmp/kh910-stage/ayab-esp32.kicad_pcb \
             | tee /tmp/kh910-hall-migration.txt
           test -s /tmp/kh910-stage/ayab-esp32.kicad_pcb
 
-      - name: Validate serialized migrated board
+      - name: Validate serialized v2 board
         run: |
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_compat.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v2.py \
+            --validate /tmp/kh910-stage/ayab-esp32.kicad_pcb
+
+      - name: Refill staged copper zones with KiCad
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/refill_rev_a_zones.py \
+            /tmp/kh910-stage/ayab-esp32.kicad_pcb
+          test -s /tmp/kh910-stage/ayab-esp32.kicad_pcb
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v2.py \
             --validate /tmp/kh910-stage/ayab-esp32.kicad_pcb
 
       - name: Require zero staged project-aware PCB DRC violations
         run: |
+          set +e
           kicad-cli pcb drc --exit-code-violations \
             -o /tmp/kh910-staged-drc.rpt \
             /tmp/kh910-stage/ayab-esp32.kicad_pcb
+          rc=$?
+          set -e
           cat /tmp/kh910-staged-drc.rpt
+          exit $rc
 
       - name: Install validated PCB and recheck in repository project path
         run: |
           cp /tmp/kh910-stage/ayab-esp32.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
-          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_compat.py \
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v2.py \
             --validate ayab-esp32/ayab-esp32.kicad_pcb
           kicad-cli pcb drc --exit-code-violations \
             -o /tmp/kh910-project-drc.rpt \
@@ -79,7 +91,7 @@ jobs:
             echo "No PCB changes to commit"
             exit 0
           fi
-          git commit -m "Migrate Hall ADC PCB section to Rev A [skip ci]"
+          git commit -m "Migrate Hall ADC PCB section to Rev A v2 [skip ci]"
           git pull --rebase origin ayab-esp32-kh910-rev-a
           git push origin HEAD:ayab-esp32-kh910-rev-a
 
@@ -87,7 +99,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kh910-hall-pcb-drc
+          name: kh910-hall-pcb-drc-v2
           path: |
             /tmp/kh910-baseline-drc.rpt
             /tmp/kh910-hall-migration.txt
