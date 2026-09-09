@@ -7,7 +7,7 @@ on:
       - ayab-esp32-kh910-rev-a
     paths:
       - 'ayab-esp32/tools/migrate_rev_a_kl_pcb_stage.py'
-      - 'ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v2.py'
+      - 'ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v3.py'
       - 'ayab-esp32/tools/route_rev_a_kl_astar.py'
       - '.github/workflows/kh910-rev-a-kl-pcb-migrate.yml'
 
@@ -43,7 +43,8 @@ jobs:
 
       - name: Stage K-L electrical split and pull-ups
         run: |
-          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v2.py \
+          set -o pipefail
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v3.py \
             ayab-esp32/ayab-esp32.kicad_pcb \
             /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb \
             | tee /tmp/kh910-kl-migration.txt
@@ -61,7 +62,7 @@ jobs:
 
       - name: Validate K-L topology
         run: |
-          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v2.py \
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v3.py \
             --validate /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb
 
       - name: Require zero staged project-aware PCB DRC violations
@@ -78,7 +79,7 @@ jobs:
       - name: Install validated PCB and recheck repository project path
         run: |
           cp /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
-          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v2.py \
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v3.py \
             --validate ayab-esp32/ayab-esp32.kicad_pcb
           kicad-cli pcb drc --exit-code-violations \
             -o /tmp/kh910-kl-project-drc.rpt \
