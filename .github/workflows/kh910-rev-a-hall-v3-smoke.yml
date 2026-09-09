@@ -1,0 +1,24 @@
+name: KH910 Rev A Hall v3 Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v3.py'
+      - '.github/workflows/kh910-rev-a-hall-v3-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Transform and validate
+        run: |
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v3.py \
+            ayab-esp32/ayab-esp32.kicad_pcb /tmp/hall-v3.kicad_pcb
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized_v3.py \
+            --validate /tmp/hall-v3.kicad_pcb
