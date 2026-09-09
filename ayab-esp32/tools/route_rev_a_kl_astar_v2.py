@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """Route Rev A KH-910 K/L parity with controlled endpoint approaches.
 
-The K/L vias are intentionally close because they inherit already DRC-clean
-legacy geometry.  A generic endpoint escape window can erase the neighboring
-via from the obstacle map, so this router instead uses fixed, outward-facing
-stubs and A* only between those safe interior points.
+Machine K/L share the relatively open In2.Cu region below the ESP32.  Their
+pull-ups route on sparse In1.Cu to the already-established machine-side vias,
+which avoids the crowded GPIO-via cluster and the In2 +3V3 trunk near y=125.94.
 
-K routes on In1.Cu and L routes on In2.Cu.  The two new pull-up launch vias are
-well separated at the top-right of the ESP32.  KiCad DRC after zone refill is
-still authoritative.
+Close K/L via pairs use fixed outward-facing stubs; A* only routes between safe
+interior stub points. KiCad DRC after zone refill remains authoritative.
 """
 from __future__ import annotations
 
@@ -31,12 +29,13 @@ CLEAR = 0.22
 EDGE_CLEAR = 0.45
 
 # name, actual start via, safe start stub, safe goal stub, actual goal via,
-# label, layer.  Stubs point away from the neighboring K/L via.
+# label, layer. Machine K/L stay below the In2 power trunk. Pull-up routes use
+# In1 and terminate at the machine-side vias on the far-right open corridor.
 ROUTES = [
-    ("/BROTHER-CONNECTORS/EOL_R_N", (239.22,145.65), (239.30,144.90), (220.30,134.15), (220.97,134.15), "machine-k", pcbnew.In1_Cu),
-    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45,145.63), (237.70,145.63), (222.35,134.14), (221.67,134.14), "machine-l", pcbnew.In2_Cu),
-    ("/BROTHER-CONNECTORS/EOL_R_N", (241.60,118.00), (242.30,118.00), (220.30,134.15), (220.97,134.15), "pullup-k", pcbnew.In1_Cu),
-    ("/BROTHER-CONNECTORS/EOL_R_S", (241.60,120.00), (242.30,120.00), (222.35,134.14), (221.67,134.14), "pullup-l", pcbnew.In2_Cu),
+    ("/BROTHER-CONNECTORS/EOL_R_N", (239.22,145.65), (240.20,144.40), (220.00,133.20), (220.97,134.15), "machine-k", pcbnew.In2_Cu),
+    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45,145.63), (237.20,146.40), (222.60,133.20), (221.67,134.14), "machine-l", pcbnew.In2_Cu),
+    ("/BROTHER-CONNECTORS/EOL_R_N", (241.60,118.00), (243.00,118.00), (240.20,144.40), (239.22,145.65), "pullup-k", pcbnew.In1_Cu),
+    ("/BROTHER-CONNECTORS/EOL_R_S", (241.60,120.00), (244.00,120.00), (237.20,146.40), (238.45,145.63), "pullup-l", pcbnew.In1_Cu),
 ]
 
 
@@ -147,8 +146,6 @@ DIRS = [
 
 def astar(start_xy, goal_xy, blocked):
     start = cell(*start_xy); goal = cell(*goal_xy)
-    # Only the exact chosen stub cells may be cleared.  Never erase a broad
-    # endpoint neighborhood: the adjacent K/L via must remain an obstacle.
     blocked.discard(start)
     blocked.discard(goal)
 
@@ -202,13 +199,12 @@ def layer_name(layer): return board.GetLayerName(layer)
 
 
 report=[
-    "# KH910 Rev A K/L route report v4", "",
-    f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm",
-    "", "K uses In1.Cu; L uses In2.Cu; close via pairs use controlled outward stubs.", "",
+    "# KH910 Rev A K/L route report v5", "",
+    f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm", "",
+    "Machine K/L use In2.Cu below the power trunk; pull-ups use In1.Cu to the machine-side vias.", "",
 ]
 
 for name, actual_start, stub_start, stub_goal, actual_goal, label, layer in ROUTES:
-    # Fixed endpoint stubs preserve clearance direction around the close K/L via pairs.
     add_track(actual_start, stub_start, name, layer)
     board.BuildConnectivity()
     raw=astar(stub_start,stub_goal,build_blocked(name,layer))
@@ -227,5 +223,5 @@ for name, actual_start, stub_start, stub_goal, actual_goal, label, layer in ROUT
 pcbnew.SaveBoard(str(PATH),board)
 report_path=PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md")
 report_path.write_text("\n".join(report)+"\n")
-print("KL_ROUTE_V4_OK",PATH)
+print("KL_ROUTE_V5_OK",PATH)
 print(report_path)
