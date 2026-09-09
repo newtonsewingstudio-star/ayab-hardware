@@ -1,0 +1,92 @@
+name: KH910 Rev A Remove Legacy Comparators
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/patch_rev_a_remove_comparators.py'
+      - '.github/workflows/kh910-rev-a-remove-comparators.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Remove comparator-only schematic network
+        run: python3 ayab-esp32/tools/patch_rev_a_remove_comparators.py
+
+      - name: Export patched hierarchical netlist
+        run: |
+          kicad-cli sch export netlist --format kicadxml \
+            --output /tmp/ayab-esp32-clean.xml ayab-esp32/ayab-esp32.kicad_sch
+          test -s /tmp/ayab-esp32-clean.xml
+
+      - name: Prove retained and removed connectivity
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse('/tmp/ayab-esp32-clean.xml').getroot()
+          refs = {c.get('ref') for c in root.findall('./components/comp')}
+          removed = {'U702','U703','C703','C704'} | {f'R{i}' for i in range(715,735)}
+          left = sorted(removed & refs)
+          assert not left, f'obsolete refs still in netlist: {left}'
+          required = {'U701','R735','R736','R737','R738','TP701','TP702'}
+          missing = sorted(required - refs)
+          assert not missing, f'retained refs missing: {missing}'
+
+          nets = {}
+          for net in root.findall('./nets/net'):
+              name = net.get('name','')
+              nodes = {(n.get('ref',''), n.get('pin','')) for n in net.findall('node')}
+              nets[name] = nodes
+
+          def require_net(suffix, members):
+              found = [(name,nodes) for name,nodes in nets.items() if name.endswith(suffix)]
+              assert len(found) == 1, f'expected one net ending {suffix}, got {[x[0] for x in found]}'
+              name, nodes = found[0]
+              missing = set(members) - nodes
+              assert not missing, f'{name} missing {sorted(missing)}; has {sorted(nodes)}'
+              print(name, 'OK', sorted(members))
+
+          require_net('HALL_L_ADC', {('R735','2'),('R736','1'),('U201','5')})
+          require_net('HALL_R_ADC', {('R737','2'),('R738','1'),('U201','6')})
+          require_net('ENC_A', {('U701','21'),('U201','9')})
+          require_net('ENC_B', {('U701','20'),('U201','10')})
+          require_net('ENC_BP', {('U701','19'),('U201','11')})
+          PY
+          grep -q 'pin "KH910_R_K" input' ayab-esp32/ayab-esp32.kicad_sch
+          grep -q 'pin "KH910_R_L" input' ayab-esp32/ayab-esp32.kicad_sch
+
+      - name: Regenerate comparator audit
+        run: |
+          python3 ayab-esp32/tools/audit_rev_a_ioconditioning_netlist.py \
+            /tmp/ayab-esp32-clean.xml ayab-esp32/KH910_REV_A_IOCONDITIONING_AUDIT.md
+          grep -q 'nets touching U702/U703: **0**' ayab-esp32/KH910_REV_A_IOCONDITIONING_AUDIT.md
+
+      - name: Run schematic ERC parser check
+        run: |
+          kicad-cli sch erc --output /tmp/kh910-comparator-cleanup-erc.rpt ayab-esp32/ayab-esp32.kicad_sch
+          sed -n '1,240p' /tmp/kh910-comparator-cleanup-erc.rpt || true
+
+      - name: Commit validated schematic cleanup
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/ioconditioning.kicad_sch ayab-esp32/KH910_REV_A_IOCONDITIONING_AUDIT.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Remove obsolete LM393 Hall comparators [skip ci]"
+            git pull --rebase origin ayab-esp32-kh910-rev-a
+            git push
+          fi
