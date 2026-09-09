@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Inspect the validated Rev A solenoid/raw +12 V copper using pcbnew.
 
-Read-only diagnostic.  It deliberately relies on KiCad's own transformed pad
+Read-only diagnostic. It deliberately relies on KiCad's own transformed pad
 positions instead of reproducing footprint rotation math in text scripts.
 """
 from __future__ import annotations
@@ -42,7 +42,6 @@ def mm(v):
 
 def pos_xy(obj):
     p = obj.GetPosition()
-    # KiCad's VECTOR2I supports GetX/GetY in the runner SWIG build.
     try:
         return mm(p.GetX()), mm(p.GetY())
     except AttributeError:
@@ -54,10 +53,6 @@ def endpoints(track):
         (mm(track.GetStartX()), mm(track.GetStartY())),
         (mm(track.GetEndX()), mm(track.GetEndY())),
     )
-
-
-def key(p):
-    return round(p[0], 4), round(p[1], 4)
 
 
 def dist(a, b):
@@ -82,23 +77,23 @@ for ref, wanted in TARGETS.items():
         p = bynum[pn]
         xy = pos_xy(p)
         pad_points[(ref, pn)] = xy
-        print(
-            f"PAD {ref}.{pn} xy=({xy[0]:.4f},{xy[1]:.4f}) "
-            f"netcode={p.GetNetCode()} net={p.GetNetname()}"
-        )
+        print(f"PAD {ref}.{pn} xy=({xy[0]:.4f},{xy[1]:.4f}) netcode={p.GetNetCode()} net={p.GetNetname()}")
 
 raw_codes = set()
+raw_pads = []
 for fp in board.GetFootprints():
     for p in fp.Pads():
         if p.GetNetname() == "+12V":
             raw_codes.add(p.GetNetCode())
+            raw_pads.append((fp.GetReference(), str(p.GetNumber()), pos_xy(p)))
 if len(raw_codes) != 1:
     raise RuntimeError(f"expected exactly one +12V net code, got {raw_codes}")
 raw = next(iter(raw_codes))
 print("RAW_12V_NETCODE", raw)
+print("RAW_12V_ALL_PADS", len(raw_pads))
+for ref, pn, xy in sorted(raw_pads, key=lambda x: (x[2][1], x[2][0], x[0], x[1])):
+    print(f"RAWPAD {ref}.{pn} xy=({xy[0]:.4f},{xy[1]:.4f})")
 
-# Build a geometric endpoint graph of raw +12 V tracks and vias.  This is not
-# a substitute for KiCad connectivity; it is a diagnostic map around the pads.
 items = []
 for tr in board.GetTracks():
     if tr.GetNetCode() != raw:
@@ -108,9 +103,12 @@ for tr in board.GetTracks():
     items.append((tr, a, b, is_via))
 
 print("RAW_12V_TRACK_COUNT", len(items))
+print("RAW_12V_ALL_ITEMS")
+for i, (tr, a, b, is_via) in enumerate(items):
+    layer = "VIA" if is_via else board.GetLayerName(tr.GetLayer())
+    width = mm(tr.GetDrillValue()) if is_via else mm(tr.GetWidth())
+    print(f"RAWITEM {i} type={layer} width_or_drill={width:.4f} a=({a[0]:.4f},{a[1]:.4f}) b=({b[0]:.4f},{b[1]:.4f})")
 
-# Show every raw +12 item terminating within 0.8 mm of one of the relevant pad
-# centers.  This exposes the exact interleaving of the PSU and solenoid loads.
 print("RAW_12V_ITEMS_NEAR_TARGETS")
 seen = set()
 for (ref, pn), pxy in pad_points.items():
@@ -122,34 +120,7 @@ for (ref, pn), pxy in pad_points.items():
             continue
         seen.add(sig)
         layer = "VIA" if is_via else board.GetLayerName(tr.GetLayer())
-        width = mm(tr.GetWidth()) if not is_via else mm(tr.GetWidth())
-        print(
-            f"NEAR {ref}.{pn} item={i} type={layer} width={width:.4f} "
-            f"a=({a[0]:.4f},{a[1]:.4f}) b=({b[0]:.4f},{b[1]:.4f})"
-        )
-
-# Dump the entire raw +12 V copper graph in the bounding region containing all
-# 12 target pad centers, padded by 8 mm.  This is compact enough for CI logs and
-# sufficient to identify shared trunks and split points.
-xs = [p[0] for p in pad_points.values()]
-ys = [p[1] for p in pad_points.values()]
-box = (min(xs)-8, max(xs)+8, min(ys)-8, max(ys)+8)
-print(
-    "RAW_12V_TARGET_BOX",
-    f"xmin={box[0]:.4f} xmax={box[1]:.4f} ymin={box[2]:.4f} ymax={box[3]:.4f}",
-)
-print("RAW_12V_ITEMS_IN_TARGET_BOX")
-for i, (tr, a, b, is_via) in enumerate(items):
-    if not (
-        max(a[0], b[0]) >= box[0] and min(a[0], b[0]) <= box[1]
-        and max(a[1], b[1]) >= box[2] and min(a[1], b[1]) <= box[3]
-    ):
-        continue
-    layer = "VIA" if is_via else board.GetLayerName(tr.GetLayer())
-    width = mm(tr.GetWidth())
-    print(
-        f"RAWITEM {i} type={layer} width={width:.4f} "
-        f"a=({a[0]:.4f},{a[1]:.4f}) b=({b[0]:.4f},{b[1]:.4f})"
-    )
+        width = mm(tr.GetDrillValue()) if is_via else mm(tr.GetWidth())
+        print(f"NEAR {ref}.{pn} item={i} type={layer} width_or_drill={width:.4f} a=({a[0]:.4f},{a[1]:.4f}) b=({b[0]:.4f},{b[1]:.4f})")
 
 print("SOLENOID_BUS_INSPECT_OK")
