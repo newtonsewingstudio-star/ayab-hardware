@@ -28,8 +28,10 @@ jobs:
 
       - name: Export hierarchical netlist
         run: |
-          kicad-cli sch export netlist --output /tmp/ayab-esp32.xml ayab-esp32/ayab-esp32.kicad_sch
+          kicad-cli sch export netlist --format kicadxml \
+            --output /tmp/ayab-esp32.xml ayab-esp32/ayab-esp32.kicad_sch
           test -s /tmp/ayab-esp32.xml
+          head -n 5 /tmp/ayab-esp32.xml
 
       - name: Generate comparator connectivity audit
         run: |
