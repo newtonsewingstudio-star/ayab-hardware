@@ -50,7 +50,7 @@ jobs:
           git pull --rebase origin ayab-esp32-kh910-rev-a
           git push origin HEAD:ayab-esp32-kh910-rev-a
 
-      - name: Upload audit evidence
+      - name: Upload audit evidence and PCB snapshot
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -58,4 +58,6 @@ jobs:
           path: |
             /tmp/kh910-kl-baseline-drc.rpt
             ayab-esp32/KH910_REV_A_KL_PCB_PARITY.md
+            ayab-esp32/ayab-esp32.kicad_pcb
+            ayab-esp32/ayab-esp32.kicad_pro
           if-no-files-found: ignore
