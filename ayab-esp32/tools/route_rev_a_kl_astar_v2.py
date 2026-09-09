@@ -58,9 +58,13 @@ ROUTES = [
         "label": "pullup-l", "net": L,
         "actual_start": (241.60, 120.00), "actual_goal": (238.45, 145.63),
         "candidates": [
-            (pcbnew.In1_Cu, (244.00,120.00), (240.00,144.40)),
-            (pcbnew.In1_Cu, (243.40,120.00), (240.20,143.80)),
-            (pcbnew.B_Cu,   (244.00,120.00), (240.00,144.40)),
+            # J801.4 is a 1.7 mm through-hole GND pad at (244.43,120.25).
+            # Earlier start stubs at x=243.4..244.0 were inside its clearance
+            # envelope. Escape vertically from the existing L launch via first
+            # and approach the crowded K/L via row from directly above.
+            (pcbnew.In1_Cu, (241.60,120.40), (238.45,144.60)),
+            (pcbnew.In1_Cu, (242.00,120.40), (238.45,144.60)),
+            (pcbnew.B_Cu,   (241.60,120.40), (239.80,144.40)),
         ],
     },
     {
@@ -268,7 +272,7 @@ def choose_candidate(route):
 
 
 report = [
-    "# KH910 Rev A K/L route report v8", "",
+    "# KH910 Rev A K/L route report v9", "",
     f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm", "",
     "Machine L is routed before K. Each route uses the first A* candidate that is topologically available; KiCad DRC after zone refill is authoritative.", "",
 ]
@@ -300,5 +304,5 @@ for route in ROUTES:
 pcbnew.SaveBoard(str(PATH), board)
 report_path = PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md")
 report_path.write_text("\n".join(report)+"\n")
-print("KL_ROUTE_V8_OK", PATH)
+print("KL_ROUTE_V9_OK", PATH)
 print(report_path)
