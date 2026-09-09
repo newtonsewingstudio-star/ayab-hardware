@@ -123,18 +123,17 @@ addseg(rraw,(rraw[0],raw_y),raw_net,0.35)
 addseg((rraw[0],raw_y),(q805s[0],raw_y),raw_net,0.35)
 addseg((q805s[0],raw_y),q805s,raw_net,0.35)
 
-# P-gate uses orthogonal surface routes, clear of Q805 drain and Q806 gate.
+# P-gate is moved to In2.  This avoids the existing GND via at
+# (114.59,159.99), the 1 mm switched-power F.Cu route, and the N-gate In1 route.
 qg=pos["Q805.1"]; q6d=pos["Q806.3"]; rpg=pos["R820.2"]
-addseg(rpg,(114.60,rpg[1]),pg_net,0.25)
-addseg((114.60,rpg[1]),(114.60,qg[1]),pg_net,0.25)
-addseg((114.60,qg[1]),qg,pg_net,0.25)
-pg_y=157.55; pg_x=122.80
-addseg(qg,(qg[0],pg_y),pg_net,0.25)
-addseg((qg[0],pg_y),(pg_x,pg_y),pg_net,0.25)
-addseg((pg_x,pg_y),(pg_x,q6d[1]),pg_net,0.25)
-addseg((pg_x,q6d[1]),q6d,pg_net,0.25)
+pg0=(113.35,160.90); pg1=(115.35,158.55); pg2=(122.65,160.90)
+addseg(rpg,pg0,pg_net,0.25); addvia(pg0,pg_net)
+addseg(qg,pg1,pg_net,0.25); addvia(pg1,pg_net)
+addseg(q6d,pg2,pg_net,0.25); addvia(pg2,pg_net)
+addseg(pg0,pg1,pg_net,0.25,pcbnew.In2_Cu)
+addseg(pg1,pg2,pg_net,0.25,pcbnew.In2_Cu)
 
-# N-gate is moved to In1 so it cannot cross the P-gate or enable pad on F.Cu.
+# N-gate stays on In1 so it cannot cross the P-gate or enable pad on F.Cu.
 ng0=(119.15,158.45); ng1=(126.55,158.25); ng2=(129.65,160.75)
 addseg(pos["Q806.1"],ng0,ng_net,0.25); addvia(ng0,ng_net)
 addseg(pos["R821.2"],ng1,ng_net,0.25); addvia(ng1,ng_net)
