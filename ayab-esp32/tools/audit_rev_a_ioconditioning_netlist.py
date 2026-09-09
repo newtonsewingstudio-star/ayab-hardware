@@ -4,13 +4,15 @@
 Usage:
   audit_rev_a_ioconditioning_netlist.py NETLIST_XML [OUTPUT_MD]
 
-The report is intentionally read-only. It identifies every net touching U702/U703
-and expands those nets to all connected component pins so Rev A can remove only
-obsolete comparator circuitry without disturbing unrelated encoder functions.
+The report is intentionally read-only. It identifies every net touching U702/U703,
+expands those nets to connected component pins, and maps the complete pin-to-net
+topology of the local R715-R738 / C701-C704 network so Rev A can remove only
+obsolete comparator circuitry without disturbing retained ADC or encoder paths.
 """
 
 from __future__ import annotations
 
+import re
 import sys
 import xml.etree.ElementTree as ET
 from collections import defaultdict
@@ -25,6 +27,13 @@ LEGACY_NAME_TOKENS = (
 def text(node, tag, default=""):
     child = node.find(tag)
     return child.text.strip() if child is not None and child.text else default
+
+
+def local_ref(ref: str) -> bool:
+    if ref in {"U701", "U702", "U703", "C701", "C702", "C703", "C704", "TP701", "TP702"}:
+        return True
+    m = re.fullmatch(r"R(\d+)", ref)
+    return bool(m and 701 <= int(m.group(1)) <= 738)
 
 
 def main() -> None:
@@ -46,6 +55,7 @@ def main() -> None:
 
     nets = []
     pin_to_nets = defaultdict(list)
+    ref_pin_nodes = defaultdict(dict)
     for net in root.findall("./nets/net"):
         name = net.get("name", "")
         code = net.get("code", "")
@@ -59,6 +69,7 @@ def main() -> None:
             }
             nodes.append(item)
             pin_to_nets[(item["ref"], item["pin"])].append(name)
+            ref_pin_nodes[item["ref"]][item["pin"]] = (name, item["pinfunction"], item["pintype"])
         nets.append({"name": name, "code": code, "nodes": nodes})
 
     comparator_nets = [
@@ -109,6 +120,28 @@ def main() -> None:
         )
         lines.append(f"- `{net['name']}`: {members}")
 
+    lines += ["", "## Local conditioning component topology", ""]
+    lines += [
+        "This table lists every connected pin for U701-U703, C701-C704, TP701/TP702 and R701-R738. It is the removal decision table.",
+        "",
+        "| Ref | Value | Pin 1 / net | Pin 2 / net | Other pins / nets |",
+        "|---|---|---|---|---|",
+    ]
+    for ref in sorted((r for r in comps if local_ref(r)), key=lambda r: (r[0], int(re.sub(r'\D', '', r) or 0), r)):
+        c = comps.get(ref, {})
+        pins = ref_pin_nodes.get(ref, {})
+        def desc(pin):
+            if pin not in pins:
+                return "—"
+            net, fn, typ = pins[pin]
+            suffix = f" ({fn})" if fn else ""
+            return f"`{net or '<unnamed>'}`{suffix}"
+        others = []
+        for pin in sorted((p for p in pins if p not in {"1", "2"}), key=lambda p: (len(p), p)):
+            net, fn, typ = pins[pin]
+            others.append(f"{pin}: `{net or '<unnamed>'}`" + (f" ({fn})" if fn else ""))
+        lines.append(f"| {ref} | {c.get('value','')} | {desc('1')} | {desc('2')} | {'; '.join(others) if others else '—'} |")
+
     lines += ["", "## Adjacent component inventory", ""]
     lines += ["| Ref | Value | Footprint |", "|---|---|---|"]
     for ref in sorted(connected_refs):
@@ -119,7 +152,7 @@ def main() -> None:
         "",
         "## Rev A interpretation gate",
         "",
-        "Do not delete U702/U703 by reference alone. A comparator unit may share package power pins or nets with other functions. The removal patch must be based on the expanded net membership above and then verified by ERC plus a regenerated netlist.",
+        "Do not delete U702/U703 by reference alone. The removal patch must preserve the passive HALL_L_ADC/HALL_R_ADC dividers and the encoder path, then be verified by ERC plus a regenerated netlist.",
     ]
 
     out_path.write_text("\n".join(lines) + "\n")
