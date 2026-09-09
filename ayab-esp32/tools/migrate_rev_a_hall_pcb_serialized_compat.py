@@ -6,12 +6,37 @@ reference/value`), while a KiCad 9 save rewrites those fields as `property
 "Reference"/"Value"`.  The core transformer supports the audited electrical
 migration; this wrapper makes reference/value access format-preserving across
 both serializations without changing any unrelated board text.
+
+It also applies one narrowly asserted runtime correction to the first core
+revision: Python evaluates the default argument to dict.get eagerly, so the
+new ADC-net lookup must use an explicit conditional rather than
+`adc_ids.get(net_name, nets[net_name])`.  The exact source line is required to
+occur once; otherwise this wrapper aborts instead of silently patching code.
 """
 
 from __future__ import annotations
 
+import importlib.util
+from pathlib import Path
 import re
-import migrate_rev_a_hall_pcb_serialized as migration
+import sys
+
+CORE = Path(__file__).with_name("migrate_rev_a_hall_pcb_serialized.py")
+source = CORE.read_text(encoding="utf-8")
+old = "net_id = adc_ids.get(net_name, nets[net_name])"
+new = "net_id = adc_ids[net_name] if net_name in adc_ids else nets[net_name]"
+if source.count(old) != 1:
+    raise RuntimeError(f"expected exactly one ADC net-selection expression, found {source.count(old)}")
+source = source.replace(old, new)
+
+runtime_core = Path("/tmp/migrate_rev_a_hall_pcb_serialized_runtime.py")
+runtime_core.write_text(source, encoding="utf-8")
+spec = importlib.util.spec_from_file_location("kh910_hall_serialized_runtime", runtime_core)
+if spec is None or spec.loader is None:
+    raise RuntimeError("could not create runtime module spec")
+migration = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = migration
+spec.loader.exec_module(migration)
 
 
 def reference(block: str) -> str | None:
@@ -43,8 +68,8 @@ def replace_property(block: str, prop_name: str, new_value: str) -> str:
             new_pb = pb[:m.start(2)] + new_value + pb[m.end(2):]
             return block[:s.start] + new_pb + block[s.end:]
 
-    # Legacy branch serialization.  Preserve whether the original token was
-    # quoted or bare so the edit is as small as possible.
+    # Legacy branch serialization. Preserve whether the token was quoted or
+    # bare so the edit remains minimal.
     kind = "reference" if prop_name == "Reference" else "value" if prop_name == "Value" else None
     if kind is not None:
         for s in children:
