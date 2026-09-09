@@ -1,0 +1,44 @@
+name: KH910 Rev A Hall Serialized Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized.py'
+      - '.github/workflows/kh910-rev-a-hall-serialized-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+
+      - name: Transform serialized board
+        run: |
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized.py \
+            ayab-esp32/ayab-esp32.kicad_pcb \
+            /tmp/ayab-esp32-hall-migrated.kicad_pcb \
+            | tee /tmp/kh910-hall-serialized-smoke.txt
+          test -s /tmp/ayab-esp32-hall-migrated.kicad_pcb
+
+      - name: Reparse and validate transformed board
+        run: |
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb_serialized.py \
+            --validate /tmp/ayab-esp32-hall-migrated.kicad_pcb
+
+      - name: Upload smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-hall-serialized-smoke
+          path: |
+            /tmp/kh910-hall-serialized-smoke.txt
+            /tmp/ayab-esp32-hall-migrated.kicad_pcb
+          if-no-files-found: ignore
