@@ -61,10 +61,10 @@ REMOVE_VIAS = {
 
 # Exact dead/prototype segments to remove.  The long legacy branches to U701
 # are no longer functional after the split and otherwise produce dangling-track
-# warnings.  The four old pull-up-bank segments are replaced at the new site.
+# warnings.  Old +3V3 pull-up-bank links are removed under their actual +3V3
+# net ownership (not duplicated in the K/L expectation sets).
 REMOVE_SEGMENTS = {
     core.MACH_K: {
-        frozenset(((210.325, 132.025), (211.925, 132.025))),
         frozenset(((208.675, 132.025), (207.5, 132.025))),
         frozenset(((239.22, 149.86), (239.11, 149.75))),
         frozenset(((239.11, 149.75), (196.82, 149.75))),
@@ -72,7 +72,6 @@ REMOVE_SEGMENTS = {
         frozenset(((239.22, 149.86), (239.22, 145.65))),
     },
     core.MACH_L: {
-        frozenset(((210.325, 135.325), (211.925, 135.325))),
         frozenset(((208.675, 135.325), (207.5, 135.325))),
         frozenset(((238.43, 150.42), (238.11, 150.10))),
         frozenset(((238.11, 150.10), (196.87, 150.10))),
