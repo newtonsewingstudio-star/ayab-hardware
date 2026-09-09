@@ -1,0 +1,46 @@
+name: KH910 Rev A Layout Debug SVG
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - '.github/workflows/kh910-rev-a-layout-debug-svg.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+      - name: Export combined copper and edge SVG
+        run: |
+          kicad-cli pcb export svg \
+            --layers F.Cu,In1.Cu,In2.Cu,B.Cu,Edge.Cuts \
+            --mode-single \
+            --fit-page-to-board \
+            --exclude-drawing-sheet \
+            --check-zones \
+            -o ayab-esp32/KH910_REV_A_LAYOUT_DEBUG.svg \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          test -s ayab-esp32/KH910_REV_A_LAYOUT_DEBUG.svg
+      - name: Commit debug SVG
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_LAYOUT_DEBUG.svg
+          if git diff --cached --quiet; then
+            echo "No SVG changes"
+            exit 0
+          fi
+          git commit -m "Record Rev A layout debug SVG [skip ci]"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push origin HEAD:ayab-esp32-kh910-rev-a
