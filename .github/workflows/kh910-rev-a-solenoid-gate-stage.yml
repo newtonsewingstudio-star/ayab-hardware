@@ -9,6 +9,7 @@ on:
       - 'ayab-esp32/tools/stage_rev_a_solenoid_gate_local_v1.py'
       - 'ayab-esp32/tools/fix_rev_a_solenoid_pg_corner.py'
       - 'ayab-esp32/tools/route_rev_a_solenoid_enable_astar.py'
+      - 'ayab-esp32/tools/stage_rev_a_solenoid_tp703.py'
       - '.github/workflows/kh910-rev-a-solenoid-gate-stage.yml'
 
 jobs:
@@ -44,6 +45,9 @@ jobs:
       - name: Route solenoid enable with all-layer via clearance
         run: |
           /usr/bin/python3 ayab-esp32/tools/route_rev_a_solenoid_enable_astar.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb | tee -a /tmp/gate-stage.txt
+      - name: Stage switched-rail test point
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/stage_rev_a_solenoid_tp703.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb | tee -a /tmp/gate-stage.txt
       - name: Refill zones
         run: |
           /usr/bin/python3 ayab-esp32/tools/refill_rev_a_zones.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb
