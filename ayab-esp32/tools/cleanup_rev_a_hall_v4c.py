@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
-"""Clean only the residual copper identified by the v4c KiCad DRC reports.
+"""Clean only residual copper identified by the v4c KiCad DRC reports.
 
 Input is the staged v4c board after the board-aware A* Hall routes are added.
 This script deliberately does not alter either A* route, divider footprint, MCU
 pad assignment, or any unrelated net.
 
-Repairs:
-1. Remove legacy B.Cu Hall tails. The new A* In1.Cu routes terminate at the
-   existing MCU Hall vias, so downstream retagged B.Cu tails are redundant.
-2. Remove comparator-era supply stubs explicitly proven dangling by KiCad DRC.
-3. Restore the direct GND link between adjacent U701 pads 11 and 12.
-
-KiCad DRC is the final authority; all expected edits are assertion checked.
+KiCad DRC is the final authority; every surgical removal is assertion checked.
 """
 from __future__ import annotations
 
@@ -83,22 +77,48 @@ def add_track(a, b, net_name, layer=pcbnew.F_Cu, width_mm=0.25):
     board.Add(tr)
 
 
+def unique_track(name, point, expected_len, layer=pcbnew.F_Cu, excluded=()):
+    matches = [
+        item for item in board.GetTracks()
+        if not isinstance(item, pcbnew.PCB_VIA)
+        and item.GetLayer() == layer
+        and item.GetNetname() == name
+        and touches(item, point)
+        and abs(length_mm(item) - expected_len) <= 0.01
+        and item not in excluded
+    ]
+    if len(matches) != 1:
+        candidates = [
+            (endpoints(item), round(length_mm(item), 4))
+            for item in board.GetTracks()
+            if not isinstance(item, pcbnew.PCB_VIA)
+            and item.GetLayer() == layer
+            and item.GetNetname() == name
+            and touches(item, point)
+            and item not in excluded
+        ]
+        raise RuntimeError(
+            f"expected one track at {name} {point} len {expected_len}; "
+            f"found {len(matches)}; candidates={candidates}"
+        )
+    return matches[0]
+
+
 removed_adc = {ADC_L: 0, ADC_R: 0}
 remove = []
 
-# All B.Cu TRACK segments on the two ADC nets are legacy tails. Keep vias:
-# the MCU vias are precisely where the new In1 routes meet the F.Cu MCU stubs.
+# The new A* In1 routes terminate at the existing MCU Hall vias. All non-via
+# B.Cu ADC segments are therefore obsolete legacy tails.
 for item in board.GetTracks():
     if isinstance(item, pcbnew.PCB_VIA):
         continue
     if item.GetLayer() == pcbnew.B_Cu and item.GetNetname() in removed_adc:
         remove.append(item)
         removed_adc[item.GetNetname()] += 1
-
 if removed_adc[ADC_L] < 1 or removed_adc[ADC_R] < 1:
     raise RuntimeError(f"expected legacy ADC B.Cu tails on both nets, found {removed_adc}")
 
-# Exact first-wave DRC-proven dead comparator-era supply segments.
+# First DRC wave: exact dead comparator-era supply segments.
 exact_remove = [
     (GND, (91.7878, 142.2030), (91.0628, 141.4780)),
     (GND, (91.0628, 141.4780), (91.0628, 139.8280)),
@@ -115,56 +135,33 @@ for item in board.GetTracks():
             if item not in remove:
                 remove.append(item)
             found[i] += 1
-
 missing = [exact_remove[i] for i, count in found.items() if count != 1]
 if missing:
     raise RuntimeError(f"expected exact residual segments once each; mismatches: {missing} counts={found}")
 
-# Second DRC pass exposed the next pieces of two dead +5V branches. Match both
-# the reported dangling endpoint and the KiCad-reported segment length, so a
-# live neighboring branch sharing the same junction cannot be removed.
-second_wave = [
+# Subsequent DRC passes expose the next dead segment in a branch after its leaf
+# is removed. Match both endpoint and DRC-reported length so a live neighboring
+# segment sharing the junction cannot be selected accidentally.
+wave_specs = [
+    # second DRC wave
     (P5, (310.9000, 157.2800), 0.7495),
     (P5, (325.2700, 153.4250), 1.5000),
+    # third DRC wave
+    (GND, (90.1378, 140.6530), 0.9250),
+    (P5, (310.3700, 156.7500), 2.1750),
+    (P5, (324.4950, 152.6500), 1.0960),
 ]
-second_found = []
-for name, point, expected_len in second_wave:
-    matches = [
-        item for item in board.GetTracks()
-        if not isinstance(item, pcbnew.PCB_VIA)
-        and item.GetLayer() == pcbnew.F_Cu
-        and item.GetNetname() == name
-        and touches(item, point)
-        and abs(length_mm(item) - expected_len) <= 0.01
-        and item not in remove
-    ]
-    if len(matches) != 1:
-        candidates = [
-            (endpoints(item), round(length_mm(item), 4))
-            for item in board.GetTracks()
-            if not isinstance(item, pcbnew.PCB_VIA)
-            and item.GetLayer() == pcbnew.F_Cu
-            and item.GetNetname() == name
-            and touches(item, point)
-            and item not in remove
-        ]
-        raise RuntimeError(
-            f"expected one second-wave dead segment at {name} {point} len {expected_len}; "
-            f"found {len(matches)}; candidates={candidates}"
-        )
-    remove.append(matches[0])
-    second_found.append((name, point, endpoints(matches[0]), round(length_mm(matches[0]), 4)))
+wave_found = []
+for name, point, expected_len in wave_specs:
+    item = unique_track(name, point, expected_len, excluded=remove)
+    remove.append(item)
+    wave_found.append((name, point, endpoints(item), round(length_mm(item), 4)))
 
 for item in remove:
     board.Remove(item)
 
-# Do not reconnect the former left comparator GND trunk. The second DRC pass
-# proved the attempted 140.653 -> 139.828 link itself was a dead-end warning,
-# while the board already had zero unconnected items. Leaving it absent is the
-# correct cleanup result.
-
-# U701 pads 11 and 12 are adjacent GND pins; comparator cleanup exposed the
-# absence of their local bridge. Add the shortest possible same-net F.Cu link.
+# U701 pads 11 and 12 are adjacent GND pins. Comparator cleanup exposed the
+# missing local bridge, so preserve the shortest same-net F.Cu connection.
 fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
 u701 = fps.get("U701")
 if u701 is None:
@@ -184,5 +181,5 @@ pcbnew.SaveBoard(str(PATH), board)
 print("HALL_V4C_CLEANUP_OK", PATH)
 print("REMOVED_ADC_BCU", removed_adc)
 print("REMOVED_EXACT_SUPPLY_SEGMENTS", len(exact_remove))
-print("REMOVED_SECOND_WAVE_SEGMENTS", second_found)
+print("REMOVED_DRC_WAVE_SEGMENTS", wave_found)
 print("ADDED_U701_GND_LINK", p11, p12)
