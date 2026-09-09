@@ -1,0 +1,306 @@
+name: AYAB Rev A Handoff Package
+
+on:
+  push:
+    branches:
+      - handoff-2026-09-09-1240
+    paths:
+      - '.github/workflows/handoff-package-2026-09-09.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assemble pinned source snapshot
+        run: |
+          set -euo pipefail
+          mkdir -p package/hardware package/firmware
+          git archive fdf32b99b5c4fd83e81ea877c62f4af809361d96 | tar -x -C package/hardware
+
+          git clone https://github.com/newtonsewingstudio-star/ayab-firmware.git /tmp/ayab-firmware
+          git -C /tmp/ayab-firmware checkout 33c8dd6909133b070d3e396743a269f7baf1cf49
+          rm -rf /tmp/ayab-firmware/.git
+          cp -a /tmp/ayab-firmware/. package/firmware/
+
+          cat > package/PROJECT_HANDOFF_2026-09-09.md <<'EOF'
+          # AYAB-ESP32 KH910 Rev A — New Chat Handoff
+
+          Snapshot time: 2026-09-09 12:40 America/New_York
+
+          ## Exact source state
+
+          - Hardware repo: `newtonsewingstudio-star/ayab-hardware`
+          - Working branch: `ayab-esp32-kh910-rev-a`
+          - Pinned engineering commit: `fdf32b99b5c4fd83e81ea877c62f4af809361d96`
+          - Hall PCB migration commit: `8fd298442880e72165fc4bc64ea7709fd2f66bd2`
+          - Firmware repo: `newtonsewingstudio-star/ayab-firmware`
+          - Firmware baseline: `33c8dd6909133b070d3e396743a269f7baf1cf49`
+
+          The handoff/package branch is packaging-only. Continue engineering on `ayab-esp32-kh910-rev-a`.
+
+          ## Project objective
+
+          Build a production-capable modern replacement controller for the Brother KH-910 using the AYAB ESP32 architecture, with ESP32-S3, USB-C, Wi-Fi, modern display/front-panel capability, original Brother machine connectors, original physical controls where practical, standalone operation, AYAB compatibility, strong diagnostics, factory assembly, and safe power behavior.
+
+          Primary validation machine: Brother KH-910. Preserve compatibility with other electronic Brother machines where that does not compromise KH-910 correctness.
+
+          First manufacturing target is approximately five assembled boards.
+
+          ## Architecture decisions already made
+
+          - Keep `ESP32-S3-MINI-1-N4R2`.
+          - Keep USB-C and native ESP32-S3 USB.
+          - Keep MCP23017 + ULN2003A solenoid architecture unless later validation disproves it.
+          - Keep Brother connector architecture.
+          - Prefer factory SMD assembly/JLC-friendly parts.
+          - No unnecessary MCU swap/touchscreen/feature creep.
+          - Hardware may move ahead of firmware; firmware will be reconciled afterward.
+          - Original KH-910 keypad + modern replacement display remains a desired front-panel architecture; final mechanical geometry is not yet frozen.
+
+          ## Major completed electrical work
+
+          ### U602 / 3.3 V regulator
+
+          Upstream regulator metadata error was corrected from `XL1509-5.0E1` / C61063 to `XL1509-3.3E1` / LCSC C74193 on the 3.3 V rail.
+
+          ### MCU / pin architecture
+
+          Authoritative Rev A I/O map exists in `ayab-esp32/KH910_REV_A_IO_MAP.md`.
+
+          Important target signals:
+
+          - GPIO1: `HALL_L_ADC`
+          - GPIO2: `HALL_R_ADC`
+          - GPIO4: `MACHINE_PWR_SENSE`
+          - GPIO5/6/7: encoder A/B/C
+          - GPIO8/9: internal I2C / MCP23017
+          - GPIO10-13: display SPI
+          - GPIO15/16: external/front-panel I2C
+          - GPIO17: `KH910_R_K`
+          - GPIO18: `KH910_R_L`
+          - GPIO19/20: native USB D-/D+
+          - GPIO21: `SOLENOID_PWR_EN`
+          - GPIO38: buzzer
+          - GPIO43/44: UART
+
+          Native USB was re-audited carefully after an early coordinate-audit mistake. The original board's USB mapping on GPIO19/20 was already correct. The audit tooling was fixed; do not repeat the erroneous USB reroute.
+
+          ### Machine-power sense
+
+          GPIO4 `MACHINE_PWR_SENSE` is implemented and validated using a 47 kOhm / 10 kOhm divider from raw +12 V. This provides about 2.1 V at 12 V and useful headroom.
+
+          ### USB / 5 V reverse-current isolation
+
+          Upstream issue #28 documented USB-only backfeed that raises the nominal 12 V rail to about 4 V.
+
+          Rev A adds an LM66100 ideal-diode/reverse-current-blocking stage in the machine-derived 5 V path, replacing the logical role of the old R406 0-ohm link. The selected configuration uses CE tied to VOUT for always-on reverse-current blocking. The schematic stage was validated.
+
+          ### Solenoid fail-safe schematic
+
+          Hardware-default-OFF solenoid-power gating is implemented in the schematic.
+
+          - GPIO21 = `SOLENOID_PWR_EN`.
+          - High-side switch uses LP9435LT1G P-channel MOSFET.
+          - AO3400A N-channel MOSFET pulls the P-MOS gate down when enabled.
+          - Q806 source/drain orientation was specifically corrected after a body-diode safety review.
+          - Switched rail = `SOLENOID_12V_SW`.
+          - Switched rail feeds Brother solenoid-positive supply groups and ULN2003 flyback COM rail.
+          - Raw +12 V remains available for machine-power sensing/control logic.
+          - TP703 / `SOL12_SW` test point was added to the schematic.
+
+          The schematic fail-safe stage passed ERC/DRC. PCB implementation/parity for the solenoid power gate is NOT finished yet.
+
+          ## KH-910 Hall / carriage work — COMPLETE THROUGH PCB
+
+          This was the largest completed workstream.
+
+          ### Why it was required
+
+          Upstream AYAB issue #43 documents that KH-910 right-side K/L digital open-collector signals do not work correctly through the prototype LM393 normalization network. The comparators can hold derived signals low and prevent the KH-910 outputs from being read.
+
+          ### Schematic architecture
+
+          - KH-910 right K and L are separate digital signals. Do not OR them.
+          - Preserve native machine polarity in hardware; firmware interprets it.
+          - K -> dedicated GPIO17 with external 10 kOhm pull-up to 3.3 V.
+          - L -> dedicated GPIO18 with external 10 kOhm pull-up to 3.3 V.
+          - Analog Hall machines use passive ADC divider paths instead of LM393 normalization.
+          - Left analog Hall -> GPIO1 ADC.
+          - Right analog Hall -> GPIO2 ADC.
+          - Passive Hall dividers are 10 kOhm / 10 kOhm.
+
+          ### Comparator removal
+
+          The obsolete LM393 Hall/comparator circuitry was removed from the schematic. The strict comparator-only removal set included U702/U703, C703/C704, and R715-R734. The retained Rev A ADC divider network is R735-R738.
+
+          U701/J701/J702 level-shifter/test-header circuitry is retained where it still has a valid function; do not broadly delete it as 'old comparator stuff'.
+
+          ### Hall PCB migration
+
+          The Hall PCB migration is DONE and committed at:
+
+          `8fd298442880e72165fc4bc64ea7709fd2f66bd2`
+
+          It was only committed after the staged and repository-path KiCad DRC gates reached zero violations / zero unconnected items.
+
+          The final Hall routing used a board-aware A* router rather than hand-authored long routes. Route report is stored in `ayab-esp32/KH910_REV_A_HALL_ASTAR_ROUTE.md`.
+
+          Important final PCB state:
+
+          - U201 pad 5 now = `/ESP32/HALL_L_ADC`.
+          - U201 pad 6 now = `/ESP32/HALL_R_ADC`.
+          - R735-R738 exist as the Hall divider network.
+          - Obsolete comparator footprints/copper were removed as required.
+          - Hall routes were validated after KiCad zone refill.
+          - Board remained 0 DRC / 0 unconnected at the Hall commit gate.
+
+          ## ACTIVE TASK: KH-910 K/L PCB parity migration
+
+          The K/L schematic architecture is already designed and validated, but the PCB is still stale and must now be migrated to match it.
+
+          Latest authoritative audit file:
+
+          `ayab-esp32/KH910_REV_A_KL_PCB_PARITY.md`
+
+          The audit was refreshed after the Hall-migrated board and is current in the pinned hardware commit.
+
+          ### Current PCB facts from K/L parity audit
+
+          - R213: MISSING on PCB.
+          - R214: MISSING on PCB.
+          - J405 pad 8 currently uses legacy `/BROTHER-CONNECTORS/EOL_R_N`.
+          - J405 pad 7 currently uses legacy `/BROTHER-CONNECTORS/EOL_R_S`.
+          - J702 pads 6/7 currently share those legacy nets.
+          - U201 GPIO17 physical pad is module pad 21 and is currently `/ESP32/ESP17`.
+          - U201 GPIO18 physical pad is module pad 22 and is currently `/ESP32/ESP18`.
+          - The validated schematic separates the actual KH-910 machine K/L lines from the retained U701/J702 level-shifter channels.
+
+          ### Intended K/L PCB result
+
+          1. Keep the actual KH-910 machine signals separate from the retained U701/J702 local channels.
+          2. J405 machine K/L pins must become the dedicated KH910 machine nets.
+          3. Route machine K/L to GPIO17/GPIO18.
+          4. Add R213/R214 10 kOhm pull-ups to 3.3 V.
+          5. Preserve the U701/J702 channels on their own valid local nets; do not accidentally merge them back into machine K/L.
+          6. Use the same staged/fail-closed method as Hall: baseline PCB DRC 0/0 -> staged edit -> zone refill -> staged DRC 0/0 -> repository-path DRC 0/0 -> commit only then.
+
+          The compiled K/L netlist audit workflow succeeded at the pinned head (`KH910 Rev A K/L Netlist Audit`, run 34377939107). Use it as additional schematic truth when preparing the PCB migration.
+
+          ## PCB editing lessons that must be retained
+
+          Several hard-won tooling lessons are important:
+
+          - Do not blindly calculate rotated KiCad pad coordinates with ordinary Cartesian assumptions. KiCad board Y/rotation semantics caused earlier errors.
+          - KiCad's Python/SWIG pad wrappers became unstable after board mutation; do not rely on long chains of mutated wrapper objects.
+          - Raw S-expression editing is acceptable only with strict structural assertions and KiCad CLI validation.
+          - A previous serializer inserted route records inside a nested footprint because it searched for a generic `(zone` substring. That was fixed by only inserting at true root-level items.
+          - DRC must run with the `.kicad_pro` project context. Running a staged PCB alone in `/tmp` produced hundreds of false violations due to generic constraints.
+          - After net/pad changes, refill copper zones before DRC using KiCad `ZONE_FILLER` / `refill_rev_a_zones.py`.
+          - The board-aware A* routing approach successfully solved the Hall cross-board route problem and is preferable to hand-picked waypoints.
+          - Keep the repository board protected: do not commit staged PCB changes unless DRC is 0/0.
+
+          See `ayab-esp32/KH910_REV_A_PCB_EDIT_METHOD.md` and the Hall tools/workflows for examples.
+
+          ## Other important unfinished work after K/L
+
+          ### Solenoid fail-safe PCB parity/layout
+
+          The schematic is validated, but PCB placement/routing for Q805/Q806/R820-R822/TP703 and `SOLENOID_12V_SW` is unfinished. Earlier raw-text layout attempts were intentionally rejected and never committed. Resume this only after K/L PCB parity is clean.
+
+          ### 5 V isolation PCB parity
+
+          The LM66100 reverse-current isolation schematic design is validated. Confirm PCB parity/placement/routing and power-state behavior before fabrication.
+
+          ### Power-state verification
+
+          Must ultimately validate:
+
+          - machine power only;
+          - USB only;
+          - both connected;
+          - machine plug/unplug while USB present;
+          - USB plug/unplug while machine powered;
+          - reset/brownout;
+          - firmware crash / uninitialized I/O;
+          - no partial solenoid/machine-rail energization from USB.
+
+          ### Front panel / mechanical
+
+          Desired direction remains a drop-in KH-910 replacement console using original enclosure, original physical keypad/rubber mat, modern display, USB/Wi-Fi and diagnostics. Documentation-first reverse engineering should continue before asking Brian for measurements.
+
+          Only request physical machine measurements/photos when a specific geometry cannot be resolved from Brother service documentation, eKnitter public installation references, existing board imagery, or mechanical drawings.
+
+          ### Firmware
+
+          Firmware has not yet been reconciled to all Rev A names/features. Experimental ESP32 firmware still contains comparator-era EOL naming in places. Later tasks include:
+
+          - update board pin names for HALL_L_ADC / HALL_R_ADC / KH910_R_K / KH910_R_L / MACHINE_PWR_SENSE / SOLENOID_PWR_EN;
+          - make GPIO21 default LOW before any solenoid logic;
+          - safe startup/reset behavior;
+          - diagnostic firmware for MCP23017, encoder, K/L transitions, Hall ADC values, power sense and individual safe solenoid tests;
+          - local display/keypad diagnostics.
+
+          ## Fabrication gate
+
+          DO NOT FABRICATE YET.
+
+          Before fabrication:
+
+          - finish K/L PCB parity;
+          - finish solenoid fail-safe PCB parity;
+          - finish 5 V isolation/power-path PCB parity;
+          - complete schematic/PCB annotation/parity review;
+          - clean ERC/DRC with understood exceptions only;
+          - verify connector orientation and mounting/mechanical fit;
+          - verify test points and silkscreen/serviceability;
+          - JLC/BOM/CPL availability and assembly review;
+          - generate and visually inspect Gerbers/BOM/CPL/docs;
+          - bench power-state and fail-safe test plan.
+
+          ## Recommended exact restart sequence in the new chat
+
+          1. Read this handoff.
+          2. Ground against hardware commit `fdf32b99b5c4fd83e81ea877c62f4af809361d96` on branch `ayab-esp32-kh910-rev-a`.
+          3. Open `ayab-esp32/KH910_REV_A_KL_PCB_PARITY.md`.
+          4. Inspect the successful K/L compiled-netlist workflow run 34377939107 if needed.
+          5. Build the K/L PCB migration from current Hall-clean board state.
+          6. Add R213/R214 and split machine K/L from U701/J702 local channels correctly.
+          7. Route K/L to GPIO17/GPIO18 using board-aware geometry.
+          8. Refill zones.
+          9. Require staged and repository-path PCB DRC = 0 violations / 0 unconnected.
+          10. Commit only after that gate passes.
+          11. Then return to the solenoid fail-safe PCB migration.
+
+          ## Brian / user action required now
+
+          None. Continue engineering from the repo. Do not ask Brian to dismantle or measure the KH-910 unless a specific unresolved mechanical fact genuinely requires it.
+          EOF
+
+          git --no-pager log --oneline -80 fdf32b99b5c4fd83e81ea877c62f4af809361d96 > package/HARDWARE_RECENT_COMMITS.txt
+          printf '%s\n' \
+            'hardware=fdf32b99b5c4fd83e81ea877c62f4af809361d96' \
+            'hall_pcb_commit=8fd298442880e72165fc4bc64ea7709fd2f66bd2' \
+            'firmware=33c8dd6909133b070d3e396743a269f7baf1cf49' \
+            'working_branch=ayab-esp32-kh910-rev-a' \
+            'active_task=KH910 K/L PCB parity migration' \
+            > package/SNAPSHOT_MANIFEST.txt
+
+          (cd package && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+          zip -qr AYAB-ESP32_KH910_RevA_HANDOFF_2026-09-09.zip package
+          sha256sum AYAB-ESP32_KH910_RevA_HANDOFF_2026-09-09.zip
+
+      - name: Upload handoff package
+        uses: actions/upload-artifact@v4
+        with:
+          name: AYAB-ESP32_KH910_RevA_HANDOFF_2026-09-09
+          path: AYAB-ESP32_KH910_RevA_HANDOFF_2026-09-09.zip
+          if-no-files-found: error
+          compression-level: 0
