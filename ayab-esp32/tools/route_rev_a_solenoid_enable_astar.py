@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Route SOLENOID_PWR_EN from its existing GPIO21 copper endpoint to R821.1.
+"""Route SOLENOID_PWR_EN from existing GPIO21 copper to staged R821.1.
 
-Run after stage_rev_a_solenoid_gate_local_v1.py.  The router is fail-closed:
-it requires the known existing B.Cu endpoint and the staged R821.1 pad, then
-tries a small ordered set of B.Cu/inner-layer A* candidates.  KiCad DRC after
-zone refill remains authoritative.
+The existing GPIO21 net is already fully routed on the promoted board.  This
+script does not assume one historical coordinate: it inventories endpoints of
+that same-net copper, tries the nearest useful anchors first, and A* routes a
+new branch to R821.1. KiCad DRC after zone refill remains authoritative.
 """
 from __future__ import annotations
 import heapq, math, sys
@@ -19,20 +19,15 @@ if b is None: raise RuntimeError(f"could not load {PATH}")
 b.BuildConnectivity()
 
 NET="SOLENOID_PWR_EN"
-START=(134.835,120.300)
 TRACK_W=0.25
 STEP=0.20
 CLEAR=0.22
 EDGE_CLEAR=0.45
-
 mm=pcbnew.ToMM
 iu=pcbnew.FromMM
 def pt(x,y): return pcbnew.VECTOR2I(iu(x),iu(y))
-def code(name):
-    n=b.GetNetcodeFromNetname(name)
-    if n<=0: raise RuntimeError(f"missing net {name}")
-    return n
-NC=code(NET)
+NC=b.GetNetcodeFromNetname(NET)
+if NC<=0: raise RuntimeError(f"missing net {NET}")
 
 def netobj():
     for f in b.GetFootprints():
@@ -45,37 +40,30 @@ NO=netobj()
 
 def xypos(o):
     p=o.GetPosition(); return mm(p.x),mm(p.y)
-
-def endpoint(t,which):
-    p=t.GetStart() if which==0 else t.GetEnd(); return mm(p.x),mm(p.y)
-
-def close(a,z,tol=0.03): return abs(a[0]-z[0])<=tol and abs(a[1]-z[1])<=tol
-
-# Require the DRC-exposed existing endpoint on B.Cu.  Do not create a second
-# parallel GPIO21 run from the ESP32 itself.
-start_hits=[]
-for t in b.GetTracks():
-    if isinstance(t,pcbnew.PCB_VIA) or t.GetNetCode()!=NC or t.GetLayer()!=pcbnew.B_Cu: continue
-    for k in (0,1):
-        if close(endpoint(t,k),START): start_hits.append(t)
-if not start_hits:
-    raise RuntimeError(f"expected existing {NET} B.Cu endpoint at {START}")
+def endpoint(t,k):
+    p=t.GetStart() if k==0 else t.GetEnd(); return mm(p.x),mm(p.y)
 
 r821=next((f for f in b.GetFootprints() if f.GetReference()=="R821"),None)
 if r821 is None: raise RuntimeError("R821 missing; run local gate stage first")
 pad1=next((p for p in r821.Pads() if p.GetNumber()=="1"),None)
-if pad1 is None or pad1.GetNetname()!=NET:
-    raise RuntimeError(f"R821.1 is not on {NET}")
+if pad1 is None or pad1.GetNetname()!=NET: raise RuntimeError(f"R821.1 is not on {NET}")
 GOAL_PAD=xypos(pad1)
 
-# Candidate goal vias sit immediately above R821.1 so the final F.Cu stub is
-# short and cannot wander through the compact gate pocket.
-CANDS=[
-    (pcbnew.B_Cu,  (124.175,157.20), False),
-    (pcbnew.In2_Cu,(124.175,157.20), True),
-    (pcbnew.In1_Cu,(124.175,157.20), True),
-    (pcbnew.B_Cu,  (123.40,157.00), False),
-]
+# Use endpoints of existing same-net tracks as branch anchors. They are already
+# electrically part of GPIO21, regardless of which track KiCad happens to cite
+# in an unconnected-items report. Deduplicate coincident endpoint/layer pairs.
+anchors={}
+for t in b.GetTracks():
+    if isinstance(t,pcbnew.PCB_VIA) or t.GetNetCode()!=NC: continue
+    layer=t.GetLayer()
+    for k in (0,1):
+        q=endpoint(t,k)
+        key=(layer,round(q[0],3),round(q[1],3))
+        anchors[key]=(layer,q)
+if not anchors: raise RuntimeError(f"no existing routed copper found on {NET}")
+ordered=sorted(anchors.values(),key=lambda z:math.hypot(z[1][0]-GOAL_PAD[0],z[1][1]-GOAL_PAD[1]))
+print("SOL_ENABLE_ANCHOR_COUNT",len(ordered))
+for layer,q in ordered[:12]: print("SOL_ENABLE_NEAR_ANCHOR",b.GetLayerName(layer),*(round(v,3) for v in q))
 
 def bbox(obj):
     r=obj.GetBoundingBox()
@@ -88,7 +76,6 @@ X0=math.floor(mm(bb.GetX())/STEP)*STEP; Y0=math.floor(mm(bb.GetY())/STEP)*STEP
 X1=math.ceil((mm(bb.GetX())+mm(bb.GetWidth()))/STEP)*STEP
 Y1=math.ceil((mm(bb.GetY())+mm(bb.GetHeight()))/STEP)*STEP
 NX=int(round((X1-X0)/STEP))+1; NY=int(round((Y1-Y0)/STEP))+1
-
 def cell(x,y): return int(round((x-X0)/STEP)),int(round((y-Y0)/STEP))
 def xy(c): return X0+c[0]*STEP,Y0+c[1]*STEP
 def inside(c): return 0<=c[0]<NX and 0<=c[1]<NY
@@ -151,30 +138,30 @@ def simplify(cells,start,goal):
     return out
 
 def addseg(a,z,layer):
-    t=pcbnew.PCB_TRACK(b); t.SetStart(pt(*a)); t.SetEnd(pt(*z)); t.SetLayer(layer); t.SetWidth(iu(TRACK_W))
-    if hasattr(t,"SetNet"): t.SetNet(NO)
-    else: t.SetNetCode(NC)
-    b.Add(t)
+    t=pcbnew.PCB_TRACK(b); t.SetStart(pt(*a)); t.SetEnd(pt(*z)); t.SetLayer(layer); t.SetWidth(iu(TRACK_W)); t.SetNet(NO); b.Add(t)
 def addvia(q,size=0.7,drill=0.35):
-    v=pcbnew.PCB_VIA(b); v.SetPosition(pt(*q)); v.SetWidth(iu(size)); v.SetDrill(iu(drill)); v.SetLayerPair(pcbnew.F_Cu,pcbnew.B_Cu)
-    if hasattr(v,"SetNet"): v.SetNet(NO)
-    else: v.SetNetCode(NC)
-    b.Add(v)
+    v=pcbnew.PCB_VIA(b); v.SetPosition(pt(*q)); v.SetWidth(iu(size)); v.SetDrill(iu(drill)); v.SetLayerPair(pcbnew.F_Cu,pcbnew.B_Cu); v.SetNet(NO); b.Add(v)
 
+# For a non-F.Cu branch, land at a via just above R821.1 and make the final
+# short vertical-ish F.Cu connection. F.Cu candidates may terminate on the pad.
+goal_vias=[(124.175,157.20),(123.40,157.00),(125.00,157.00)]
 selected=None
-for idx,(layer,goal,start_via) in enumerate(CANDS,1):
-    path=astar(START,goal,blocked_for(layer))
-    if path is not None:
-        selected=(idx,layer,goal,start_via,path); break
-    print("SOL_ENABLE_CANDIDATE_BLOCKED",idx,b.GetLayerName(layer),goal)
-if selected is None: raise RuntimeError("no obstacle-aware SOLENOID_PWR_EN route found")
-idx,layer,goal,start_via,path=selected
-pts=simplify(path,START,goal)
-if start_via: addvia(START)
+for rank,(layer,start) in enumerate(ordered[:24],1):
+    goals=[GOAL_PAD] if layer==pcbnew.F_Cu else goal_vias
+    for gi,goal in enumerate(goals,1):
+        path=astar(start,goal,blocked_for(layer))
+        if path is not None:
+            selected=(rank,gi,layer,start,goal,path); break
+    if selected: break
+    print("SOL_ENABLE_ANCHOR_BLOCKED",rank,b.GetLayerName(layer),tuple(round(v,3) for v in start))
+if selected is None: raise RuntimeError("no obstacle-aware SOLENOID_PWR_EN route found from nearest existing copper anchors")
+rank,gi,layer,start,goal,path=selected
+pts=simplify(path,start,goal)
 for a,z in zip(pts,pts[1:]): addseg(a,z,layer)
-addvia(goal)
-addseg(goal,GOAL_PAD,pcbnew.F_Cu)
+if layer!=pcbnew.F_Cu:
+    addvia(goal)
+    addseg(goal,GOAL_PAD,pcbnew.F_Cu)
 b.BuildConnectivity(); pcbnew.SaveBoard(str(PATH),b)
-print("SOL_ENABLE_ROUTE_OK",f"candidate={idx}",f"layer={b.GetLayerName(layer)}",f"cells={len(path)}")
-print("SOL_ENABLE_START",START,"GOAL_VIA",goal,"R821_1",GOAL_PAD)
+print("SOL_ENABLE_ROUTE_OK",f"anchor_rank={rank}",f"goal_candidate={gi}",f"layer={b.GetLayerName(layer)}",f"cells={len(path)}")
+print("SOL_ENABLE_START",tuple(round(v,4) for v in start),"GOAL",tuple(round(v,4) for v in goal),"R821_1",tuple(round(v,4) for v in GOAL_PAD))
 print("SOL_ENABLE_POINTS"," -> ".join(f"({x:.3f},{y:.3f})" for x,y in pts))
