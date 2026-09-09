@@ -57,6 +57,11 @@ def touches(item, point):
     return near(p, point) or near(q, point)
 
 
+def length_mm(item):
+    p, q = endpoints(item)
+    return math.hypot(p[0] - q[0], p[1] - q[1])
+
+
 def net_obj(name):
     for fp in board.GetFootprints():
         for pad in fp.Pads():
@@ -115,29 +120,40 @@ missing = [exact_remove[i] for i, count in found.items() if count != 1]
 if missing:
     raise RuntimeError(f"expected exact residual segments once each; mismatches: {missing} counts={found}")
 
-# Second DRC pass proved that two adjacent +5V segments were merely the next
-# pieces of the same dead comparator branches. Remove exactly one F.Cu track
-# touching each newly exposed endpoint. Endpoint matching is intentional: the
-# opposite coordinates are not electrically meaningful once the comparator
-# footprints are gone.
+# Second DRC pass exposed the next pieces of two dead +5V branches. Match both
+# the reported dangling endpoint and the KiCad-reported segment length, so a
+# live neighboring branch sharing the same junction cannot be removed.
 second_wave = [
-    (P5, (310.9000, 157.2800)),
-    (P5, (325.2700, 153.4250)),
+    (P5, (310.9000, 157.2800), 0.7495),
+    (P5, (325.2700, 153.4250), 1.5000),
 ]
 second_found = []
-for name, point in second_wave:
+for name, point, expected_len in second_wave:
     matches = [
         item for item in board.GetTracks()
         if not isinstance(item, pcbnew.PCB_VIA)
         and item.GetLayer() == pcbnew.F_Cu
         and item.GetNetname() == name
         and touches(item, point)
+        and abs(length_mm(item) - expected_len) <= 0.01
         and item not in remove
     ]
     if len(matches) != 1:
-        raise RuntimeError(f"expected one second-wave dead segment at {name} {point}; found {len(matches)}")
+        candidates = [
+            (endpoints(item), round(length_mm(item), 4))
+            for item in board.GetTracks()
+            if not isinstance(item, pcbnew.PCB_VIA)
+            and item.GetLayer() == pcbnew.F_Cu
+            and item.GetNetname() == name
+            and touches(item, point)
+            and item not in remove
+        ]
+        raise RuntimeError(
+            f"expected one second-wave dead segment at {name} {point} len {expected_len}; "
+            f"found {len(matches)}; candidates={candidates}"
+        )
     remove.append(matches[0])
-    second_found.append((name, point, endpoints(matches[0])))
+    second_found.append((name, point, endpoints(matches[0]), round(length_mm(matches[0]), 4)))
 
 for item in remove:
     board.Remove(item)
