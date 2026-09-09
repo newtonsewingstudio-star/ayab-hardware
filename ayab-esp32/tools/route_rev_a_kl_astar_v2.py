@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Route Rev A KH-910 K/L parity with controlled endpoint approaches.
 
-Machine K uses the open In2.Cu region below the ESP32. Machine L uses In1.Cu,
-where its retagged legacy GPIO18 corridor already exists and same-net copper is
-not an obstacle. The two pull-ups also use sparse In1.Cu to reach the existing
-machine-side vias without crossing the In2 +3V3 trunk.
+Machine K uses the open In2.Cu region below the ESP32. Machine L needs only a
+short In1.Cu link from its machine-side via into the already-retagged GPIO18/L
+corridor at y=146.75. The two pull-ups use sparse In1.Cu to reach the existing
+machine-side vias.
 
-Close K/L via pairs use fixed outward-facing stubs; A* only routes between safe
-interior stub points. KiCad DRC after zone refill remains authoritative.
+Close K/L via pairs use fixed outward-facing stubs for A* routes. KiCad DRC
+after zone refill remains authoritative.
 """
 from __future__ import annotations
 
@@ -28,12 +28,14 @@ STEP = 0.20
 TRACK_W = 0.25
 CLEAR = 0.22
 EDGE_CLEAR = 0.45
+MACH_L = "/BROTHER-CONNECTORS/EOL_R_S"
+MACHINE_L_VIA = (238.45, 145.63)
+MACHINE_L_CORRIDOR = (238.45, 146.75)
 
 # name, actual start via, safe start stub, safe goal stub, actual goal via,
-# label, layer. K and L machine runs are intentionally on different layers.
+# label, layer. Machine-L is handled separately as a short direct same-net link.
 ROUTES = [
     ("/BROTHER-CONNECTORS/EOL_R_N", (239.22,145.65), (240.20,144.40), (220.00,133.20), (220.97,134.15), "machine-k", pcbnew.In2_Cu),
-    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45,145.63), (237.20,146.40), (222.60,133.20), (221.67,134.14), "machine-l", pcbnew.In1_Cu),
     ("/BROTHER-CONNECTORS/EOL_R_N", (241.60,118.00), (243.00,118.00), (240.20,144.40), (239.22,145.65), "pullup-k", pcbnew.In1_Cu),
     ("/BROTHER-CONNECTORS/EOL_R_S", (241.60,120.00), (244.00,120.00), (237.20,146.40), (238.45,145.63), "pullup-l", pcbnew.In1_Cu),
 ]
@@ -84,6 +86,24 @@ def require_endpoint_via(name, xy, tol=0.02):
         raise RuntimeError(f"expected exactly one {name} via at {xy}, got {matches}")
 
 
+def require_point_on_same_net_track(name, xy, layer, tol=0.02):
+    code = net_code(name)
+    x, y = xy
+    for item in board.GetTracks():
+        if isinstance(item, pcbnew.PCB_VIA) or item.GetNetCode() != code or item.GetLayer() != layer:
+            continue
+        a = item.GetStart(); b = item.GetEnd()
+        ax, ay = mm(a.x), mm(a.y); bx, by = mm(b.x), mm(b.y)
+        # The known destination is on a horizontal corridor, but support either axis.
+        if abs(ay - by) <= tol and abs(y - ay) <= tol and min(ax, bx)-tol <= x <= max(ax, bx)+tol:
+            return
+        if abs(ax - bx) <= tol and abs(x - ax) <= tol and min(ay, by)-tol <= y <= max(ay, by)+tol:
+            return
+    raise RuntimeError(f"{xy} is not on existing {name} copper on {board.GetLayerName(layer)}")
+
+
+require_endpoint_via(MACH_L, MACHINE_L_VIA)
+require_point_on_same_net_track(MACH_L, MACHINE_L_CORRIDOR, pcbnew.In1_Cu)
 for name, actual_start, _stub_start, _stub_goal, actual_goal, _label, _layer in ROUTES:
     require_endpoint_via(name, actual_start)
     require_endpoint_via(name, actual_goal)
@@ -146,9 +166,7 @@ DIRS = [
 
 def astar(start_xy, goal_xy, blocked):
     start = cell(*start_xy); goal = cell(*goal_xy)
-    blocked.discard(start)
-    blocked.discard(goal)
-
+    blocked.discard(start); blocked.discard(goal)
     def h(c): return math.hypot(c[0]-goal[0], c[1]-goal[1])
     pq=[(h(start),0.0,start,None)]; best={start:0.0}; parent={}
     while pq:
@@ -199,9 +217,20 @@ def layer_name(layer): return board.GetLayerName(layer)
 
 
 report=[
-    "# KH910 Rev A K/L route report v6", "",
+    "# KH910 Rev A K/L route report v7", "",
     f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm", "",
-    "Machine K uses In2.Cu; machine L and pull-ups use In1.Cu with controlled endpoint stubs.", "",
+    "Machine L uses a 1.12 mm direct In1 link into the existing retagged L corridor; other routes use A*.", "",
+]
+
+# Machine L: the existing same-net horizontal corridor passes directly above
+# the machine-side via at the same x coordinate. This short vertical link is
+# deliberately simpler and safer than a second full-board A* route.
+add_track(MACHINE_L_VIA, MACHINE_L_CORRIDOR, MACH_L, pcbnew.In1_Cu)
+board.BuildConnectivity()
+report += [
+    "## machine-l", f"- net: `{MACH_L}`", "- layer: `In1.Cu`",
+    f"- via start: {MACHINE_L_VIA}", f"- existing-corridor target: {MACHINE_L_CORRIDOR}",
+    "- routing: direct same-net segment; KiCad DRC authoritative", "- segments: 1", "",
 ]
 
 for name, actual_start, stub_start, stub_goal, actual_goal, label, layer in ROUTES:
@@ -223,5 +252,5 @@ for name, actual_start, stub_start, stub_goal, actual_goal, label, layer in ROUT
 pcbnew.SaveBoard(str(PATH),board)
 report_path=PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md")
 report_path.write_text("\n".join(report)+"\n")
-print("KL_ROUTE_V6_OK",PATH)
+print("KL_ROUTE_V7_OK",PATH)
 print(report_path)
