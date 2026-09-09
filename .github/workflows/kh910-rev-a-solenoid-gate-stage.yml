@@ -51,14 +51,15 @@ jobs:
       - name: Refill zones
         run: |
           /usr/bin/python3 ayab-esp32/tools/refill_rev_a_zones.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb
-      - name: Report staged DRC
+      - name: Require zero staged DRC violations and unconnected pads
         run: |
           set +e
-          kicad-cli pcb drc -o /tmp/gate-stage-drc.rpt /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb
+          kicad-cli pcb drc --exit-code-violations -o /tmp/gate-stage-drc.rpt /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb
           rc=$?
           set -e
           cat /tmp/gate-stage-drc.rpt
           echo "DRC_REPORT_EXIT=$rc"
+          exit $rc
       - name: Upload gate-stage evidence
         if: always()
         uses: actions/upload-artifact@v4
