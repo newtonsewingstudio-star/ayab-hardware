@@ -1,0 +1,32 @@
+name: KH910 Rev A Hall Legacy Route Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/audit_rev_a_hall_legacy_routes.py'
+      - '.github/workflows/kh910-rev-a-hall-route-audit.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Generate route audit
+        run: python3 ayab-esp32/tools/audit_rev_a_hall_legacy_routes.py
+      - name: Commit report
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_HALL_LEGACY_ROUTES.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Record Hall legacy route audit [skip ci]"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push origin HEAD:ayab-esp32-kh910-rev-a
