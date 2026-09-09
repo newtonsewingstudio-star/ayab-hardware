@@ -4,7 +4,9 @@ Generated from the rejected staged PCB. The invalid PCB itself was not committed
 
 ## KiCad validation output
 ```text
-Failed to load board
+Found 251 violations
+Found 9 unconnected items
+Saved DRC Report to /tmp/solenoid-pcb-drc.rpt
 ```
 
 ## DesignChecks files
