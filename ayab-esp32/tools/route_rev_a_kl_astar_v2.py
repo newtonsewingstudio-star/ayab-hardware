@@ -2,11 +2,9 @@
 """Route Rev A KH-910 K/L parity using existing DRC-clean vias.
 
 Machine K/L and the R213 pull-up route on In1.Cu between existing/new vias.
-R214 is locally congested on In1.Cu, so its existing launch via routes on B.Cu
-directly into the already DRC-clean horizontal L corridor at y=130.71. This
-avoids adding another via or disturbing the three routes already proven by CI.
-
-KiCad DRC after zone refill remains authoritative.
+R214 is locally congested on In1.Cu, so its launch via uses a deliberate direct
+B.Cu segment into the already DRC-clean horizontal L corridor at y=130.71.
+KiCad DRC after zone refill is authoritative for that final segment.
 """
 from __future__ import annotations
 
@@ -29,12 +27,13 @@ CLEAR = 0.22
 EDGE_CLEAR = 0.45
 ENDPOINT_ESCAPE_CELLS = 4
 ROUTES = [
-    ("/BROTHER-CONNECTORS/EOL_R_N", (239.22, 145.65), (220.97, 134.15), "machine-k", pcbnew.In1_Cu, True),
-    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45, 145.63), (221.67, 134.14), "machine-l", pcbnew.In1_Cu, True),
-    ("/BROTHER-CONNECTORS/EOL_R_N", (207.5, 132.025), (220.97, 134.15), "pullup-k", pcbnew.In1_Cu, True),
+    ("/BROTHER-CONNECTORS/EOL_R_N", (239.22, 145.65), (220.97, 134.15), "machine-k", pcbnew.In1_Cu, True, False),
+    ("/BROTHER-CONNECTORS/EOL_R_S", (238.45, 145.63), (221.67, 134.14), "machine-l", pcbnew.In1_Cu, True, False),
+    ("/BROTHER-CONNECTORS/EOL_R_N", (207.5, 132.025), (220.97, 134.15), "pullup-k", pcbnew.In1_Cu, True, False),
     # The B.Cu goal is a point on the pre-existing retagged GPIO18 corridor,
-    # which spans through x=207.5 at y=130.71. No extra goal via is needed.
-    ("/BROTHER-CONNECTORS/EOL_R_S", (207.5, 135.325), (207.5, 130.71), "pullup-l", pcbnew.B_Cu, False),
+    # which spans through x=207.5 at y=130.71.  A direct same-net segment is
+    # intentionally used here; downstream KiCad DRC is the acceptance gate.
+    ("/BROTHER-CONNECTORS/EOL_R_S", (207.5, 135.325), (207.5, 130.71), "pullup-l", pcbnew.B_Cu, False, True),
 ]
 
 
@@ -91,7 +90,6 @@ def point_on_same_net_track(name, goal, layer, tol=0.02):
             continue
         a = item.GetStart(); b = item.GetEnd()
         ax, ay = mm(a.x), mm(a.y); bx, by = mm(b.x), mm(b.y)
-        # Goal is intentionally on a horizontal/vertical existing segment.
         if abs(ay - by) <= tol and abs(gy - ay) <= tol and min(ax, bx) - tol <= gx <= max(ax, bx) + tol:
             return True
         if abs(ax - bx) <= tol and abs(gx - ax) <= tol and min(ay, by) - tol <= gy <= max(ay, by) + tol:
@@ -99,7 +97,7 @@ def point_on_same_net_track(name, goal, layer, tol=0.02):
     return False
 
 
-for name, start, goal, _label, layer, goal_is_via in ROUTES:
+for name, start, goal, _label, layer, goal_is_via, _direct in ROUTES:
     require_endpoint_via(name, start)
     if goal_is_via:
         require_endpoint_via(name, goal)
@@ -232,12 +230,21 @@ def layer_name(layer):
 
 
 report = [
-    "# KH910 Rev A K/L A* route report v2", "",
+    "# KH910 Rev A K/L route report v3", "",
     f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm; endpoint escape {ENDPOINT_ESCAPE_CELLS} cells",
-    "", "Machine/GPIO endpoints reuse DRC-clean vias. R214 terminates directly on the existing B.Cu L corridor.", "",
+    "", "Machine/GPIO endpoints reuse DRC-clean vias. R214 uses a direct B.Cu same-net segment with KiCad DRC as the acceptance gate.", "",
 ]
 
-for name, start, goal, label, layer, _goal_is_via in ROUTES:
+for name, start, goal, label, layer, _goal_is_via, direct in ROUTES:
+    if direct:
+        add_track(start, goal, name, layer)
+        board.BuildConnectivity()
+        report += [
+            f"## {label}", f"- net: `{name}`", f"- layer: `{layer_name(layer)}`",
+            f"- start: {start}", f"- goal: {goal}", "- routing: deliberate direct segment; downstream KiCad DRC authoritative",
+            "- segments: 1", f"- points: ({start[0]:.3f},{start[1]:.3f}) -> ({goal[0]:.3f},{goal[1]:.3f})", "",
+        ]
+        continue
     raw = astar(start, goal, build_blocked(name, layer))
     points = simplify(raw, start, goal)
     for a, b in zip(points, points[1:]):
@@ -253,5 +260,5 @@ for name, start, goal, label, layer, _goal_is_via in ROUTES:
 pcbnew.SaveBoard(str(PATH), board)
 report_path = PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md")
 report_path.write_text("\n".join(report) + "\n")
-print("KL_ASTAR_ROUTE_V2_OK", PATH)
+print("KL_ROUTE_V3_OK", PATH)
 print(report_path)
