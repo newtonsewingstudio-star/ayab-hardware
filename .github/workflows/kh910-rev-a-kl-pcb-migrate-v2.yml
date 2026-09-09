@@ -7,7 +7,9 @@ on:
       - ayab-esp32-kh910-rev-a
     paths:
       - 'ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v4.py'
+      - 'ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v5.py'
       - 'ayab-esp32/tools/route_rev_a_kl_astar_v2.py'
+      - 'ayab-esp32/tools/cleanup_rev_a_kl_legacy_tails.py'
       - '.github/workflows/kh910-rev-a-kl-pcb-migrate-v2.yml'
 
 permissions:
@@ -49,7 +51,7 @@ jobs:
       - name: Stage K-L split, pull-ups, and existing-via topology
         run: |
           set -o pipefail
-          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v4.py \
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v5.py \
             ayab-esp32/ayab-esp32.kicad_pcb \
             /tmp/kh910-kl-v2-stage/ayab-esp32.kicad_pcb \
             | tee /tmp/kh910-kl-v2-migration.txt
@@ -65,9 +67,14 @@ jobs:
           /usr/bin/python3 ayab-esp32/tools/refill_rev_a_zones.py \
             /tmp/kh910-kl-v2-stage/ayab-esp32.kicad_pcb
 
+      - name: Remove KiCad-visible legacy K-L tails
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/cleanup_rev_a_kl_legacy_tails.py \
+            /tmp/kh910-kl-v2-stage/ayab-esp32.kicad_pcb
+
       - name: Validate K-L topology
         run: |
-          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v4.py \
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v5.py \
             --validate /tmp/kh910-kl-v2-stage/ayab-esp32.kicad_pcb
 
       - name: Require zero staged project-aware PCB DRC violations
@@ -84,7 +91,7 @@ jobs:
       - name: Install validated PCB and recheck repository project path
         run: |
           cp /tmp/kh910-kl-v2-stage/ayab-esp32.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
-          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v4.py \
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v5.py \
             --validate ayab-esp32/ayab-esp32.kicad_pcb
           kicad-cli pcb drc --exit-code-violations \
             -o /tmp/kh910-kl-v2-project-drc.rpt \
