@@ -3,15 +3,16 @@
 
 The branch PCB uses the older KiCad footprint serialization (`fp_text
 reference/value`), while a KiCad 9 save rewrites those fields as `property
-"Reference"/"Value"`.  The core transformer supports the audited electrical
+"Reference"/"Value"`. The core transformer supports the audited electrical
 migration; this wrapper makes reference/value access format-preserving across
 both serializations without changing any unrelated board text.
 
-It also applies one narrowly asserted runtime correction to the first core
-revision: Python evaluates the default argument to dict.get eagerly, so the
-new ADC-net lookup must use an explicit conditional rather than
-`adc_ids.get(net_name, nets[net_name])`.  The exact source line is required to
-occur once; otherwise this wrapper aborts instead of silently patching code.
+The first core revision also contains three narrowly identified implementation
+bugs. This wrapper patches only those exact source expressions at runtime and
+aborts if any expected expression is not present exactly once:
+- avoid eager evaluation of dict.get()'s fallback for newly created ADC nets;
+- require the audited left ADC copper count of exactly 14 items;
+- require the audited right ADC copper count of exactly 18 items.
 """
 
 from __future__ import annotations
@@ -23,11 +24,19 @@ import sys
 
 CORE = Path(__file__).with_name("migrate_rev_a_hall_pcb_serialized.py")
 source = CORE.read_text(encoding="utf-8")
-old = "net_id = adc_ids.get(net_name, nets[net_name])"
-new = "net_id = adc_ids[net_name] if net_name in adc_ids else nets[net_name]"
-if source.count(old) != 1:
-    raise RuntimeError(f"expected exactly one ADC net-selection expression, found {source.count(old)}")
-source = source.replace(old, new)
+PATCHES = {
+    "net_id = adc_ids.get(net_name, nets[net_name])":
+        "net_id = adc_ids[net_name] if net_name in adc_ids else nets[net_name]",
+    "if copper_counts.get(nets[ADC_L], 0) < 15:":
+        "if copper_counts.get(nets[ADC_L], 0) != 14:",
+    "if copper_counts.get(nets[ADC_R], 0) < 19:":
+        "if copper_counts.get(nets[ADC_R], 0) != 18:",
+}
+for old, new in PATCHES.items():
+    count = source.count(old)
+    if count != 1:
+        raise RuntimeError(f"expected exactly one runtime-patch target {old!r}, found {count}")
+    source = source.replace(old, new)
 
 runtime_core = Path("/tmp/migrate_rev_a_hall_pcb_serialized_runtime.py")
 runtime_core.write_text(source, encoding="utf-8")
