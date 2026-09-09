@@ -9,6 +9,7 @@ on:
       - 'ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v4.py'
       - 'ayab-esp32/tools/migrate_rev_a_kl_pcb_stage_v5.py'
       - 'ayab-esp32/tools/route_rev_a_kl_astar_v2.py'
+      - 'ayab-esp32/tools/route_rev_a_kl_astar_v3.py'
       - 'ayab-esp32/tools/cleanup_rev_a_kl_legacy_tails.py'
       - '.github/workflows/kh910-rev-a-kl-pcb-migrate-v2.yml'
 
@@ -26,9 +27,6 @@ jobs:
 
       - name: Install KiCad
         run: |
-          # GitHub's runner image currently carries the Google Chrome apt source.
-          # A transient Chrome repository hash mismatch must not block this KiCad-only
-          # hardware validation job, so disable that unrelated source for this run.
           sudo rm -f /etc/apt/sources.list.d/google-chrome.list
           sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
           bash ./scripts/dependencies.sh
@@ -56,9 +54,9 @@ jobs:
             /tmp/kh910-kl-v2-stage/ayab-esp32.kicad_pcb \
             | tee /tmp/kh910-kl-v2-migration.txt
 
-      - name: Route K-L using existing DRC-clean vias
+      - name: Route K-L on separated pull-up layers
         run: |
-          /usr/bin/python3 ayab-esp32/tools/route_rev_a_kl_astar_v2.py \
+          /usr/bin/python3 ayab-esp32/tools/route_rev_a_kl_astar_v3.py \
             /tmp/kh910-kl-v2-stage/ayab-esp32.kicad_pcb
           cat /tmp/kh910-kl-v2-stage/KH910_REV_A_KL_ASTAR_ROUTE.md
 
