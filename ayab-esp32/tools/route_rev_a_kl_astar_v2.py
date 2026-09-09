@@ -37,10 +37,13 @@ ROUTES = [
         "label": "machine-l", "net": L,
         "actual_start": (238.45, 145.63), "actual_goal": (221.67, 134.14),
         "candidates": [
-            (pcbnew.In2_Cu, (237.20,146.40), (222.60,133.20)),
-            (pcbnew.In2_Cu, (239.80,146.80), (223.00,132.80)),
-            (pcbnew.B_Cu,   (239.80,145.00), (222.80,133.20)),
-            (pcbnew.In1_Cu, (240.00,146.80), (223.00,133.00)),
+            # Run-16 DRC proved the former diagonal 223.0,132.8 -> GPIO via
+            # approach clipped the GND and ESP21 vias. End directly below the
+            # L GPIO via instead; the final stub is then vertical at x=221.67.
+            (pcbnew.In2_Cu, (239.80,146.80), (221.67,132.60)),
+            (pcbnew.In2_Cu, (237.20,146.40), (221.67,132.40)),
+            (pcbnew.B_Cu,   (239.80,145.00), (221.67,132.60)),
+            (pcbnew.In1_Cu, (240.00,146.80), (221.67,132.40)),
         ],
     },
     {
@@ -54,20 +57,20 @@ ROUTES = [
     },
     {
         "label": "pullup-l", "net": L,
-        "actual_start": (267.00, 120.00), "actual_goal": (238.45, 145.63),
+        "actual_start": (262.00, 120.00), "actual_goal": (238.45, 145.63),
         "candidates": [
-            (pcbnew.In1_Cu, (268.00,120.00), (238.45,144.60)),
-            (pcbnew.In1_Cu, (268.00,122.00), (240.00,144.40)),
-            (pcbnew.B_Cu,   (268.00,120.00), (239.80,144.40)),
+            (pcbnew.In1_Cu, (262.80,120.00), (238.45,144.60)),
+            (pcbnew.In1_Cu, (263.00,122.00), (240.00,144.40)),
+            (pcbnew.B_Cu,   (262.80,120.00), (239.80,144.40)),
         ],
     },
     {
         "label": "pullup-k", "net": K,
-        "actual_start": (267.00, 118.00), "actual_goal": (239.22, 145.65),
+        "actual_start": (262.00, 118.00), "actual_goal": (239.22, 145.65),
         "candidates": [
-            (pcbnew.In1_Cu, (268.00,118.00), (240.20,144.40)),
-            (pcbnew.In1_Cu, (269.00,119.00), (241.00,143.80)),
-            (pcbnew.B_Cu,   (268.00,118.00), (240.20,144.40)),
+            (pcbnew.In1_Cu, (262.80,118.00), (240.20,144.40)),
+            (pcbnew.In1_Cu, (263.00,119.00), (241.00,143.80)),
+            (pcbnew.B_Cu,   (262.80,118.00), (240.20,144.40)),
         ],
     },
 ]
@@ -190,7 +193,7 @@ def choose_candidate(route):
         print(f"KL_ROUTE_CANDIDATE_BLOCKED {route['label']} candidate={idx} layer={board.GetLayerName(layer)}")
     raise RuntimeError(f"no candidate route for {route['label']}")
 
-report = ["# KH910 Rev A K/L route report v11", "", f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm", "", "Pull-up launch vias are beyond the top-edge notch and J801. Machine L is routed before K; KiCad DRC after zone refill is authoritative.", ""]
+report = ["# KH910 Rev A K/L route report v12", "", f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm", "", "Pull-ups sit in the verified J801-to-C609 corridor. Machine L approaches its GPIO via vertically to clear the adjacent GND and ESP21 vias. KiCad DRC after zone refill is authoritative.", ""]
 for route in ROUTES:
     idx,layer,start_stub,goal_stub,raw = choose_candidate(route); points = simplify(raw,start_stub,goal_stub)
     add_track(route["actual_start"], start_stub, route["net"], layer)
@@ -201,4 +204,4 @@ for route in ROUTES:
 
 pcbnew.SaveBoard(str(PATH), board)
 report_path = PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md"); report_path.write_text("\n".join(report)+"\n")
-print("KL_ROUTE_V11_OK", PATH); print(report_path)
+print("KL_ROUTE_V12_OK", PATH); print(report_path)
