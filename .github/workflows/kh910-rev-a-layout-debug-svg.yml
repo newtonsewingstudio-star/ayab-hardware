@@ -28,7 +28,6 @@ jobs:
             --mode-single \
             --fit-page-to-board \
             --exclude-drawing-sheet \
-            --check-zones \
             -o ayab-esp32/KH910_REV_A_LAYOUT_DEBUG.svg \
             ayab-esp32/ayab-esp32.kicad_pcb
           test -s ayab-esp32/KH910_REV_A_LAYOUT_DEBUG.svg
