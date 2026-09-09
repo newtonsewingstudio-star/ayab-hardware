@@ -1,0 +1,116 @@
+name: KH910 Rev A Solenoid Route Prefix Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/debug_rev_a_solenoid_route_prefix.py'
+      - '.github/workflows/kh910-rev-a-solenoid-route-prefix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Build rejected full patch in temporary workspace
+        run: |
+          cp ayab-esp32/ayab-esp32.kicad_pcb /tmp/original.kicad_pcb
+          python3 ayab-esp32/tools/patch_rev_a_solenoid_pcb.py
+          cp ayab-esp32/ayab-esp32.kicad_pcb /tmp/full.kicad_pcb
+          git restore ayab-esp32/ayab-esp32.kicad_pcb ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md
+
+      - name: Build progressive route-prefix variants
+        run: |
+          rm -rf /tmp/route-prefix
+          python3 ayab-esp32/tools/debug_rev_a_solenoid_route_prefix.py \
+            /tmp/original.kicad_pcb /tmp/full.kicad_pcb /tmp/route-prefix
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Find first route primitive that breaks board loading
+        shell: bash
+        run: |
+          REPORT=ayab-esp32/KH910_REV_A_SOLENOID_ROUTE_PREFIX.md
+          {
+            echo '# KH910 Rev A — Solenoid Route Prefix Isolation'
+            echo
+            echo 'Progressive KiCad load probe. Variant 000 contains the validated net migration + footprints but none of the 50 new routing primitives.'
+            echo
+            head -1 /tmp/route-prefix/manifest.tsv | sed 's/^/- /'
+            echo
+            echo '| Prefix | Result | Primitive added at this step |'
+            echo '|---:|---|---|'
+          } > "$REPORT"
+
+          first_fail=''
+          for f in /tmp/route-prefix/[0-9][0-9][0-9].kicad_pcb; do
+            n=$(basename "$f" .kicad_pcb)
+            out="/tmp/prefix-${n}.out"
+            rpt="/tmp/prefix-${n}.rpt"
+            set +e
+            kicad-cli pcb drc --output "$rpt" "$f" >"$out" 2>&1
+            rc=$?
+            set -e
+            if grep -q 'Failed to load board' "$out"; then
+              result='**FAILED TO LOAD**'
+            else
+              result='LOADED'
+            fi
+            if [ "$n" = '000' ]; then
+              primitive='baseline (no new route primitive)'
+            else
+              primitive=$(awk -F '\t' -v n="$n" '$1==n {print $2}' /tmp/route-prefix/manifest.tsv)
+            fi
+            echo "| $n | $result | \`$primitive\` |" >> "$REPORT"
+            if [ "$result" = '**FAILED TO LOAD**' ]; then
+              first_fail="$n"
+              {
+                echo
+                echo '## First failing prefix'
+                echo
+                echo "Prefix: **$n**"
+                echo
+                echo '```text'
+                awk -F '\t' -v n="$n" '$1==n {print $3}' /tmp/route-prefix/manifest.tsv
+                echo '```'
+                echo
+                echo 'KiCad output:'
+                echo '```text'
+                cat "$out"
+                echo '```'
+              } >> "$REPORT"
+              break
+            fi
+          done
+
+          if [ -z "$first_fail" ]; then
+            {
+              echo
+              echo '## Result'
+              echo
+              echo 'Every progressive prefix loaded; the failure is not attributable to a single appended primitive and needs an interaction/order probe.'
+            } >> "$REPORT"
+          fi
+          cat "$REPORT"
+
+      - name: Commit route-prefix isolation report only
+        shell: bash
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_SOLENOID_ROUTE_PREFIX.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Pinpoint solenoid PCB route serialization failure"
+            git pull --rebase origin ayab-esp32-kh910-rev-a
+            git push
+          fi
