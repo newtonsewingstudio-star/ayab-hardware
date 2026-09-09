@@ -1,0 +1,61 @@
+name: KH910 Rev A K-L PCB Parity Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/audit_rev_a_kl_pcb_parity.py'
+      - '.github/workflows/kh910-rev-a-kl-pcb-audit.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Prove current PCB DRC baseline
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/kh910-kl-baseline-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/kh910-kl-baseline-drc.rpt
+
+      - name: Generate K-L PCB parity audit
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/audit_rev_a_kl_pcb_parity.py
+          test -s ayab-esp32/KH910_REV_A_KL_PCB_PARITY.md
+          cat ayab-esp32/KH910_REV_A_KL_PCB_PARITY.md
+
+      - name: Commit refreshed audit report
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_KL_PCB_PARITY.md
+          if git diff --cached --quiet; then
+            echo "K-L parity report unchanged"
+            exit 0
+          fi
+          git commit -m "Refresh K-L PCB parity audit [skip ci]"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push origin HEAD:ayab-esp32-kh910-rev-a
+
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-kl-pcb-parity-audit
+          path: |
+            /tmp/kh910-kl-baseline-drc.rpt
+            ayab-esp32/KH910_REV_A_KL_PCB_PARITY.md
+          if-no-files-found: ignore
