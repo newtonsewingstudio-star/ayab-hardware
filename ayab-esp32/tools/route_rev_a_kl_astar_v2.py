@@ -57,20 +57,20 @@ ROUTES = [
     },
     {
         "label": "pullup-l", "net": L,
-        "actual_start": (262.00, 120.00), "actual_goal": (238.45, 145.63),
+        "actual_start": (262.00, 126.00), "actual_goal": (238.45, 145.63),
         "candidates": [
-            (pcbnew.In1_Cu, (262.80,120.00), (238.45,144.60)),
-            (pcbnew.In1_Cu, (263.00,122.00), (240.00,144.40)),
-            (pcbnew.B_Cu,   (262.80,120.00), (239.80,144.40)),
+            (pcbnew.In1_Cu, (262.80,126.00), (238.45,144.60)),
+            (pcbnew.In1_Cu, (263.00,127.20), (240.00,144.40)),
+            (pcbnew.B_Cu,   (262.80,126.00), (239.80,144.40)),
         ],
     },
     {
         "label": "pullup-k", "net": K,
-        "actual_start": (262.00, 118.00), "actual_goal": (239.22, 145.65),
+        "actual_start": (262.00, 124.00), "actual_goal": (239.22, 145.65),
         "candidates": [
-            (pcbnew.In1_Cu, (262.80,118.00), (240.20,144.40)),
-            (pcbnew.In1_Cu, (263.00,119.00), (241.00,143.80)),
-            (pcbnew.B_Cu,   (262.80,118.00), (240.20,144.40)),
+            (pcbnew.In1_Cu, (262.80,124.00), (240.20,144.40)),
+            (pcbnew.In1_Cu, (263.00,125.20), (241.00,143.80)),
+            (pcbnew.B_Cu,   (262.80,124.00), (240.20,144.40)),
         ],
     },
 ]
@@ -193,7 +193,7 @@ def choose_candidate(route):
         print(f"KL_ROUTE_CANDIDATE_BLOCKED {route['label']} candidate={idx} layer={board.GetLayerName(layer)}")
     raise RuntimeError(f"no candidate route for {route['label']}")
 
-report = ["# KH910 Rev A K/L route report v12", "", f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm", "", "Pull-ups sit in the verified J801-to-C609 corridor. Machine L approaches its GPIO via vertically to clear the adjacent GND and ESP21 vias. KiCad DRC after zone refill is authoritative.", ""]
+report = ["# KH910 Rev A K/L route report v13", "", f"grid {STEP} mm; width {TRACK_W} mm; clearance raster {CLEAR} mm", "", "Pull-ups sit below J801 at y=124/126 mm. Machine L approaches its GPIO via vertically to clear the adjacent GND and ESP21 vias. KiCad DRC after zone refill is authoritative.", ""]
 for route in ROUTES:
     idx,layer,start_stub,goal_stub,raw = choose_candidate(route); points = simplify(raw,start_stub,goal_stub)
     add_track(route["actual_start"], start_stub, route["net"], layer)
@@ -204,4 +204,4 @@ for route in ROUTES:
 
 pcbnew.SaveBoard(str(PATH), board)
 report_path = PATH.with_name("KH910_REV_A_KL_ASTAR_ROUTE.md"); report_path.write_text("\n".join(report)+"\n")
-print("KL_ROUTE_V12_OK", PATH); print(report_path)
+print("KL_ROUTE_V13_OK", PATH); print(report_path)
