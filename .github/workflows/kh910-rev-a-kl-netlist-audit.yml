@@ -1,0 +1,57 @@
+name: KH910 Rev A K/L Netlist Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/ayab-esp32.kicad_sch'
+      - 'ayab-esp32/mcu.kicad_sch'
+      - 'ayab-esp32/brother-connectors.kicad_sch'
+      - 'ayab-esp32/ioconditioning.kicad_sch'
+      - '.github/workflows/kh910-rev-a-kl-netlist-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+      - name: Export compiled KiCad netlist
+        run: |
+          kicad-cli sch export netlist \
+            --format kicadsexpr \
+            --output /tmp/ayab-esp32.net \
+            ayab-esp32/ayab-esp32.kicad_sch
+          test -s /tmp/ayab-esp32.net
+      - name: Print K/L target connectivity
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text=Path('/tmp/ayab-esp32.net').read_text(errors='replace')
+          refs={'J405','J702','U701','R213','R214','U201','J202'}
+          needles=('KH910','EOL_R_N','EOL_R_S','ESP17','ESP18','R213','R214','J405','J702','U701','U201','J202')
+          print('=== MATCHING NETLIST LINES ===')
+          for line in text.splitlines():
+              if any(n in line for n in needles): print(line)
+          print('=== COMPONENT PRESENCE ===')
+          for ref in sorted(refs):
+              found=bool(re.search(r'\(ref\s+"?'+re.escape(ref)+r'"?\)',text))
+              print(ref, 'PRESENT' if found else 'MISSING')
+          print('=== K/L ASSERTIONS ===')
+          for token in ('KH910_R_K','KH910_R_L','GPIO17','GPIO18'):
+              print(token, text.count(token))
+          PY
+      - name: Upload compiled netlist
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-kl-compiled-netlist
+          path: /tmp/ayab-esp32.net
