@@ -1,0 +1,85 @@
+name: KH910 Rev A Hall ADC PCB Migration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/migrate_rev_a_hall_pcb.py'
+      - '.github/workflows/kh910-rev-a-hall-pcb-migrate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Prove baseline PCB DRC is clean
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/kh910-baseline-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/kh910-baseline-drc.rpt
+
+      - name: Stage native pcbnew Hall migration
+        run: |
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb.py \
+            ayab-esp32/ayab-esp32.kicad_pcb \
+            /tmp/ayab-esp32-hall-migrated.kicad_pcb
+          test -s /tmp/ayab-esp32-hall-migrated.kicad_pcb
+
+      - name: Validate serialized migrated board
+        run: |
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb.py \
+            --validate /tmp/ayab-esp32-hall-migrated.kicad_pcb
+
+      - name: Require zero staged PCB DRC violations
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/kh910-staged-drc.rpt \
+            /tmp/ayab-esp32-hall-migrated.kicad_pcb
+          cat /tmp/kh910-staged-drc.rpt
+
+      - name: Install validated PCB and recheck in project path
+        run: |
+          cp /tmp/ayab-esp32-hall-migrated.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
+          python3 ayab-esp32/tools/migrate_rev_a_hall_pcb.py \
+            --validate ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/kh910-project-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/kh910-project-drc.rpt
+
+      - name: Commit only the validated board
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/ayab-esp32.kicad_pcb
+          if git diff --cached --quiet; then
+            echo "No PCB changes to commit"
+            exit 0
+          fi
+          git commit -m "Migrate Hall ADC PCB section to Rev A [skip ci]"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push origin HEAD:ayab-esp32-kh910-rev-a
+
+      - name: Upload DRC evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-hall-pcb-drc
+          path: |
+            /tmp/kh910-baseline-drc.rpt
+            /tmp/kh910-staged-drc.rpt
+            /tmp/kh910-project-drc.rpt
+          if-no-files-found: ignore
