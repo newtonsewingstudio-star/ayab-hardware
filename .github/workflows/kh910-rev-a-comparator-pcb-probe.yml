@@ -1,0 +1,82 @@
+name: KH910 Rev A Comparator PCB Cleanup Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/probe_rev_a_comparator_pcb_cleanup.py'
+      - '.github/workflows/kh910-rev-a-comparator-pcb-probe.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Stage comparator footprint removal with pcbnew
+        run: |
+          python3 ayab-esp32/tools/probe_rev_a_comparator_pcb_cleanup.py \
+            ayab-esp32/ayab-esp32.kicad_pcb \
+            /tmp/kh910-comparator-clean.kicad_pcb \
+            ayab-esp32/KH910_REV_A_COMPARATOR_PCB_PROBE.md
+          test -s /tmp/kh910-comparator-clean.kicad_pcb
+
+      - name: Run baseline and staged DRC
+        run: |
+          kicad-cli pcb drc --output /tmp/baseline-comparator-probe.rpt ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb drc --output /tmp/staged-comparator-probe.rpt /tmp/kh910-comparator-clean.kicad_pcb
+          {
+            echo
+            echo '## Direct DRC comparison'
+            echo
+            echo '### Baseline summary'
+            echo '```text'
+            grep -E '^\*\* Found|^Found ' /tmp/baseline-comparator-probe.rpt || true
+            echo '```'
+            echo
+            echo '### Staged footprint-removal summary'
+            echo '```text'
+            grep -E '^\*\* Found|^Found ' /tmp/staged-comparator-probe.rpt || true
+            echo '```'
+            echo
+            echo '### Staged violation type counts'
+            echo '```text'
+            grep -o '^\[[^]]*\]' /tmp/staged-comparator-probe.rpt | sort | uniq -c | sort -nr || true
+            echo '```'
+            echo
+            echo '### Staged dangling / unconnected / shorting excerpts'
+            echo '```text'
+            awk '
+              /^\[(track_dangling|via_dangling|unconnected_items|shorting_items)\]/ {
+                print; for (i=0;i<5;i++) { if (getline <= 0) break; print }
+              }
+            ' /tmp/staged-comparator-probe.rpt | head -n 900
+            echo '```'
+          } >> ayab-esp32/KH910_REV_A_COMPARATOR_PCB_PROBE.md
+
+      - name: Verify staged board parses after save
+        run: |
+          kicad-cli pcb render --output /tmp/kh910-comparator-clean.png /tmp/kh910-comparator-clean.kicad_pcb
+          test -s /tmp/kh910-comparator-clean.png
+
+      - name: Commit diagnostic report only
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_COMPARATOR_PCB_PROBE.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Record comparator PCB cleanup probe [skip ci]"
+            git pull --rebase origin ayab-esp32-kh910-rev-a
+            git push
+          fi
