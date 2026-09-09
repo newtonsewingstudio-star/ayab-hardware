@@ -1,0 +1,49 @@
+name: KH910 Rev A I/O Conditioning Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/audit_rev_a_ioconditioning_netlist.py'
+      - '.github/workflows/kh910-rev-a-ioconditioning-audit.yml'
+      - 'ayab-esp32/ioconditioning.kicad_sch'
+      - 'ayab-esp32/ayab-esp32.kicad_sch'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Export hierarchical netlist
+        run: |
+          kicad-cli sch export netlist --output /tmp/ayab-esp32.xml ayab-esp32/ayab-esp32.kicad_sch
+          test -s /tmp/ayab-esp32.xml
+
+      - name: Generate comparator connectivity audit
+        run: |
+          python3 ayab-esp32/tools/audit_rev_a_ioconditioning_netlist.py \
+            /tmp/ayab-esp32.xml ayab-esp32/KH910_REV_A_IOCONDITIONING_AUDIT.md
+          cat ayab-esp32/KH910_REV_A_IOCONDITIONING_AUDIT.md
+
+      - name: Commit refreshed audit
+        run: |
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add ayab-esp32/KH910_REV_A_IOCONDITIONING_AUDIT.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh I/O conditioning netlist audit [skip ci]"
+            git pull --rebase origin ayab-esp32-kh910-rev-a
+            git push
+          fi
