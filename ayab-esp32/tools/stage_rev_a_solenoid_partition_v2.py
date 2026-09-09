@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """KiCad 9 compatibility wrapper for the Rev A solenoid partition stage.
 
-The v1 stage is intentionally fail-closed and remains the source of electrical
-and geometry intent.  This wrapper patches two KiCad 9 Python binding quirks:
+The v1 stage remains the source of electrical and geometry intent. This wrapper
+only adapts that fail-closed migration to KiCad 9's SWIG behavior:
 
 1. GetNetcodeFromNetname() raises IndexError when a net is absent.
-2. GetTracks() can become non-iterable after an in-memory board.Remove().
+2. GetTracks() may become non-iterable after board.Remove().
+3. Wrappers for removed tracks may be recycled, so an old track snapshot must
+   not be queried after mutation.
 
-To avoid the second issue, resolve one immutable track snapshot before any
-mutation, mark removed tracks as dead, and use the filtered snapshot for both
-exact cut/retag lookup and A* obstacle rasterization.  Newly-added items are all
-on SOLENOID_12V_SW, so omitting them from the obstacle snapshot is intentional.
+All exact REMOVE/RETAG objects are therefore resolved and uniqueness-checked
+before the first mutation. After those edits and pad retagging, the staged board
+is saved and reloaded before any new routing so A* sees a fresh KiCad object
+container and connectivity graph.
 """
 from pathlib import Path
 
@@ -25,18 +27,18 @@ patches = [
     ),
     (
         '''def exact_tracks(spec, require_raw=True):\n    layer, a, b = spec\n    found = []\n    for item in list(board.GetTracks()):''',
-        '''TRACK_SNAPSHOT = list(board.GetTracks())\nREMOVED_TRACK_IDS = set()\n\ndef exact_tracks(spec, require_raw=True):\n    layer, a, b = spec\n    found = []\n    for item in TRACK_SNAPSHOT:\n        if id(item) in REMOVED_TRACK_IDS:\n            continue''',
-        "immutable track snapshot",
+        '''TRACK_SNAPSHOT = list(board.GetTracks())\n\ndef exact_tracks(spec, require_raw=True):\n    layer, a, b = spec\n    found = []\n    for item in TRACK_SNAPSHOT:''',
+        "immutable pre-mutation track snapshot",
     ),
     (
-        '''    removed.append((layer_name(item.GetLayer()), endpoints(item)))\n    board.Remove(item)''',
-        '''    removed.append((layer_name(item.GetLayer()), endpoints(item)))\n    REMOVED_TRACK_IDS.add(id(item))\n    board.Remove(item)''',
-        "removed-track bookkeeping",
+        '''removed = []\nfor spec in REMOVE:\n    rows = exact_tracks(spec)\n    if len(rows) != 1:\n        raise RuntimeError(f"expected one raw removal {layer_name(spec[0])} {spec[1]}->{spec[2]}, got {len(rows)}")\n    item = rows[0]\n    removed.append((layer_name(item.GetLayer()), endpoints(item)))\n    board.Remove(item)\n\nretagged = []\nfor spec in RETAG:\n    rows = exact_tracks(spec)\n    if len(rows) != 1:\n        raise RuntimeError(f"expected one raw retag {layer_name(spec[0])} {spec[1]}->{spec[2]}, got {len(rows)}")\n    item = rows[0]\n    item.SetNet(sw_net)\n    retagged.append((layer_name(item.GetLayer()), endpoints(item)))''',
+        '''# Resolve and validate every exact edit against one immutable board state\n# before the first mutation. KiCad 9 may recycle SWIG wrappers after Remove().\n_remove_items = []\nfor spec in REMOVE:\n    rows = exact_tracks(spec)\n    if len(rows) != 1:\n        raise RuntimeError(f"expected one raw removal {layer_name(spec[0])} {spec[1]}->{spec[2]}, got {len(rows)}")\n    _remove_items.append(rows[0])\n\n_retag_items = []\nfor spec in RETAG:\n    rows = exact_tracks(spec)\n    if len(rows) != 1:\n        raise RuntimeError(f"expected one raw retag {layer_name(spec[0])} {spec[1]}->{spec[2]}, got {len(rows)}")\n    _retag_items.append(rows[0])\n\nif len({id(x) for x in _remove_items + _retag_items}) != len(_remove_items) + len(_retag_items):\n    raise RuntimeError("same PCB track matched more than one REMOVE/RETAG specification")\n\nremoved = []\nfor item in _remove_items:\n    removed.append((layer_name(item.GetLayer()), endpoints(item)))\n    board.Remove(item)\n\nretagged = []\nfor item in _retag_items:\n    item.SetNet(sw_net)\n    retagged.append((layer_name(item.GetLayer()), endpoints(item)))''',
+        "pre-resolve all exact edits",
     ),
     (
-        '''def build_blocked(layer):\n    blocked=set()\n    for item in board.GetTracks():''',
-        '''def build_blocked(layer):\n    blocked=set()\n    for item in TRACK_SNAPSHOT:\n        if id(item) in REMOVED_TRACK_IDS:\n            continue''',
-        "A* obstacle snapshot",
+        '''for ref, pns in TARGETS.items():\n    for pn in pns:\n        get_pad(ref, pn).SetNet(sw_net)\n\n\ndef add_track(a, b, layer, width=LOCAL_W):''',
+        '''for ref, pns in TARGETS.items():\n    for pn in pns:\n        get_pad(ref, pn).SetNet(sw_net)\n\n# Drop all mutated SWIG wrappers before routing. A fresh KiCad load gives A*\n# a valid track iterator and an authoritative post-partition connectivity graph.\npcbnew.SaveBoard(str(PATH), board)\nboard = pcbnew.LoadBoard(str(PATH))\nif board is None:\n    raise RuntimeError("could not reload staged board after exact partition edits")\nboard.BuildConnectivity()\nfps = {fp.GetReference(): fp for fp in board.GetFootprints()}\nraw_code = board.GetNetcodeFromNetname(RAW)\nsw_code = board.GetNetcodeFromNetname(SW)\nif raw_code <= 0 or sw_code <= 0:\n    raise RuntimeError("raw/switched nets missing after staged-board reload")\nsw_net = get_pad("J401", "9").GetNet()\nif get_pad("J401", "9").GetNetname() != SW:\n    raise RuntimeError("J401 switched pad did not survive staged-board reload")\n\n\ndef add_track(a, b, layer, width=LOCAL_W):''',
+        "save/reload before routing",
     ),
 ]
 
