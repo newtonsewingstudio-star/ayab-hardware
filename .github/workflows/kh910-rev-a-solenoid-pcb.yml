@@ -48,13 +48,17 @@ jobs:
         id: directdrc
         shell: bash
         run: |
+          set +e
           set -o pipefail
           kicad-cli pcb drc --exit-code-violations --output /tmp/solenoid-pcb-drc.rpt ayab-esp32/ayab-esp32.kicad_pcb 2>&1 | tee ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
+          rc=${PIPESTATUS[0]}
+          set -e
           if [ -f /tmp/solenoid-pcb-drc.rpt ]; then
             echo >> ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
             echo '--- direct DRC report ---' >> ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
             cat /tmp/solenoid-pcb-drc.rpt >> ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
           fi
+          exit "$rc"
 
       - name: Run full KiCad ERC and DRC
         id: designcheck
@@ -76,7 +80,7 @@ jobs:
             echo
             echo '## KiCad validation output'
             echo '```text'
-            sed -n '1,2400p' ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt 2>/dev/null || true
+            sed -n '1,4000p' ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt 2>/dev/null || true
             echo '```'
             echo
             echo '## DesignChecks files'
@@ -92,7 +96,6 @@ jobs:
           } > "$REPORT"
           cat "$REPORT"
 
-          # Never allow the rejected PCB or its generated parity audit into this diagnostic commit.
           git restore ayab-esp32/ayab-esp32.kicad_pcb ayab-esp32/KH910_REV_A_SOLENOID_PCB_AUDIT.md
           rm -f ayab-esp32/KH910_REV_A_SOLENOID_PCB_DRC_RAW.txt
           git config user.name "Newton Sewing Studio AYAB Bot"
