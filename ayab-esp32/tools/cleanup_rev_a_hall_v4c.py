@@ -84,7 +84,6 @@ for item in board.GetTracks():
 if removed_adc[ADC_L]<1 or removed_adc[ADC_R]<1:
     raise RuntimeError(f"expected legacy ADC B.Cu tails on both nets, found {removed_adc}")
 
-# First DRC wave: exact dead comparator-era supply segments.
 exact_remove=[
     (GND,(91.7878,142.2030),(91.0628,141.4780)),
     (GND,(91.0628,141.4780),(91.0628,139.8280)),
@@ -102,8 +101,6 @@ for item in board.GetTracks():
 missing=[exact_remove[i] for i,count in found.items() if count!=1]
 if missing: raise RuntimeError(f"expected exact residual segments once each; mismatches: {missing} counts={found}")
 
-# Later DRC waves expose the next dead segment after the previous leaf is
-# removed. Endpoint + KiCad-reported length uniquely identifies each branch.
 wave_specs=[
     (P5,(310.9000,157.2800),0.7495),
     (P5,(325.2700,153.4250),1.5000),
@@ -124,30 +121,25 @@ for name,point,expected_len in wave_specs:
     item=unique_track(name,point,expected_len,excluded=remove)
     remove.append(item); wave_found.append((name,point,endpoints(item),round(length_mm(item),4)))
 
-# Left comparator-era +5V island exposed in earlier DRC waves.
 dead_via=unique_via(P5,(309.7000,153.3700),excluded=remove)
 remove.append(dead_via)
 dead_bcu=unique_track(P5,(309.7000,153.3700),0.0300,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(dead_bcu)
-
-# Final small remnants exposed by the previous cleanup wave.
 final_via=unique_via(P5,(320.1300,152.3000),excluded=remove)
 remove.append(final_via)
 final_bcu=unique_track(P5,(309.7300,153.3700),1.5132,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(final_bcu)
-
-# Removing those remnants exposes the remaining comparator-era +5V B.Cu
-# branches one by one. Each is uniquely identified by DRC endpoint and length.
 final_trunk=unique_track(P5,(310.8000,152.3000),9.3300,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(final_trunk)
 final_symmetric=unique_track(P5,(320.1300,152.3000),4.5962,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(final_symmetric)
 final_exposed=unique_track(P5,(323.3800,155.5500),15.3225,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(final_exposed)
+final_tail=unique_track(P5,(338.7025,155.5500),3.0865,layer=pcbnew.B_Cu,excluded=remove)
+remove.append(final_tail)
 
 for item in remove: board.Remove(item)
 
-# U701 pads 11/12 are adjacent GND pins; preserve the shortest local bridge.
 fps={fp.GetReference():fp for fp in board.GetFootprints()}; u701=fps.get("U701")
 if u701 is None: raise RuntimeError("U701 missing")
 pads={str(p.GetNumber()):p for p in u701.Pads()}
@@ -170,4 +162,5 @@ print("REMOVED_FINAL_BCU_REMNANT",P5,(309.7300,153.3700),1.5132)
 print("REMOVED_LAST_BCU_TRUNK",P5,(310.8000,152.3000),9.3300)
 print("REMOVED_FINAL_SYMMETRIC_BCU",P5,(320.1300,152.3000),4.5962)
 print("REMOVED_FINAL_EXPOSED_BCU",P5,(323.3800,155.5500),15.3225)
+print("REMOVED_FINAL_TAIL",P5,(338.7025,155.5500),3.0865)
 print("ADDED_U701_GND_LINK",p11,p12)
