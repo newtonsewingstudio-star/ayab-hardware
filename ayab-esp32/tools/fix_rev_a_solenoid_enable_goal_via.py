@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Move the final SOLENOID_PWR_EN layer-change via clear of the In2 +5V track."""
+"""Move the final SOLENOID_PWR_EN layer-change via into the clear inner-layer window."""
 from pathlib import Path
 import sys
 import pcbnew
@@ -10,7 +10,7 @@ P=Path(sys.argv[1]).resolve(); b=pcbnew.LoadBoard(str(P))
 if b is None: raise RuntimeError(f"could not load {P}")
 b.BuildConnectivity(); MM=pcbnew.ToMM; NET="SOLENOID_PWR_EN"; NC=b.GetNetcodeFromNetname(NET)
 if NC<=0: raise RuntimeError(f"missing {NET}")
-OLD=(124.175,157.20); NEW=(124.175,158.00)
+OLD=(124.175,157.20); NEW=(124.175,157.60)
 
 def pos(o):
     p=o.GetPosition(); return MM(p.x),MM(p.y)
@@ -25,7 +25,6 @@ PAD=pos(pad)
 
 vias=[v for v in b.GetTracks() if isinstance(v,pcbnew.PCB_VIA) and v.GetNetCode()==NC and near(pos(v),OLD)]
 if len(vias)!=1: raise RuntimeError(f"expected one enable via at {OLD}, got {len(vias)}")
-# Remove only the old F.Cu final stub; preserve the successful A* B.Cu path.
 stubs=[]
 for t in b.GetTracks():
     if isinstance(t,pcbnew.PCB_VIA) or t.GetNetCode()!=NC or t.GetLayer()!=pcbnew.F_Cu: continue
