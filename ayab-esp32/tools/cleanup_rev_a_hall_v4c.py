@@ -130,12 +130,17 @@ remove.append(dead_via)
 dead_bcu=unique_track(P5,(309.7000,153.3700),0.0300,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(dead_bcu)
 
-# Final DRC wave: the symmetric right-side via and the remaining left-side
-# B.Cu supply tail are now isolated. Remove only these exact two remnants.
+# Final small remnants exposed by the previous cleanup wave.
 final_via=unique_via(P5,(320.1300,152.3000),excluded=remove)
 remove.append(final_via)
 final_bcu=unique_track(P5,(309.7300,153.3700),1.5132,layer=pcbnew.B_Cu,excluded=remove)
 remove.append(final_bcu)
+
+# Removing those remnants exposes the last comparator-era +5V B.Cu trunk.
+# KiCad identifies it uniquely by endpoint and length; no other B.Cu power
+# route is touched.
+final_trunk=unique_track(P5,(310.8000,152.3000),9.3300,layer=pcbnew.B_Cu,excluded=remove)
+remove.append(final_trunk)
 
 for item in remove: board.Remove(item)
 
@@ -159,4 +164,5 @@ print("REMOVED_LEFT_DEAD_VIA",P5,(309.7000,153.3700))
 print("REMOVED_LEFT_BCU_REMNANT",P5,(309.7000,153.3700),0.0300)
 print("REMOVED_FINAL_DEAD_VIA",P5,(320.1300,152.3000))
 print("REMOVED_FINAL_BCU_REMNANT",P5,(309.7300,153.3700),1.5132)
+print("REMOVED_LAST_BCU_TRUNK",P5,(310.8000,152.3000),9.3300)
 print("ADDED_U701_GND_LINK",p11,p12)
