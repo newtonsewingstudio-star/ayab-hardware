@@ -1,0 +1,74 @@
+name: KH910 Rev A Solenoid Partition Stage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/stage_rev_a_solenoid_partition.py'
+      - '.github/workflows/kh910-rev-a-solenoid-partition-stage.yml'
+
+jobs:
+  stage-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+
+      - name: Install KiCad
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          bash ./scripts/dependencies.sh
+
+      - name: Require clean K-L validated baseline
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/solenoid-partition-baseline-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/solenoid-partition-baseline-drc.rpt
+
+      - name: Create staged project copy
+        run: |
+          rm -rf /tmp/solenoid-partition-stage
+          mkdir -p /tmp/solenoid-partition-stage
+          cp -a ayab-esp32/. /tmp/solenoid-partition-stage/
+          test -s /tmp/solenoid-partition-stage/ayab-esp32.kicad_pcb
+          test -s /tmp/solenoid-partition-stage/ayab-esp32.kicad_pro
+
+      - name: Stage raw-switched solenoid partition
+        run: |
+          set -o pipefail
+          /usr/bin/python3 ayab-esp32/tools/stage_rev_a_solenoid_partition.py \
+            /tmp/solenoid-partition-stage/ayab-esp32.kicad_pcb \
+            | tee /tmp/solenoid-partition-stage.txt
+
+      - name: Refill staged copper zones
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/refill_rev_a_zones.py \
+            /tmp/solenoid-partition-stage/ayab-esp32.kicad_pcb
+
+      - name: Require zero staged DRC violations and unconnected pads
+        run: |
+          set +e
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/solenoid-partition-drc.rpt \
+            /tmp/solenoid-partition-stage/ayab-esp32.kicad_pcb
+          rc=$?
+          set -e
+          cat /tmp/solenoid-partition-drc.rpt
+          exit $rc
+
+      - name: Upload partition evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-solenoid-partition-stage
+          path: |
+            /tmp/solenoid-partition-baseline-drc.rpt
+            /tmp/solenoid-partition-stage.txt
+            /tmp/solenoid-partition-drc.rpt
+            /tmp/solenoid-partition-stage/ayab-esp32.kicad_pcb
+          if-no-files-found: ignore
