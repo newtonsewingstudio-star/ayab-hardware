@@ -2,7 +2,7 @@
 """Remove exactly the two KiCad-visible legacy K/L dangling tails.
 
 The text migration cannot see these tracks reliably, but KiCad DRC reports them
-after the board is loaded/rebuilt.  Match by exact anchor geometry and expected
+after the board is loaded/rebuilt. Match by exact anchor geometry and expected
 2.0375 mm horizontal-left length, independent of transient net assignment.
 """
 from __future__ import annotations
@@ -32,8 +32,13 @@ def mm(v):
     return pcbnew.ToMM(v)
 
 
-def xy(vec):
-    return (mm(vec.x), mm(vec.y))
+def endpoints(item):
+    # KiCad 9's SWIG build can expose GetStart()/GetEnd() as opaque objects;
+    # the scalar accessors are stable and documented on PCB_TRACK.
+    return (
+        (mm(item.GetStartX()), mm(item.GetStartY())),
+        (mm(item.GetEndX()), mm(item.GetEndY())),
+    )
 
 
 def near(a, b, tol=TOL):
@@ -48,8 +53,7 @@ def candidate_for_anchor(anchor):
             continue
         if item.GetLayer() != pcbnew.F_Cu:
             continue
-        a = xy(item.GetStart())
-        b = xy(item.GetEnd())
+        a, b = endpoints(item)
         if near(a, anchor):
             other = b
         elif near(b, anchor):
@@ -75,8 +79,7 @@ def candidate_for_anchor(anchor):
 removed = []
 for anchor in ANCHORS:
     item = candidate_for_anchor(anchor)
-    a = xy(item.GetStart())
-    b = xy(item.GetEnd())
+    a, b = endpoints(item)
     net = item.GetNetname()
     board.Remove(item)
     removed.append((anchor, a, b, net))
