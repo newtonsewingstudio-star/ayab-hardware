@@ -1,0 +1,117 @@
+name: KH910 Rev A K-L PCB Migration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/migrate_rev_a_kl_pcb_stage.py'
+      - 'ayab-esp32/tools/route_rev_a_kl_astar.py'
+      - '.github/workflows/kh910-rev-a-kl-pcb-migrate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+          fetch-depth: 0
+
+      - name: Install KiCad
+        run: bash ./scripts/dependencies.sh
+
+      - name: Require clean Hall-era PCB baseline
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/kh910-kl-baseline-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/kh910-kl-baseline-drc.rpt
+
+      - name: Create staged project copy
+        run: |
+          rm -rf /tmp/kh910-kl-stage
+          mkdir -p /tmp/kh910-kl-stage
+          cp -a ayab-esp32/. /tmp/kh910-kl-stage/
+          test -s /tmp/kh910-kl-stage/ayab-esp32.kicad_pro
+          test -s /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb
+
+      - name: Stage K-L electrical split and pull-ups
+        run: |
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage.py \
+            ayab-esp32/ayab-esp32.kicad_pcb \
+            /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb \
+            | tee /tmp/kh910-kl-migration.txt
+
+      - name: Route K-L staged connections against real board geometry
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/route_rev_a_kl_astar.py \
+            /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb
+          cat /tmp/kh910-kl-stage/KH910_REV_A_KL_ASTAR_ROUTE.md
+
+      - name: Refill staged copper zones with KiCad
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/refill_rev_a_zones.py \
+            /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb
+
+      - name: Validate K-L topology
+        run: |
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage.py \
+            --validate /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb
+
+      - name: Require zero staged project-aware PCB DRC violations
+        run: |
+          set +e
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/kh910-kl-staged-drc.rpt \
+            /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb
+          rc=$?
+          set -e
+          cat /tmp/kh910-kl-staged-drc.rpt
+          exit $rc
+
+      - name: Install validated PCB and recheck repository project path
+        run: |
+          cp /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
+          python3 ayab-esp32/tools/migrate_rev_a_kl_pcb_stage.py \
+            --validate ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/kh910-kl-project-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/kh910-kl-project-drc.rpt
+
+      - name: Commit only validated K-L PCB parity result
+        run: |
+          cp /tmp/kh910-kl-stage/KH910_REV_A_KL_ASTAR_ROUTE.md ayab-esp32/KH910_REV_A_KL_ASTAR_ROUTE.md
+          /usr/bin/python3 ayab-esp32/tools/audit_rev_a_kl_pcb_parity.py
+          git config user.name "Newton Sewing Studio AYAB Bot"
+          git config user.email "newtonsewingstudio@gmail.com"
+          git add \
+            ayab-esp32/ayab-esp32.kicad_pcb \
+            ayab-esp32/KH910_REV_A_KL_ASTAR_ROUTE.md \
+            ayab-esp32/KH910_REV_A_KL_PCB_PARITY.md
+          if git diff --cached --quiet; then
+            echo "No K-L PCB changes to commit"
+            exit 0
+          fi
+          git commit -m "Migrate KH910 K-L PCB parity to Rev A [skip ci]"
+          git pull --rebase origin ayab-esp32-kh910-rev-a
+          git push origin HEAD:ayab-esp32-kh910-rev-a
+
+      - name: Upload K-L migration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-kl-pcb-migration
+          path: |
+            /tmp/kh910-kl-baseline-drc.rpt
+            /tmp/kh910-kl-migration.txt
+            /tmp/kh910-kl-staged-drc.rpt
+            /tmp/kh910-kl-project-drc.rpt
+            /tmp/kh910-kl-stage/KH910_REV_A_KL_ASTAR_ROUTE.md
+            /tmp/kh910-kl-stage/ayab-esp32.kicad_pcb
+          if-no-files-found: ignore
