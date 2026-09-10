@@ -388,6 +388,8 @@ def main() -> None:
     r215_p2 = pad_position("R215", "2")
     r215_p1 = pad_position("R215", "1")
     r216_p1 = pad_position("R216", "1")
+    r216_p2 = pad_position("R216", "2")
+    r815_p2 = pad_position("R815", "2")
     routing_failures: list[str] = []
     try:
         local_sense_path = route_b_cu(
@@ -408,6 +410,7 @@ def main() -> None:
         routing_failures.append(str(exc))
     plus12_endpoint = (207.00, 163.10)
     add_via(r215_p1, "+12V")
+    add_via(plus12_endpoint, "+12V")
     try:
         plus12_path, plus12_layer = route_any_signal_layer(
             r215_p1, plus12_endpoint, "+12V", (200.0, 133.0, 215.0, 164.0)
@@ -415,6 +418,15 @@ def main() -> None:
     except RuntimeError as exc:
         plus12_path = []
         plus12_layer = -1
+        routing_failures.append(str(exc))
+    add_via(r216_p2, "GND")
+    try:
+        ground_path, ground_layer = route_any_signal_layer(
+            r216_p2, r815_p2, "GND", (205.0, 133.0, 216.0, 145.0)
+        )
+    except RuntimeError as exc:
+        ground_path = []
+        ground_layer = -1
         routing_failures.append(str(exc))
 
     board.BuildConnectivity()
@@ -429,6 +441,8 @@ def main() -> None:
     print("SENSE_ROUTE_LAYER", sense_layer)
     print("PLUS12_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_path))
     print("PLUS12_ROUTE_LAYER", plus12_layer)
+    print("GROUND_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in ground_path))
+    print("GROUND_ROUTE_LAYER", ground_layer)
     print("ROUTE_STUDY_FAILURES", " | ".join(routing_failures))
 
 
