@@ -124,6 +124,13 @@ for layer in layers:
     print("TP703_LAYER_BLOCKED",b.GetLayerName(layer))
 if sel is None: raise RuntimeError("no TP703 switched-rail route found")
 layer,pth=sel; pts=simplify(pth); no=tp.GetNet()
+# TP703 is a front-copper pad.  The selected escape is on an inner layer, so
+# put a through-via inside the test-point annulus to make that layer change
+# explicit; a track endpoint alone does not connect across layers.
+if layer != pcbnew.F_Cu:
+    v=pcbnew.PCB_VIA(b)
+    v.SetPosition(pt(*START)); v.SetWidth(iu(.60)); v.SetDrill(iu(.30))
+    v.SetLayerPair(pcbnew.F_Cu,pcbnew.B_Cu); v.SetNet(no); b.Add(v)
 for a,z in zip(pts,pts[1:]):
     t=pcbnew.PCB_TRACK(b); t.SetStart(pt(*a)); t.SetEnd(pt(*z)); t.SetLayer(layer); t.SetWidth(iu(WIDTH)); t.SetNet(no); b.Add(t)
 b.BuildConnectivity(); pcbnew.SaveBoard(str(P),b)
