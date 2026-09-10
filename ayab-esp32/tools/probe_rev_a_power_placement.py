@@ -49,6 +49,16 @@ def coordinate(value: str) -> tuple[float, float]:
     return x, y
 
 
+def components(value: str) -> tuple[str, ...]:
+    requested = tuple(item.strip() for item in value.split(",") if item.strip())
+    invalid = sorted(set(requested) - set(TEMPLATES))
+    if invalid or not requested:
+        raise argparse.ArgumentTypeError(
+            "components must be a non-empty comma-separated subset of " + ", ".join(TEMPLATES)
+        )
+    return requested
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("input", type=Path)
@@ -59,6 +69,7 @@ def main() -> None:
     parser.add_argument("--u403-side", choices=("front", "back"), default="front")
     parser.add_argument("--r215-side", choices=("front", "back"), default="front")
     parser.add_argument("--r216-side", choices=("front", "back"), default="front")
+    parser.add_argument("--components", type=components, default=tuple(TEMPLATES))
     args = parser.parse_args()
     board = pcbnew.LoadBoard(str(args.input))
     if board is None:
@@ -70,7 +81,8 @@ def main() -> None:
 
     coordinates = {"U403": args.u403, "R215": args.r215, "R216": args.r216}
     sides = {"U403": args.u403_side, "R215": args.r215_side, "R216": args.r216_side}
-    for reference, template_ref in TEMPLATES.items():
+    for reference in args.components:
+        template_ref = TEMPLATES[reference]
         xy = coordinates[reference]
         footprint = clone_template(board, template_ref)
         footprint.SetReference(reference)

@@ -27,6 +27,10 @@ on:
         description: 'R216 side: front or back'
         required: false
         default: 'front'
+      components:
+        description: 'Comma-separated components to place: U403,R215,R216'
+        required: false
+        default: 'U403,R215,R216'
   push:
     branches:
       - ayab-esp32-kh910-rev-a
@@ -59,6 +63,7 @@ jobs:
             --u403-side '${{ inputs.u403_side || 'front' }}' \
             --r215-side '${{ inputs.r215_side || 'front' }}' \
             --r216-side '${{ inputs.r216_side || 'front' }}' \
+            --components '${{ inputs.components || 'U403,R215,R216' }}' \
             > /tmp/rev-a-power-placement.log 2>&1
           cat /tmp/rev-a-power-placement.log
       - name: Record placement DRC without treating expected unconnected pads as success
