@@ -71,6 +71,12 @@ jobs:
           test -e /tmp/rev-a-power-placement-drc.rpt
           cat /tmp/rev-a-power-placement-drc.rpt
           echo "Placement-probe DRC exit status: $drc_status (unconnected pads are expected at this stage)"
+      - name: Render disposable placement candidate for visual review
+        run: |
+          kicad-cli pcb render --output /tmp/rev-a-power-placement-top.png /tmp/rev-a-power-placement.kicad_pcb
+          kicad-cli pcb render --side bottom --output /tmp/rev-a-power-placement-bottom.png /tmp/rev-a-power-placement.kicad_pcb
+          test -s /tmp/rev-a-power-placement-top.png
+          test -s /tmp/rev-a-power-placement-bottom.png
       - name: Archive disposable placement evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,3 +86,5 @@ jobs:
             /tmp/rev-a-power-placement.kicad_pcb
             /tmp/rev-a-power-placement.log
             /tmp/rev-a-power-placement-drc.rpt
+            /tmp/rev-a-power-placement-top.png
+            /tmp/rev-a-power-placement-bottom.png
