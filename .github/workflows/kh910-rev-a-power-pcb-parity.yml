@@ -34,7 +34,13 @@ jobs:
       - name: Capture native power-placement preflight
         run: python3 ayab-esp32/tools/audit_rev_a_power_pcb_layout.py --output /tmp/rev-a-power-pcb-layout.md
       - name: Derive full Rev A power support set and require PCB parity
-        run: python3 ayab-esp32/tools/audit_rev_a_power_pcb_parity.py --output /tmp/rev-a-power-pcb-parity.md
+        run: |
+          set +e
+          python3 ayab-esp32/tools/audit_rev_a_power_pcb_parity.py \
+            --output /tmp/rev-a-power-pcb-parity.md
+          echo $? > /tmp/rev-a-power-pcb-parity.status
+          set -e
+          cat /tmp/rev-a-power-pcb-parity.md
       - name: Require clean board and solenoid fail-safe topology
         run: |
           kicad-cli pcb drc --exit-code-violations \
@@ -64,6 +70,12 @@ jobs:
             git commit -m "Record Rev A PCB review evidence [skip ci]"
             git push origin HEAD:ayab-esp32-kh910-rev-a
           fi
+      - name: Require published topology audit to pass
+        run: |
+          test "$(cat /tmp/rev-a-power-pcb-parity.status)" = 0
+          grep -Fq '**PASS:** every schematic-derived local power part has a matching physical footprint.' \
+            /tmp/rev-a-power-pcb-parity.md
+          ! grep -Fq '**FAIL**' /tmp/rev-a-power-pcb-parity.md
       - name: Archive audit report
         if: always()
         uses: actions/upload-artifact@v4
