@@ -220,6 +220,18 @@ def main() -> None:
     add_segment((r215_p2[0], 143.00), (234.50, 143.00), SENSE)
     add_segment((234.50, 143.00), r216_p1, SENSE)
 
+    # Use already-routed landing points for the two shortest external ties:
+    # the B.Cu +5 V trace beside U403 and the established GND through-via
+    # below the divider.  The remaining raw-power and sense runs are kept out
+    # of this narrow stage until their longer corridors are independently
+    # checked.
+    add_segment((301.50, 156.25), (302.00, 156.25), "+5V")
+    add_segment((302.00, 156.25), (302.00, 148.75), "+5V")
+    add_segment((302.00, 148.75), (301.09, 147.99), "+5V")
+    r216_p2 = pad_position("R216", "2")
+    add_segment(r216_p2, (r216_p2[0], 145.30), "GND")
+    add_segment((r216_p2[0], 145.30), (230.41, 145.30), "GND")
+
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(args.output), board)
