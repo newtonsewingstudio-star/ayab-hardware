@@ -1,0 +1,42 @@
+name: KH910 Rev A Power Placement Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/tools/probe_rev_a_power_placement.py'
+      - '.github/workflows/kh910-rev-a-power-placement-probe.yml'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Install KiCad 9 runtime
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update -qq
+          sudo apt-get install -qy --no-install-recommends kicad
+      - name: Create disposable placement candidate
+        run: |
+          python3 ayab-esp32/tools/probe_rev_a_power_placement.py \
+            ayab-esp32/ayab-esp32.kicad_pcb /tmp/rev-a-power-placement.kicad_pcb \
+            | tee /tmp/rev-a-power-placement.log
+      - name: Record placement DRC without treating expected unconnected pads as success
+        run: |
+          kicad-cli pcb drc -o /tmp/rev-a-power-placement-drc.rpt /tmp/rev-a-power-placement.kicad_pcb || true
+          cat /tmp/rev-a-power-placement-drc.rpt
+      - name: Archive disposable placement evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-rev-a-power-placement-probe
+          path: |
+            /tmp/rev-a-power-placement.kicad_pcb
+            /tmp/rev-a-power-placement.log
+            /tmp/rev-a-power-placement-drc.rpt
