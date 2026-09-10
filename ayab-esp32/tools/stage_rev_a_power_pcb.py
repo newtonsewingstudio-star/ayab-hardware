@@ -419,7 +419,7 @@ def main() -> None:
     add_via(r215_p2, SENSE)
     try:
         sense_path, sense_layer = route_any_signal_layer(
-            legacy_sense_escape, r215_p2, SENSE, (200.0, 120.0, 235.0, 164.0)
+            legacy_sense_escape, r215_p2, SENSE, (62.0, 116.0, 335.0, 164.0)
         )
     except RuntimeError as exc:
         sense_path = []
