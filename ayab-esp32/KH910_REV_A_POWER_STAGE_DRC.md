@@ -25,7 +25,7 @@ ROUTE_STUDY_FAILURES
 ## Source-board DRC
 ```text
 ** Drc report for ayab-esp32.kicad_pcb **
-** Created on 2026-09-10T23:11:15+0000 **
+** Created on 2026-09-10T23:13:12+0000 **
 ** Report includes: Errors, Warnings **
 
 ** Found 0 DRC violations **
@@ -40,13 +40,10 @@ ROUTE_STUDY_FAILURES
 ## Staged-board DRC
 ```text
 ** Drc report for rev-a-power-stage.kicad_pcb **
-** Created on 2026-09-10T23:11:17+0000 **
+** Created on 2026-09-10T23:13:13+0000 **
 ** Report includes: Errors, Warnings **
 
-** Found 1 DRC violations **
-[via_dangling]: Via is not connected or connected on only one layer
-    Local override; warning
-    @(224.1750 mm, 159.0000 mm): Via [/ESP32/MACHINE_PWR_SENSE] on F.Cu - B.Cu
+** Found 0 DRC violations **
 
 ** Found 0 unconnected pads **
 
