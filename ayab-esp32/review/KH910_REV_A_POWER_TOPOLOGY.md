@@ -62,7 +62,7 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 - U403.1: schematic `/PSU/5V_SW`; matches
 - U403.2: schematic `GND`; matches
 - U403.3: schematic `+5V`; matches
-- U403.4: schematic `unconnected-(U403-N/C-Pad4)`; **PCB `unconnected`**
+- U403.4: schematic `unconnected`; matches
 - U403.5: schematic `GND`; matches
 - U403.6: schematic `+5V`; matches
 - U601.1: schematic `+12V`; matches
@@ -90,5 +90,4 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 
 ## Result
 
-**BLOCKED:** the prototype power circuit is not fully represented on the PCB.
-- Topology mismatch: `U403.4` expected `unconnected-(U403-N/C-Pad4)`, found `unconnected`
+**PASS:** every schematic-derived local power part has a matching physical footprint.
