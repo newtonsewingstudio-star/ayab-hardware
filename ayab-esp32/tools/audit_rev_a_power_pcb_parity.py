@@ -31,7 +31,10 @@ GLOBAL_NETS = {"", "GND", "+12V", "+5V", "+3V3", "5V", "3V3"}
 
 
 def export_netlist(destination: Path) -> None:
-    command = ["kicad-cli", "sch", "export", "netlist", "-o", str(destination), str(TOP)]
+    command = [
+        "kicad-cli", "sch", "export", "netlist", "--format", "kicadxml",
+        "-o", str(destination), str(TOP),
+    ]
     result = subprocess.run(command, text=True, capture_output=True)
     if result.returncode:
         raise RuntimeError(
