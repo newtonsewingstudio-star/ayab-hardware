@@ -1,0 +1,31 @@
+name: KH910 Rev A Power Via Escape Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ayab-esp32-kh910-rev-a]
+    paths:
+      - 'ayab-esp32/tools/probe_rev_a_power_via_sites.py'
+      - '.github/workflows/kh910-rev-a-power-via-probe.yml'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Install KiCad 9 runtime
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update -qq
+          sudo apt-get install -qy --no-install-recommends kicad
+      - name: Find all-layer-clear via escape sites
+        run: python3 ayab-esp32/tools/probe_rev_a_power_via_sites.py --output /tmp/rev-a-power-via-probe.md
+      - name: Archive probe report
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-rev-a-power-via-probe
+          path: /tmp/rev-a-power-via-probe.md
