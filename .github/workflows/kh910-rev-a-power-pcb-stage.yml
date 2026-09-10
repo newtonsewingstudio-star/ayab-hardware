@@ -1,0 +1,51 @@
+name: KH910 Rev A Power PCB Stage
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ayab-esp32-kh910-rev-a]
+    paths:
+      - 'ayab-esp32/tools/stage_rev_a_power_pcb.py'
+      - '.github/workflows/kh910-rev-a-power-pcb-stage.yml'
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Install KiCad 9 runtime
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update -qq
+          sudo apt-get install -qy --no-install-recommends kicad
+      - name: Stage disposable power integration board
+        run: |
+          python3 ayab-esp32/tools/stage_rev_a_power_pcb.py \
+            ayab-esp32/ayab-esp32.kicad_pcb /tmp/rev-a-power-stage.kicad_pcb \
+            > /tmp/rev-a-power-stage.log 2>&1
+          cat /tmp/rev-a-power-stage.log
+      - name: Record staged DRC
+        run: |
+          set +e
+          kicad-cli pcb drc --exit-code-violations -o /tmp/rev-a-power-stage-drc.rpt /tmp/rev-a-power-stage.kicad_pcb
+          status=$?
+          set -e
+          cat /tmp/rev-a-power-stage-drc.rpt
+          echo "Staged DRC exit status: $status"
+      - name: Render staged board
+        run: |
+          kicad-cli pcb render --side bottom --output /tmp/rev-a-power-stage-bottom.png /tmp/rev-a-power-stage.kicad_pcb
+      - name: Archive staged evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-rev-a-power-pcb-stage
+          path: |
+            /tmp/rev-a-power-stage.kicad_pcb
+            /tmp/rev-a-power-stage.log
+            /tmp/rev-a-power-stage-drc.rpt
+            /tmp/rev-a-power-stage-bottom.png
