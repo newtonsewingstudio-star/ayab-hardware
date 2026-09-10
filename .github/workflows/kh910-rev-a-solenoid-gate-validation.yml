@@ -1,0 +1,36 @@
+name: KH910 Rev A Solenoid Gate Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/ayab-esp32.kicad_pcb'
+      - 'ayab-esp32/solenoids.kicad_sch'
+      - 'ayab-esp32/tools/audit_rev_a_solenoid_gate_source.py'
+      - 'ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py'
+      - '.github/workflows/kh910-rev-a-solenoid-gate-validation.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Install KiCad 9 runtime
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update -qq
+          sudo apt-get install -qy --no-install-recommends kicad
+      - name: Require source review
+        run: python3 ayab-esp32/tools/audit_rev_a_solenoid_gate_source.py
+      - name: Require zero integrated-board DRC violations and unconnected pads
+        run: |
+          kicad-cli pcb drc --exit-code-violations -o /tmp/solenoid-gate-integrated-drc.rpt ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/solenoid-gate-integrated-drc.rpt
+      - name: Require integrated solenoid fail-safe topology
+        run: python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py ayab-esp32/ayab-esp32.kicad_pcb

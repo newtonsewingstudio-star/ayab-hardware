@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""Source-only acceptance audit for the KH910 Rev A solenoid fail-safe gate.
+"""Source acceptance audit for the KH910 Rev A solenoid fail-safe gate.
 
-This deliberately does not promote the staged physical change.  It protects
-the selected components and schematic identifiers while the separately-run
-PCB topology and DRC checks protect electrical connectivity and geometry.
+This protects component selection and schematic identifiers.  The separate
+PCB validation workflow is authoritative for physical connectivity and DRC.
 """
 from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
 SCH = (ROOT / "solenoids.kicad_sch").read_text(encoding="utf-8")
-PCB = (ROOT / "ayab-esp32.kicad_pcb").read_text(encoding="utf-8")
 
 def block_after(text, start):
     depth = 0; quote = False; escape = False
@@ -59,9 +57,6 @@ if SCH.count('"SOLENOID_12V_SW"') < 2:
     raise RuntimeError("switched-rail label is not represented at both gate/load locations")
 if '"DEFAULT_OFF' in SCH:
     raise RuntimeError("unexpected production-promotion marker in source")
-if '"SOLENOID_12V_SW"' not in PCB or '"TP703"' in PCB:
-    raise RuntimeError("promoted PCB must not be altered by this source-only gate audit")
-
 print("SOLENOID_GATE_SOURCE_AUDIT_OK")
-print("SOURCE_ONLY: no prototype evidence and no production promotion")
+print("SOURCE_REVIEW: no prototype evidence and no fabrication output")
 print("PARTS: Q805 LP9435LT1G, Q806 AO3400A, 100k/10k default-off network, TP703")
