@@ -36,9 +36,9 @@ jobs:
         run: python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py ayab-esp32/ayab-esp32.kicad_pcb
       - name: Export PCB views for visual review
         run: |
-          mkdir -p /tmp/solenoid-gate-views/top /tmp/solenoid-gate-views/bottom
-          kicad-cli pcb export svg --output /tmp/solenoid-gate-views/top --layers F.Cu --common-layers F.Mask,F.SilkS,Edge.Cuts ayab-esp32/ayab-esp32.kicad_pcb
-          kicad-cli pcb export svg --output /tmp/solenoid-gate-views/bottom --layers B.Cu --common-layers B.Mask,B.SilkS,Edge.Cuts ayab-esp32/ayab-esp32.kicad_pcb
+          mkdir -p /tmp/solenoid-gate-views
+          kicad-cli pcb export svg --output /tmp/solenoid-gate-views/top.svg --layers F.Cu --common-layers F.Mask,F.SilkS,Edge.Cuts ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb export svg --output /tmp/solenoid-gate-views/bottom.svg --layers B.Cu --common-layers B.Mask,B.SilkS,Edge.Cuts ayab-esp32/ayab-esp32.kicad_pcb
       - name: Archive PCB views for visual review
         uses: actions/upload-artifact@v4
         with:
