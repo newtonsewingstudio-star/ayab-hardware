@@ -106,19 +106,25 @@ def remove_tracks_touching(text: str, points: list[tuple[float, float]]) -> tupl
     return text, len(removals)
 
 
-def remove_gpio4_branch(text: str) -> tuple[str, int]:
-    target = ((209.785, 129.675), (217.125, 129.675))
+def remove_legacy_gpio4_copper(text: str) -> tuple[str, int]:
+    """Remove the obsolete GPIO4 legacy-net copper, not the active K/L path.
+
+    Rev A's verified pin map assigns GPIO4 to MACHINE_PWR_SENSE.  The active
+    right end-stop remains on the separate /BROTHER-CONNECTORS/EOL_R_N net at
+    U201.21; this retires only the older /ESP32/EOL_R_N net 30 copper.
+    """
     removals = []
     for start, end, block in u.blocks(text, "(segment"):
-        details = u.seg_points(block)
-        if not details:
-            continue
-        if (u.close(details[0], target[0]) and u.close(details[1], target[1])) or (u.close(details[0], target[1]) and u.close(details[1], target[0])):
+        if re.search(r"\(net\s+30\)", block):
             removals.append((start, end))
-    if len(removals) != 1:
-        raise RuntimeError(f"expected one direct GPIO4 legacy segment, found {len(removals)}")
-    start, end = removals[0]
-    return text[:start] + text[end:], 1
+    for start, end, block in u.blocks(text, "(via"):
+        if re.search(r"\(net\s+30\)", block):
+            removals.append((start, end))
+    if not removals:
+        raise RuntimeError("legacy GPIO4 copper not found")
+    for start, end in reversed(sorted(removals)):
+        text = text[:start] + text[end:]
+    return text, len(removals)
 
 
 def symbol_uuid(path: Path, reference: str) -> str:
@@ -145,7 +151,7 @@ def main() -> None:
     _, _, u201 = u.find_fp(text, "U201")
     u201 = u.replace_pad_net(u201, "8", sense_code, SENSE)
     text = u.replace_fp(text, "U201", u201)
-    text, removed_gpio4_tracks = remove_gpio4_branch(text)
+    text, removed_gpio4_tracks = remove_legacy_gpio4_copper(text)
 
     _, _, q501 = u.find_fp(text, "Q501")
     _, _, r206 = u.find_fp(text, "R206")
@@ -375,6 +381,18 @@ def main() -> None:
     raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
+    # The former GPIO4 copper is now deliberately absent, so the two original
+    # F.Cu escape segments can become the protected sense route without
+    # intersecting a retained end-stop signal.  B.Cu then reaches the divider
+    # using the same board-native obstacle search as the filtered power route.
+    sense_corner = (209.785, 129.675)
+    sense_via = (207.490, 131.970)
+    u201_p8 = pad_position("U201", "8")
+    add_front_segment(u201_p8, sense_corner, SENSE)
+    add_front_segment(sense_corner, sense_via, SENSE)
+    add_via(sense_via, SENSE)
+    sense_path = route_b_cu(sense_via, r215_p2, SENSE, (190.0, 125.0, 240.0, 160.0))
+
     # No safe source corridor for the divider's +12-V leg has been found on
     # this board partition.  Leave it deliberately open in the candidate;
     # DRC records that fact while the mechanical/electrical architecture is
@@ -388,6 +406,7 @@ def main() -> None:
     print("REMOVED_BYPASS_TRACKS", removed_bypass_tracks)
     print("REMOVED_GPIO4_TRACKS", removed_gpio4_tracks)
     print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
+    print("SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_path))
     print("PLUS12_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_path))
 
 
