@@ -26,7 +26,7 @@ def mm(value: int) -> float:
 
 
 def candidates(board: pcbnew.BOARD, name: str, net: str, centre: tuple[float, float],
-               radius: float, count: int = 8) -> list[tuple[float, float]]:
+               radius: float, count: int = 32) -> list[tuple[float, float]]:
     own = board.GetNetcodeFromNetname(net)
     blocked: list[tuple[float, float, float, float]] = []
 
@@ -71,7 +71,7 @@ def main() -> None:
         raise RuntimeError(f"could not load {PCB}")
     lines: list[str] = ["# KH910 Rev A Power Via Escape Probe", ""]
     probes = (
-        ("GPIO4_F_ESCAPE", "/ESP32/EOL_R_N", (217.125, 129.675), 3.0),
+        ("GPIO4_F_ESCAPE", "/ESP32/EOL_R_N", (217.125, 129.675), 12.0),
         ("SENSE_B_ESCAPE", "", (206.175, 137.500), 5.0),
         ("PLUS12_B_ESCAPE", "+12V", (207.825, 137.500), 5.0),
         ("GND_B_ESCAPE", "GND", (209.175, 137.500), 5.0),

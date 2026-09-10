@@ -106,22 +106,29 @@ def remove_tracks_touching(text: str, points: list[tuple[float, float]]) -> tupl
     return text, len(removals)
 
 
-def remove_legacy_gpio4_copper(text: str) -> tuple[str, int]:
-    """Remove the obsolete GPIO4 legacy-net copper, not the active K/L path.
+def remove_legacy_gpio4_branch(text: str) -> tuple[str, int]:
+    """Remove only the old U201 branch, retaining J701-to-U701 copper.
 
-    Rev A's verified pin map assigns GPIO4 to MACHINE_PWR_SENSE.  The active
-    right end-stop remains on the separate /BROTHER-CONNECTORS/EOL_R_N net at
-    U201.21; this retires only the older /ESP32/EOL_R_N net 30 copper.
+    Net 30 has a direct F.Cu J701-to-U701 path plus a branch through a via to
+    U201.8.  GPIO4 is now the sense input, so only the five branch items are
+    retired; removing the whole net would unnecessarily disconnect J701/U701.
     """
+    obsolete = {
+        "8bac310c-0660-4140-ad94-917957d62621",
+        "f6a7ea09-b6e6-4db1-860f-d027f6ed01d4",
+        "0b0b05f3-c43f-4117-84c2-1f32771f5b48",
+        "65f9136a-8580-4e01-8edb-36f49b08d509",
+        "540fd51e-0690-4bf9-81c8-524f3e1a6e64",
+    }
     removals = []
     for start, end, block in u.blocks(text, "(segment"):
-        if re.search(r"\(net\s+30\)", block):
+        if any(f'(uuid "{item}")' in block for item in obsolete):
             removals.append((start, end))
     for start, end, block in u.blocks(text, "(via"):
-        if re.search(r"\(net\s+30\)", block):
+        if any(f'(uuid "{item}")' in block for item in obsolete):
             removals.append((start, end))
-    if not removals:
-        raise RuntimeError("legacy GPIO4 copper not found")
+    if len(removals) != len(obsolete):
+        raise RuntimeError(f"expected {len(obsolete)} legacy GPIO4 branch items, found {len(removals)}")
     for start, end in reversed(sorted(removals)):
         text = text[:start] + text[end:]
     return text, len(removals)
@@ -151,7 +158,7 @@ def main() -> None:
     _, _, u201 = u.find_fp(text, "U201")
     u201 = u.replace_pad_net(u201, "8", sense_code, SENSE)
     text = u.replace_fp(text, "U201", u201)
-    text, removed_gpio4_tracks = remove_legacy_gpio4_copper(text)
+    text, removed_gpio4_tracks = remove_legacy_gpio4_branch(text)
 
     _, _, q501 = u.find_fp(text, "Q501")
     _, _, r206 = u.find_fp(text, "R206")
@@ -390,8 +397,6 @@ def main() -> None:
     r216_p1 = pad_position("R216", "1")
     r216_p2 = pad_position("R216", "2")
     r815_p2 = pad_position("R815", "2")
-    u701_p15 = pad_position("U701", "15")
-    j701_p7 = pad_position("J701", "7")
     routing_failures: list[str] = []
     try:
         local_sense_path = route_b_cu(
@@ -430,19 +435,6 @@ def main() -> None:
         ground_path = []
         ground_layer = -1
         routing_failures.append(str(exc))
-    # GPIO4 is reassigned to sense, but the physical J701-to-U701 legacy
-    # channel remains separate from the active right end-stop.  Reconnect
-    # that retained peripheral locally rather than leaving it dangling when
-    # the obsolete branch to U201 is removed.
-    add_via(u701_p15, "/ESP32/EOL_R_N")
-    try:
-        generic_path, generic_layer = route_any_signal_layer(
-            u701_p15, j701_p7, "/ESP32/EOL_R_N", (193.0, 150.0, 215.0, 165.0)
-        )
-    except RuntimeError as exc:
-        generic_path = []
-        generic_layer = -1
-        routing_failures.append(str(exc))
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
@@ -458,8 +450,6 @@ def main() -> None:
     print("PLUS12_ROUTE_LAYER", plus12_layer)
     print("GROUND_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in ground_path))
     print("GROUND_ROUTE_LAYER", ground_layer)
-    print("LEGACY_GENERIC_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in generic_path))
-    print("LEGACY_GENERIC_ROUTE_LAYER", generic_layer)
     print("ROUTE_STUDY_FAILURES", " | ".join(routing_failures))
 
 
