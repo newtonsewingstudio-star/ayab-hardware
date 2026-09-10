@@ -387,15 +387,24 @@ def main() -> None:
     # disposable candidate only; native DRC remains the authority.
     u201_p8 = pad_position("U201", "8")
     r215_p1 = pad_position("R215", "1")
+    routing_failures: list[str] = []
     add_via(r215_p2, SENSE)
-    sense_path = route_b_cu(
-        r215_p2, u201_p8, SENSE, (195.0, 120.0, 240.0, 150.0), pcbnew.F_Cu
-    )
+    try:
+        sense_path = route_b_cu(
+            r215_p2, u201_p8, SENSE, (195.0, 120.0, 240.0, 150.0), pcbnew.F_Cu
+        )
+    except RuntimeError as exc:
+        sense_path = []
+        routing_failures.append(str(exc))
     add_via(r215_p1, "+12V")
     plus12_endpoint = (303.40, 153.33)
-    plus12_path = route_b_cu(
-        r215_p1, plus12_endpoint, "+12V", (220.0, 120.0, 315.0, 160.0), pcbnew.F_Cu
-    )
+    try:
+        plus12_path = route_b_cu(
+            r215_p1, plus12_endpoint, "+12V", (220.0, 120.0, 315.0, 160.0), pcbnew.F_Cu
+        )
+    except RuntimeError as exc:
+        plus12_path = []
+        routing_failures.append(str(exc))
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
@@ -406,6 +415,7 @@ def main() -> None:
     print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
     print("SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_path))
     print("PLUS12_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_path))
+    print("ROUTE_STUDY_FAILURES", " | ".join(routing_failures))
 
 
 if __name__ == "__main__":
