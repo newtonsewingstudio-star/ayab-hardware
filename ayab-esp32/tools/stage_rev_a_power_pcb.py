@@ -375,15 +375,11 @@ def main() -> None:
     raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
-    # Feed the divider from an existing +12-V F.Cu landing point.  This is
-    # routed independently of the MCU sense leg so its high-voltage source is
-    # not obscured by the dense end-stop escape geometry.
-    plus12_endpoint = (303.40, 153.33)
-    plus12_start = (231.50, 141.50)
-    add_segment(pad_position("R215", "1"), plus12_start, "+12V")
-    add_via(plus12_start, "+12V")
-    plus12_path = route_b_cu(plus12_start, plus12_endpoint, "+12V", (225.0, 135.0, 320.0, 165.0), pcbnew.In1_Cu)
-    add_via(plus12_endpoint, "+12V")
+    # No safe source corridor for the divider's +12-V leg has been found on
+    # this board partition.  Leave it deliberately open in the candidate;
+    # DRC records that fact while the mechanical/electrical architecture is
+    # reconsidered instead of retaining an unsafe copper crossing.
+    plus12_path: list[tuple[float, float]] = []
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
