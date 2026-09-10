@@ -106,6 +106,25 @@ jobs:
             git commit -m "Record disposable power-stage DRC evidence [skip ci]"
             git push origin HEAD:ayab-esp32-kh910-rev-a
           fi
+      - name: Require a fully clean staged board
+        run: |
+          grep -Fxq 'ROUTE_STUDY_FAILURES ' /tmp/rev-a-power-stage.log
+          grep -Fxq '** Found 0 DRC violations **' /tmp/rev-a-power-stage-drc.rpt
+          grep -Fxq '** Found 0 unconnected pads **' /tmp/rev-a-power-stage-drc.rpt
+          grep -Fxq '** Found 0 Footprint errors **' /tmp/rev-a-power-stage-drc.rpt
+      - name: Promote the validated board to source of truth
+        run: |
+          cp /tmp/rev-a-power-stage.kicad_pcb ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/rev-a-power-promoted-drc.rpt ayab-esp32/ayab-esp32.kicad_pcb
+          python3 ayab-esp32/tools/audit_rev_a_power_pcb_parity.py \
+            --output /tmp/rev-a-power-promoted-parity.md
+          python3 ayab-esp32/tools/audit_rev_a_solenoid_gate_source.py
+          python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          git add ayab-esp32/ayab-esp32.kicad_pcb
+          git commit -m "Integrate Rev A protected power and sense routing"
+          git push origin HEAD:ayab-esp32-kh910-rev-a
       - name: Render staged board
         run: |
           kicad-cli pcb render --side bottom --output /tmp/rev-a-power-stage-bottom.png /tmp/rev-a-power-stage.kicad_pcb
