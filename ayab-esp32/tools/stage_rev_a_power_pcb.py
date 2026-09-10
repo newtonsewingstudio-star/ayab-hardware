@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PSU = ROOT / "psu.kicad_sch"
 MCU = ROOT / "mcu.kicad_sch"
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
-PLACEMENTS = {"U403": (300.0, 155.0), "R215": (230.0, 142.0), "R216": (233.0, 142.0)}
+PLACEMENTS = {"U403": (300.0, 155.0), "R215": (207.0, 137.5), "R216": (210.0, 137.5)}
 
 
 def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
@@ -353,12 +353,6 @@ def main() -> None:
     add_segment((301.50, 156.25), (298.50, 156.25), "+5V")
     add_segment((298.50, 156.25), (298.50, u403_p6[1]), "+5V")
     add_segment((298.50, u403_p6[1]), u403_p6, "+5V")
-    r215_p2 = pad_position("R215", "2")
-    r216_p1 = pad_position("R216", "1")
-    add_segment(r215_p2, (r215_p2[0], 143.00), SENSE)
-    add_segment((r215_p2[0], 143.00), (234.50, 143.00), SENSE)
-    add_segment((234.50, 143.00), r216_p1, SENSE)
-
     # Use already-routed landing points for the two shortest external ties:
     # the B.Cu +5 V trace beside U403 and the established GND through-via
     # below the divider.  The remaining raw-power and sense runs are kept out
@@ -367,12 +361,6 @@ def main() -> None:
     add_segment((298.50, u403_p6[1]), (296.50, u403_p6[1]), "+5V")
     add_segment((296.50, u403_p6[1]), (296.50, 146.63), "+5V")
     add_segment((296.50, 146.63), (299.73, 146.63), "+5V")
-    r216_p2 = pad_position("R216", "2")
-    add_segment(r216_p2, (r216_p2[0], 141.00), "GND")
-    add_segment((r216_p2[0], 141.00), (227.80, 141.00), "GND")
-    add_segment((227.80, 141.00), (227.80, 145.30), "GND")
-    add_segment((227.80, 145.30), (230.41, 145.30), "GND")
-
     # The obsolete bypass left a filtered-5-V endpoint on F.Cu.  Let the
     # candidate router find a B.Cu corridor around the existing +5-V spine,
     # then use one compliant via at the endpoint.
@@ -381,28 +369,34 @@ def main() -> None:
     raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
-    # The B.Cu and internal-layer studies found no divider route.  The source
-    # endpoints are both on F.Cu, though, so test that layer explicitly before
-    # moving otherwise-clear single-board components.  Each via is part of the
-    # disposable candidate only; native DRC remains the authority.
+    # This compact back-side location passed the placement probe without a
+    # short.  It sits beside the released GPIO4 escape, while the existing 12
+    # V spine runs below it on B.Cu.  Test these two board-native corridors
+    # before treating the location as a real layout change.
     u201_p8 = pad_position("U201", "8")
+    r215_p2 = pad_position("R215", "2")
     r215_p1 = pad_position("R215", "1")
+    r216_p1 = pad_position("R216", "1")
     routing_failures: list[str] = []
-    add_via(r215_p2, SENSE)
+    try:
+        local_sense_path = route_b_cu(
+            r215_p2, r216_p1, SENSE, (203.0, 133.0, 214.0, 142.0), pcbnew.B_Cu
+        )
+    except RuntimeError as exc:
+        local_sense_path = []
+        routing_failures.append(str(exc))
+    add_via(u201_p8, SENSE)
     try:
         sense_path = route_b_cu(
-            r215_p2, u201_p8, SENSE, (195.0, 120.0, 240.0, 150.0), pcbnew.F_Cu
+            u201_p8, r215_p2, SENSE, (200.0, 120.0, 220.0, 145.0), pcbnew.B_Cu
         )
     except RuntimeError as exc:
         sense_path = []
         routing_failures.append(str(exc))
-    # The 12 V distribution spine already crosses the board on B.Cu at the
-    # lower edge.  Use its nearby native section rather than trying to cross
-    # the front-side solenoid corridor from the PSU island.
-    plus12_endpoint = (230.00, 163.10)
+    plus12_endpoint = (207.00, 163.10)
     try:
         plus12_path = route_b_cu(
-            r215_p1, plus12_endpoint, "+12V", (220.0, 120.0, 235.0, 164.0), pcbnew.B_Cu
+            r215_p1, plus12_endpoint, "+12V", (200.0, 133.0, 215.0, 164.0), pcbnew.B_Cu
         )
     except RuntimeError as exc:
         plus12_path = []
@@ -415,6 +409,7 @@ def main() -> None:
     print("REMOVED_BYPASS_TRACKS", removed_bypass_tracks)
     print("REMOVED_GPIO4_TRACKS", removed_gpio4_tracks)
     print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
+    print("LOCAL_SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in local_sense_path))
     print("SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_path))
     print("PLUS12_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_path))
     print("ROUTE_STUDY_FAILURES", " | ".join(routing_failures))
