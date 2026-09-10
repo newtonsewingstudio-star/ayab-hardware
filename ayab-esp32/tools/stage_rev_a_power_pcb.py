@@ -205,6 +205,18 @@ def main() -> None:
         track.SetNetCode(code)
         board.Add(track)
 
+    def add_front_segment(start: tuple[float, float], end: tuple[float, float], net_name: str) -> None:
+        code = board.GetNetcodeFromNetname(net_name)
+        if code <= 0:
+            raise RuntimeError(f"staged net missing: {net_name}")
+        track = pcbnew.PCB_TRACK(board)
+        track.SetStart(pcbnew.VECTOR2I_MM(*start))
+        track.SetEnd(pcbnew.VECTOR2I_MM(*end))
+        track.SetWidth(pcbnew.FromMM(0.25))
+        track.SetLayer(pcbnew.F_Cu)
+        track.SetNetCode(code)
+        board.Add(track)
+
     def add_via(position: tuple[float, float], net_name: str) -> None:
         code = board.GetNetcodeFromNetname(net_name)
         if code <= 0:
@@ -356,6 +368,17 @@ def main() -> None:
     raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
+    # Reuse the proven F.Cu escape corridor from U201.8, then land in an
+    # otherwise clear B.Cu region above the MCU and route around the actual
+    # existing copper to the divider tap.
+    sense_escape = (209.785, 129.675)
+    sense_via = (205.00, 126.50)
+    u201_p8 = pad_position("U201", "8")
+    add_front_segment(u201_p8, sense_escape, SENSE)
+    add_front_segment(sense_escape, sense_via, SENSE)
+    add_via(sense_via, SENSE)
+    sense_path = route_b_cu(sense_via, r215_p2, SENSE, (190.0, 120.0, 240.0, 160.0))
+
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(args.output), board)
@@ -363,6 +386,7 @@ def main() -> None:
     print("REMOVED_BYPASS_TRACKS", removed_bypass_tracks)
     print("REMOVED_GPIO4_TRACKS", removed_gpio4_tracks)
     print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
+    print("SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_path))
 
 
 if __name__ == "__main__":
