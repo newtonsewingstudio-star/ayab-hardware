@@ -34,6 +34,11 @@ SEEDS = {"U601", "U602", "U403", "R215", "R216", "TP603"}
 GLOBAL_NETS = {"", "GND", "+12V", "+5V", "+3V3", "5V", "3V3"}
 
 
+def normalized_pin_net(name: str) -> str:
+    """Treat KiCad's synthetic unconnected net name as an open PCB pad."""
+    return "" if name.startswith("unconnected-(") else name
+
+
 def export_netlist(destination: Path) -> None:
     command = [
         "kicad-cli", "sch", "export", "netlist", "--format", "kicadxml",
@@ -106,7 +111,7 @@ def render_report(values: dict[str, str], net_members: dict[str, set[str]],
     for key, actual in sorted(board_pins.items()):
         if key[0] not in SEEDS:
             continue
-        expected_net = schematic_pins.get(key, "")
+        expected_net = normalized_pin_net(schematic_pins.get(key, ""))
         if actual != expected_net:
             topology_mismatches.append((key[0], key[1], expected_net, actual))
     preserved_checks = [
@@ -146,9 +151,10 @@ def render_report(values: dict[str, str], net_members: dict[str, set[str]],
 
     lines += ["", "## Pin-level power topology", ""]
     for ref in sorted(SEEDS):
-        for key, expected_net in sorted(schematic_pins.items()):
+        for key, raw_expected_net in sorted(schematic_pins.items()):
             if key[0] != ref:
                 continue
+            expected_net = normalized_pin_net(raw_expected_net)
             actual = board_pins.get(key, "")
             status = "matches" if actual == expected_net else f"**PCB `{actual or 'unconnected'}`**"
             lines.append(f"- {ref}.{key[1]}: schematic `{expected_net or 'unconnected'}`; {status}")
