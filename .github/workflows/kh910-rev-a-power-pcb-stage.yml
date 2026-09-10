@@ -123,8 +123,12 @@ jobs:
           python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py \
             ayab-esp32/ayab-esp32.kicad_pcb
           git add ayab-esp32/ayab-esp32.kicad_pcb
-          git commit -m "Integrate Rev A protected power and sense routing"
-          git push origin HEAD:ayab-esp32-kh910-rev-a
+          if ! git diff --cached --quiet; then
+            git commit -m "Integrate Rev A protected power and sense routing"
+            git push origin HEAD:ayab-esp32-kh910-rev-a
+          else
+            echo "Validated power stage is already integrated."
+          fi
       - name: Render staged board
         run: |
           kicad-cli pcb render --side bottom --output /tmp/rev-a-power-stage-bottom.png /tmp/rev-a-power-stage.kicad_pcb

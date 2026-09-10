@@ -12,6 +12,7 @@ import argparse
 import heapq
 import math
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -176,7 +177,13 @@ def main() -> None:
     text = args.input.read_text(encoding="utf-8")
     existing = {ref for ref in ("U403", "R215", "R216") if f'(property "Reference" "{ref}"' in text}
     if existing:
-        raise RuntimeError("partial power PCB state already present: " + ", ".join(sorted(existing)))
+        if existing != {"U403", "R215", "R216"}:
+            raise RuntimeError("partial power PCB state already present: " + ", ".join(sorted(existing)))
+        shutil.copyfile(args.input, args.output)
+        print("POWER_STAGE_OK", args.output)
+        print("POWER_STAGE_ALREADY_INTEGRATED U403 R215 R216")
+        print("ROUTE_STUDY_FAILURES", "")
+        return
     defs = root_net_defs(text)
     names = {name: next((code for code, value in defs.items() if value == name), 0) for name in ("GND", "+5V", "+12V", "/PSU/5V_SW")}
     if any(code <= 0 for code in names.values()):
