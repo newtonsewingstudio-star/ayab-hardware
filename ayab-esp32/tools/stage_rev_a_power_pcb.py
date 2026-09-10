@@ -405,31 +405,63 @@ def main() -> None:
     except RuntimeError as exc:
         local_sense_path = []
         routing_failures.append(str(exc))
-    add_via(u201_p8, SENSE)
-    add_via(r215_p2, SENSE)
+    gpio_escape = (218.875, 135.425)
+    sense_escape = (205.425, 135.750)
+    plus12_escape = (206.325, 134.500)
+    ground_escape = (204.675, 135.000)
+    try:
+        gpio_front_path = route_b_cu(
+            u201_p8, gpio_escape, SENSE, (210.0, 120.0, 222.0, 138.0), pcbnew.F_Cu
+        )
+    except RuntimeError as exc:
+        gpio_front_path = []
+        routing_failures.append(str(exc))
+    try:
+        sense_bottom_path = route_b_cu(
+            r215_p2, sense_escape, SENSE, (202.0, 133.0, 208.0, 140.0), pcbnew.B_Cu
+        )
+    except RuntimeError as exc:
+        sense_bottom_path = []
+        routing_failures.append(str(exc))
+    add_via(gpio_escape, SENSE)
+    add_via(sense_escape, SENSE)
     try:
         sense_path, sense_layer = route_any_signal_layer(
-            u201_p8, r215_p2, SENSE, (200.0, 120.0, 220.0, 145.0)
+            gpio_escape, sense_escape, SENSE, (200.0, 120.0, 222.0, 140.0)
         )
     except RuntimeError as exc:
         sense_path = []
         sense_layer = -1
         routing_failures.append(str(exc))
     plus12_endpoint = (207.00, 163.10)
-    add_via(r215_p1, "+12V")
+    try:
+        plus12_bottom_path = route_b_cu(
+            r215_p1, plus12_escape, "+12V", (202.0, 132.0, 209.0, 140.0), pcbnew.B_Cu
+        )
+    except RuntimeError as exc:
+        plus12_bottom_path = []
+        routing_failures.append(str(exc))
+    add_via(plus12_escape, "+12V")
     add_via(plus12_endpoint, "+12V")
     try:
         plus12_path, plus12_layer = route_any_signal_layer(
-            r215_p1, plus12_endpoint, "+12V", (200.0, 133.0, 215.0, 164.0)
+            plus12_escape, plus12_endpoint, "+12V", (200.0, 132.0, 215.0, 164.0)
         )
     except RuntimeError as exc:
         plus12_path = []
         plus12_layer = -1
         routing_failures.append(str(exc))
-    add_via(r216_p2, "GND")
+    try:
+        ground_bottom_path = route_b_cu(
+            r216_p2, ground_escape, "GND", (202.0, 132.0, 212.0, 140.0), pcbnew.B_Cu
+        )
+    except RuntimeError as exc:
+        ground_bottom_path = []
+        routing_failures.append(str(exc))
+    add_via(ground_escape, "GND")
     try:
         ground_path, ground_layer = route_any_signal_layer(
-            r216_p2, r815_p2, "GND", (205.0, 133.0, 216.0, 145.0)
+            ground_escape, r815_p2, "GND", (202.0, 132.0, 216.0, 145.0)
         )
     except RuntimeError as exc:
         ground_path = []
@@ -444,12 +476,16 @@ def main() -> None:
     print("REMOVED_GPIO4_TRACKS", removed_gpio4_tracks)
     print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
     print("LOCAL_SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in local_sense_path))
+    print("GPIO_FRONT_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in gpio_front_path))
+    print("SENSE_BOTTOM_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_bottom_path))
     print("SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_path))
     print("SENSE_ROUTE_LAYER", sense_layer)
     print("PLUS12_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_path))
     print("PLUS12_ROUTE_LAYER", plus12_layer)
+    print("PLUS12_BOTTOM_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_bottom_path))
     print("GROUND_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in ground_path))
     print("GROUND_ROUTE_LAYER", ground_layer)
+    print("GROUND_BOTTOM_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in ground_bottom_path))
     print("ROUTE_STUDY_FAILURES", " | ".join(routing_failures))
 
 
