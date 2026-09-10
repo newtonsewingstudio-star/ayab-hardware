@@ -31,8 +31,9 @@ jobs:
       - name: Record placement DRC without treating expected unconnected pads as success
         run: |
           kicad-cli pcb drc -o /tmp/rev-a-power-placement-drc.rpt /tmp/rev-a-power-placement.kicad_pcb || true
-          cat /tmp/rev-a-power-placement-drc.rpt
+          test -e /tmp/rev-a-power-placement-drc.rpt && cat /tmp/rev-a-power-placement-drc.rpt || true
       - name: Archive disposable placement evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: kh910-rev-a-power-placement-probe
