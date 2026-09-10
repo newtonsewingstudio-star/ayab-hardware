@@ -203,12 +203,22 @@ def main() -> None:
         track.SetNetCode(code)
         board.Add(track)
 
-    # These three ties are wholly inside the new low-voltage island.  Keeping
-    # them local first lets CI distinguish their geometry from the remaining
-    # long runs back to the existing 5 V, 12 V, GND and MCU copper.
+    # These three ties are wholly inside the new low-voltage island.  The two
+    # detours preserve clearance to U403's GND pads and R216's grounded end.
+    # Keeping them local first lets CI distinguish their geometry from the
+    # remaining long runs back to the existing 5 V, 12 V, GND and MCU copper.
     add_segment(pad_position("U403", "2"), pad_position("U403", "5"), "GND")
-    add_segment(pad_position("U403", "3"), pad_position("U403", "6"), "+5V")
-    add_segment(pad_position("R215", "2"), pad_position("R216", "1"), SENSE)
+    u403_p3 = pad_position("U403", "3")
+    u403_p6 = pad_position("U403", "6")
+    add_segment(u403_p3, (301.50, 156.25), "+5V")
+    add_segment((301.50, 156.25), (298.50, 156.25), "+5V")
+    add_segment((298.50, 156.25), (298.50, u403_p6[1]), "+5V")
+    add_segment((298.50, u403_p6[1]), u403_p6, "+5V")
+    r215_p2 = pad_position("R215", "2")
+    r216_p1 = pad_position("R216", "1")
+    add_segment(r215_p2, (r215_p2[0], 143.00), SENSE)
+    add_segment((r215_p2[0], 143.00), (234.50, 143.00), SENSE)
+    add_segment((234.50, 143.00), r216_p1, SENSE)
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
