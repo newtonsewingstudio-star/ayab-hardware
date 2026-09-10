@@ -574,7 +574,6 @@ def main() -> None:
     r216_p2 = pad_position("R216", "2")
     routing_failures: list[str] = []
     legacy_sense_escape = (207.490, 131.970)
-    add_via(r215_p2, SENSE)
     try:
         sense_route = route_multilayer(
             legacy_sense_escape, r215_p2, SENSE, (62.0, 122.50, 335.0, 164.0)
