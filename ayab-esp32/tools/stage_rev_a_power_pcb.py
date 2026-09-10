@@ -342,6 +342,17 @@ def main() -> None:
                     heapq.heappush(queue, (next_cost + distance, next_cost, nxt))
         raise RuntimeError(f"no route for {net_name} from {start} to {goal} on layer {layer}")
 
+    def route_any_signal_layer(start: tuple[float, float], goal: tuple[float, float], net_name: str,
+                               bounds: tuple[float, float, float, float]) -> tuple[list[tuple[float, float]], int]:
+        """Try each signal layer on the disposable board without forcing a crossing."""
+        failures: list[str] = []
+        for layer in (pcbnew.B_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.F_Cu):
+            try:
+                return route_b_cu(start, goal, net_name, bounds, layer), layer
+            except RuntimeError as exc:
+                failures.append(str(exc))
+        raise RuntimeError("; ".join(failures))
+
     # These three ties are wholly inside the new low-voltage island.  The two
     # detours preserve clearance to U403's GND pads and R216's grounded end.
     # Keeping them local first lets CI distinguish their geometry from the
@@ -386,20 +397,24 @@ def main() -> None:
         local_sense_path = []
         routing_failures.append(str(exc))
     add_via(u201_p8, SENSE)
+    add_via(r215_p2, SENSE)
     try:
-        sense_path = route_b_cu(
-            u201_p8, r215_p2, SENSE, (200.0, 120.0, 220.0, 145.0), pcbnew.B_Cu
+        sense_path, sense_layer = route_any_signal_layer(
+            u201_p8, r215_p2, SENSE, (200.0, 120.0, 220.0, 145.0)
         )
     except RuntimeError as exc:
         sense_path = []
+        sense_layer = -1
         routing_failures.append(str(exc))
     plus12_endpoint = (207.00, 163.10)
+    add_via(r215_p1, "+12V")
     try:
-        plus12_path = route_b_cu(
-            r215_p1, plus12_endpoint, "+12V", (200.0, 133.0, 215.0, 164.0), pcbnew.B_Cu
+        plus12_path, plus12_layer = route_any_signal_layer(
+            r215_p1, plus12_endpoint, "+12V", (200.0, 133.0, 215.0, 164.0)
         )
     except RuntimeError as exc:
         plus12_path = []
+        plus12_layer = -1
         routing_failures.append(str(exc))
 
     board.BuildConnectivity()
@@ -411,7 +426,9 @@ def main() -> None:
     print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
     print("LOCAL_SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in local_sense_path))
     print("SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_path))
+    print("SENSE_ROUTE_LAYER", sense_layer)
     print("PLUS12_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_path))
+    print("PLUS12_ROUTE_LAYER", plus12_layer)
     print("ROUTE_STUDY_FAILURES", " | ".join(routing_failures))
 
 
