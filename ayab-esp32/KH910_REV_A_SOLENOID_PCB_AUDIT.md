@@ -1,6 +1,9 @@
-# KH910 Rev A — Solenoid PCB Parity Audit
+# KH910 Rev A — Solenoid PCB Parity Audit (Pre-integration snapshot)
 
-Generated from the current branch schematic and PCB.
+> Historical evidence only. This snapshot predates the integrated Rev A
+> high-side gate in commit `350f7d0`; its “On PCB?” table is not current.
+> The current authority is the `KH910 Rev A Solenoid Gate Validation`
+> workflow, which checks the integrated PCB DRC and fail-safe topology.
 
 - PCB bytes: **4,147,073**
 - PCB footprints parsed: **246**

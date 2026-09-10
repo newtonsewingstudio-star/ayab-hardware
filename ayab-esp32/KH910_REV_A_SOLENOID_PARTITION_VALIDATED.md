@@ -1,6 +1,6 @@
 # KH910 Rev A — Validated Solenoid Power Partition
 
-Status: **PCB partition validated and promoted; high-side gate components still to be placed/routed.**
+Status: **PCB partition and high-side fail-safe gate integrated and validated.**
 
 Validated with KiCad **9.0.9** on 2026-09-09.
 
@@ -65,9 +65,14 @@ The first clean staged partition attempted to keep the interleaved local horizon
 
 That attempt reached 46 DRC violations / 3 unconnected. The architecture above eliminates those conflicts and validates at 0/0.
 
-## Remaining solenoid PCB work
+## High-side gate integration
 
-The partition alone does **not** make the hardware fail-safe complete. Rev A still requires physical placement/routing of the schematic-defined gate:
+The high-side gate was integrated into the PCB in commit `350f7d0` and is
+checked directly by the `KH910 Rev A Solenoid Gate Validation` workflow. The
+integrated board has 0 DRC violations, 0 unconnected pads, 0 footprint errors,
+and the required default-OFF topology.
+
+The implemented gate is:
 
 - Q805 — LP9435LT1G P-channel high-side MOSFET
 - Q806 — AO3400A N-channel gate pull-down MOSFET
@@ -76,14 +81,15 @@ The partition alone does **not** make the hardware fail-safe complete. Rev A sti
 - R822 — 100 kOhm Q806 gate pulldown
 - GPIO21 / `SOLENOID_PWR_EN`
 
-The preferred placement direction is being evaluated around the J401/raw-backbone cut so the high-current raw-to-switched path can remain short. Placement must be proven with KiCad DRC before committing.
+This closes the solenoid-gate PCB implementation item. It does not replace
+prototype power-state testing or the separate final manufacturing review.
 
 ## Release status
 
 - Hall input PCB parity: complete / clean
 - K/L PCB parity: complete / clean
 - Solenoid raw/switched partition: **complete / clean**
-- Solenoid high-side fail-safe gate physical PCB: **open**
+- Solenoid high-side fail-safe gate physical PCB: **complete / clean**
 - KH-910 connector/power mapping: **open**
 - final release/BOM/manufacturing audit: **open**
 
