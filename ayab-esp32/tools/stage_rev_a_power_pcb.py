@@ -368,16 +368,12 @@ def main() -> None:
     raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
-    # Reuse the proven F.Cu escape corridor from U201.8, then land in an
-    # otherwise clear B.Cu region above the MCU and route around the actual
-    # existing copper to the divider tap.
-    sense_escape = (209.785, 129.675)
-    sense_via = (205.00, 126.50)
-    u201_p8 = pad_position("U201", "8")
-    add_front_segment(u201_p8, sense_escape, SENSE)
-    add_front_segment(sense_escape, sense_via, SENSE)
-    add_via(sense_via, SENSE)
-    sense_path = route_b_cu(sense_via, r215_p2, SENSE, (190.0, 120.0, 240.0, 160.0))
+    # Feed the divider from an existing +12-V F.Cu landing point.  This is
+    # routed independently of the MCU sense leg so its high-voltage source is
+    # not obscured by the dense end-stop escape geometry.
+    plus12_endpoint = (303.40, 153.33)
+    plus12_path = route_b_cu(pad_position("R215", "1"), plus12_endpoint, "+12V", (225.0, 135.0, 320.0, 165.0))
+    add_via(plus12_endpoint, "+12V")
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
@@ -386,7 +382,7 @@ def main() -> None:
     print("REMOVED_BYPASS_TRACKS", removed_bypass_tracks)
     print("REMOVED_GPIO4_TRACKS", removed_gpio4_tracks)
     print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
-    print("SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_path))
+    print("PLUS12_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_path))
 
 
 if __name__ == "__main__":
