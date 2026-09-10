@@ -54,6 +54,24 @@ jobs:
           }
           summary "Source baseline" /tmp/rev-a-power-baseline-drc.rpt
           summary "Staged board" /tmp/rev-a-power-stage-drc.rpt
+          {
+            echo '## Disposable power-stage evidence'
+            echo
+            echo '### Routing result'
+            echo '```text'
+            cat /tmp/rev-a-power-stage.log
+            echo '```'
+            echo
+            echo '### Source-board DRC'
+            echo '```text'
+            cat /tmp/rev-a-power-baseline-drc.rpt
+            echo '```'
+            echo
+            echo '### Staged-board DRC'
+            echo '```text'
+            cat /tmp/rev-a-power-stage-drc.rpt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Render staged board
         run: |
           kicad-cli pcb render --side bottom --output /tmp/rev-a-power-stage-bottom.png /tmp/rev-a-power-stage.kicad_pcb
