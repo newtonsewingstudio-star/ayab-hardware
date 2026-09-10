@@ -76,6 +76,9 @@ def main() -> None:
         ("PLUS12_B_ESCAPE", "+12V", (207.825, 137.500), 5.0),
         ("GND_B_ESCAPE", "GND", (209.175, 137.500), 5.0),
         ("PLUS12_BUS_ESCAPE", "+12V", (207.000, 163.100), 4.0),
+        ("LEGACY_SENSE_LOWER_ESCAPE", "/ESP32/EOL_R_N", (211.167, 158.717), 8.0),
+        ("LOWER_LEFT_ESCAPE", "", (204.500, 160.000), 6.0),
+        ("LOWER_RIGHT_ESCAPE", "", (224.000, 159.000), 6.0),
     )
     for name, net, centre, radius in probes:
         sites = candidates(board, name, net, centre, radius)
