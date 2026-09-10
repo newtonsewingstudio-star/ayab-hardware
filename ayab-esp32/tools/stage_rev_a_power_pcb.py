@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PSU = ROOT / "psu.kicad_sch"
 MCU = ROOT / "mcu.kicad_sch"
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
-PLACEMENTS = {"U403": (300.0, 155.0), "R215": (204.5, 160.0), "R216": (208.0, 160.0)}
+PLACEMENTS = {"U403": (300.0, 155.0), "R215": (218.5, 159.0), "R216": (222.0, 159.0)}
 
 
 def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
@@ -415,8 +415,8 @@ def main() -> None:
     r216_p2 = pad_position("R216", "2")
     routing_failures: list[str] = []
     legacy_sense_end = (211.1674, 158.717302)
-    sense_path = [legacy_sense_end, (211.40, 158.95), (211.40, 161.75), (r216_p1[0], 161.75), r216_p1]
-    local_sense_path = [r216_p1, (r216_p1[0], 158.25), (r215_p2[0], 158.25), r215_p2]
+    sense_path = [legacy_sense_end, (213.00, 158.70), (214.00, 159.00), r215_p2]
+    local_sense_path = [r215_p2, (r215_p2[0], 157.00), (r216_p1[0], 157.00), r216_p1]
     for first, second in zip(sense_path, sense_path[1:]):
         add_segment(first, second, SENSE)
     for first, second in zip(local_sense_path, local_sense_path[1:]):
