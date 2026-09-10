@@ -381,17 +381,21 @@ def main() -> None:
     raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
-    # Both inner layers are fully partitioned between the released GPIO4
-    # corridor and this divider location.  Keep the staged candidate open
-    # rather than retaining an unsafe crossing; the next placement pass will
-    # move the divider to a routeable single-board location.
-    sense_path: list[tuple[float, float]] = []
-
-    # No safe source corridor for the divider's +12-V leg has been found on
-    # this board partition.  Leave it deliberately open in the candidate;
-    # DRC records that fact while the mechanical/electrical architecture is
-    # reconsidered instead of retaining an unsafe copper crossing.
-    plus12_path: list[tuple[float, float]] = []
+    # The B.Cu and internal-layer studies found no divider route.  The source
+    # endpoints are both on F.Cu, though, so test that layer explicitly before
+    # moving otherwise-clear single-board components.  Each via is part of the
+    # disposable candidate only; native DRC remains the authority.
+    u201_p8 = pad_position("U201", "8")
+    r215_p1 = pad_position("R215", "1")
+    add_via(r215_p2, SENSE)
+    sense_path = route_b_cu(
+        r215_p2, u201_p8, SENSE, (195.0, 120.0, 240.0, 150.0), pcbnew.F_Cu
+    )
+    add_via(r215_p1, "+12V")
+    plus12_endpoint = (303.40, 153.33)
+    plus12_path = route_b_cu(
+        r215_p1, plus12_endpoint, "+12V", (220.0, 120.0, 315.0, 160.0), pcbnew.F_Cu
+    )
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
