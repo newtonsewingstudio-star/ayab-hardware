@@ -15,6 +15,18 @@ on:
         description: 'R216 centre, X,Y in mm'
         required: false
         default: '232.000,139.000'
+      u403_side:
+        description: 'U403 side: front or back'
+        required: false
+        default: 'front'
+      r215_side:
+        description: 'R215 side: front or back'
+        required: false
+        default: 'front'
+      r216_side:
+        description: 'R216 side: front or back'
+        required: false
+        default: 'front'
   push:
     branches:
       - ayab-esp32-kh910-rev-a
@@ -44,6 +56,9 @@ jobs:
             --u403 '${{ inputs.u403 || '300.000,136.500' }}' \
             --r215 '${{ inputs.r215 || '230.000,139.000' }}' \
             --r216 '${{ inputs.r216 || '232.000,139.000' }}' \
+            --u403-side '${{ inputs.u403_side || 'front' }}' \
+            --r215-side '${{ inputs.r215_side || 'front' }}' \
+            --r216-side '${{ inputs.r216_side || 'front' }}' \
             > /tmp/rev-a-power-placement.log 2>&1
           cat /tmp/rev-a-power-placement.log
       - name: Record placement DRC without treating expected unconnected pads as success

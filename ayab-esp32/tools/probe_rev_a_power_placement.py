@@ -56,6 +56,9 @@ def main() -> None:
     parser.add_argument("--u403", type=coordinate, default=DEFAULT_COORDINATES["U403"])
     parser.add_argument("--r215", type=coordinate, default=DEFAULT_COORDINATES["R215"])
     parser.add_argument("--r216", type=coordinate, default=DEFAULT_COORDINATES["R216"])
+    parser.add_argument("--u403-side", choices=("front", "back"), default="front")
+    parser.add_argument("--r215-side", choices=("front", "back"), default="front")
+    parser.add_argument("--r216-side", choices=("front", "back"), default="front")
     args = parser.parse_args()
     board = pcbnew.LoadBoard(str(args.input))
     if board is None:
@@ -66,6 +69,7 @@ def main() -> None:
         raise RuntimeError(f"baseline already contains {', '.join(conflicts)}")
 
     coordinates = {"U403": args.u403, "R215": args.r215, "R216": args.r216}
+    sides = {"U403": args.u403_side, "R215": args.r215_side, "R216": args.r216_side}
     for reference, template_ref in TEMPLATES.items():
         xy = coordinates[reference]
         footprint = clone_template(board, template_ref)
@@ -77,6 +81,8 @@ def main() -> None:
         # from creating false shorts, mask bridges, and unconnected-pad counts.
         for pad in footprint.Pads():
             pad.SetNetCode(0)
+        if sides[reference] == "back":
+            footprint.Flip(point(*xy), False)
         board.Add(footprint)
         pads = []
         for pad in footprint.Pads():
@@ -84,7 +90,8 @@ def main() -> None:
             pads.append(f"{pad.GetNumber()}=({pcbnew.ToMM(pos.x):.3f},{pcbnew.ToMM(pos.y):.3f})")
         print(
             "PLACED", reference, f"template={template_ref}",
-            f"at=({xy[0]:.3f},{xy[1]:.3f})", "pads=" + ",".join(pads),
+            f"side={sides[reference]}", f"at=({xy[0]:.3f},{xy[1]:.3f})",
+            "pads=" + ",".join(pads),
         )
 
     pcbnew.SaveBoard(str(args.output), board)
