@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PSU = ROOT / "psu.kicad_sch"
 MCU = ROOT / "mcu.kicad_sch"
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
-PLACEMENTS = {"U403": (300.0, 155.0), "R215": (218.5, 159.0), "R216": (222.0, 159.0)}
+PLACEMENTS = {"U403": (300.0, 155.0), "R215": (225.0, 159.0), "R216": (228.5, 159.0)}
 
 
 def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
@@ -415,13 +415,21 @@ def main() -> None:
     r216_p2 = pad_position("R216", "2")
     routing_failures: list[str] = []
     legacy_sense_end = (211.1674, 158.717302)
-    sense_path = [legacy_sense_end, (213.00, 158.70), (214.00, 159.00), r215_p2]
+    legacy_sense_escape = (211.667, 159.717)
+    add_segment(legacy_sense_end, legacy_sense_escape, SENSE)
+    add_via(legacy_sense_escape, SENSE)
+    add_via(r215_p2, SENSE)
+    try:
+        sense_path, sense_layer = route_any_signal_layer(
+            legacy_sense_escape, r215_p2, SENSE, (209.0, 154.0, 231.0, 164.0)
+        )
+    except RuntimeError as exc:
+        sense_path = []
+        sense_layer = -1
+        routing_failures.append(str(exc))
     local_sense_path = [r215_p2, (r215_p2[0], 157.00), (r216_p1[0], 157.00), r216_p1]
-    for first, second in zip(sense_path, sense_path[1:]):
-        add_segment(first, second, SENSE)
     for first, second in zip(local_sense_path, local_sense_path[1:]):
         add_segment(first, second, SENSE)
-    sense_layer = pcbnew.B_Cu
     plus12_endpoint = (r215_p1[0], 163.10)
     plus12_path = [r215_p1, plus12_endpoint]
     add_segment(r215_p1, plus12_endpoint, "+12V")
