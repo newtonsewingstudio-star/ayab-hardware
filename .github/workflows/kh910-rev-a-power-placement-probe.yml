@@ -2,6 +2,19 @@ name: KH910 Rev A Power Placement Probe
 
 on:
   workflow_dispatch:
+    inputs:
+      u403:
+        description: 'U403 centre, X,Y in mm'
+        required: false
+        default: '300.000,136.500'
+      r215:
+        description: 'R215 centre, X,Y in mm'
+        required: false
+        default: '230.000,139.000'
+      r216:
+        description: 'R216 centre, X,Y in mm'
+        required: false
+        default: '232.000,139.000'
   push:
     branches:
       - ayab-esp32-kh910-rev-a
@@ -28,6 +41,9 @@ jobs:
           set -euo pipefail
           python3 ayab-esp32/tools/probe_rev_a_power_placement.py \
             ayab-esp32/ayab-esp32.kicad_pcb /tmp/rev-a-power-placement.kicad_pcb \
+            --u403 '${{ inputs.u403 || '300.000,136.500' }}' \
+            --r215 '${{ inputs.r215 || '230.000,139.000' }}' \
+            --r216 '${{ inputs.r216 || '232.000,139.000' }}' \
             > /tmp/rev-a-power-placement.log 2>&1
           cat /tmp/rev-a-power-placement.log
       - name: Record placement DRC without treating expected unconnected pads as success

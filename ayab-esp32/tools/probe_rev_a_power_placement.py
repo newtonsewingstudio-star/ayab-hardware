@@ -13,12 +13,13 @@ from pathlib import Path
 import pcbnew
 
 
-PLACEMENTS = {
-    "U403": ("Q501", (310.120, 136.890)),
-    "R215": ("R206", (210.600, 129.400)),
-    "R216": ("R206", (210.600, 131.100)),
-}
+TEMPLATES = {"U403": "Q501", "R215": "R206", "R216": "R206"}
 VALUES = {"U403": "LM66100DCKR", "R215": "47k", "R216": "10k"}
+DEFAULT_COORDINATES = {
+    "U403": (300.000, 136.500),
+    "R215": (230.000, 139.000),
+    "R216": (232.000, 139.000),
+}
 
 
 def point(x: float, y: float) -> pcbnew.VECTOR2I:
@@ -40,24 +41,42 @@ def clone_template(board: pcbnew.BOARD, reference: str) -> pcbnew.FOOTPRINT:
     raise RuntimeError(f"template footprint not found: {reference}")
 
 
+def coordinate(value: str) -> tuple[float, float]:
+    try:
+        x, y = (float(item.strip()) for item in value.split(","))
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("coordinates must be X,Y in millimetres") from exc
+    return x, y
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--u403", type=coordinate, default=DEFAULT_COORDINATES["U403"])
+    parser.add_argument("--r215", type=coordinate, default=DEFAULT_COORDINATES["R215"])
+    parser.add_argument("--r216", type=coordinate, default=DEFAULT_COORDINATES["R216"])
     args = parser.parse_args()
     board = pcbnew.LoadBoard(str(args.input))
     if board is None:
         raise RuntimeError(f"could not load {args.input}")
     existing = {fp.GetReference() for fp in board.GetFootprints()}
-    conflicts = sorted(existing & set(PLACEMENTS))
+    conflicts = sorted(existing & set(TEMPLATES))
     if conflicts:
         raise RuntimeError(f"baseline already contains {', '.join(conflicts)}")
 
-    for reference, (template_ref, xy) in PLACEMENTS.items():
+    coordinates = {"U403": args.u403, "R215": args.r215, "R216": args.r216}
+    for reference, template_ref in TEMPLATES.items():
+        xy = coordinates[reference]
         footprint = clone_template(board, template_ref)
         footprint.SetReference(reference)
         footprint.SetValue(VALUES[reference])
         footprint.SetPosition(point(*xy))
+        # This is a geometric probe only.  Templates have electrical nets from
+        # their original locations; clearing them prevents those unrelated nets
+        # from creating false shorts, mask bridges, and unconnected-pad counts.
+        for pad in footprint.Pads():
+            pad.SetNetCode(0)
         board.Add(footprint)
         pads = []
         for pad in footprint.Pads():
