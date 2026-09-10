@@ -18,7 +18,7 @@ PCB = ROOT / "ayab-esp32.kicad_pcb"
 POWER_REFS = {
     "U601", "U602", "D605", "D606", "L601", "L602",
     "C612", "C613", "C614", "C615", "C616", "C617", "C618", "C619", "C620", "C621",
-    "R606", "R607", "R608", "R609", "R610", "TP602", "TP603",
+    "R606", "R607", "R608", "R609", "R610", "R611", "TP602", "TP603",
 }
 ANCHORS = {"U601", "U201"}
 
@@ -57,6 +57,27 @@ def main() -> None:
         for pad in footprint.Pads():
             lines.append(f"- pad {pad.GetNumber()} {point(pad.GetPosition())}: `{pad.GetNetname()}`")
         lines.append("")
+
+    gpio4 = footprints["U201"].FindPadByNumber("8")
+    lines += [
+        "## Existing GPIO4 branch to be removed", "",
+        f"- U201 pad 8 / GPIO4 at {point(gpio4.GetPosition())}: `{gpio4.GetNetname()}`",
+        "- Routed items ending directly at that pad:",
+    ]
+    endpoint_found = False
+    gpio4_pos = gpio4.GetPosition()
+    for item in board.GetTracks():
+        if isinstance(item, pcbnew.PCB_VIA):
+            continue
+        if item.GetStart() == gpio4_pos or item.GetEnd() == gpio4_pos:
+            endpoint_found = True
+            lines.append(
+                f"  - `{item.GetNetname()}` {board.GetLayerName(item.GetLayer())} "
+                f"{point(item.GetStart())} -> {point(item.GetEnd())}"
+            )
+    if not endpoint_found:
+        lines.append("  - none")
+    lines.append("")
 
     lines += ["## Nearby placement inventory", ""]
     for anchor_ref in sorted(ANCHORS):
