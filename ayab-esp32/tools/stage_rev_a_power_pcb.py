@@ -390,6 +390,8 @@ def main() -> None:
     r216_p1 = pad_position("R216", "1")
     r216_p2 = pad_position("R216", "2")
     r815_p2 = pad_position("R815", "2")
+    u701_p15 = pad_position("U701", "15")
+    j701_p7 = pad_position("J701", "7")
     routing_failures: list[str] = []
     try:
         local_sense_path = route_b_cu(
@@ -428,6 +430,19 @@ def main() -> None:
         ground_path = []
         ground_layer = -1
         routing_failures.append(str(exc))
+    # GPIO4 is reassigned to sense, but the physical J701-to-U701 legacy
+    # channel remains separate from the active right end-stop.  Reconnect
+    # that retained peripheral locally rather than leaving it dangling when
+    # the obsolete branch to U201 is removed.
+    add_via(u701_p15, "/ESP32/EOL_R_N")
+    try:
+        generic_path, generic_layer = route_any_signal_layer(
+            u701_p15, j701_p7, "/ESP32/EOL_R_N", (193.0, 150.0, 215.0, 165.0)
+        )
+    except RuntimeError as exc:
+        generic_path = []
+        generic_layer = -1
+        routing_failures.append(str(exc))
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
@@ -443,6 +458,8 @@ def main() -> None:
     print("PLUS12_ROUTE_LAYER", plus12_layer)
     print("GROUND_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in ground_path))
     print("GROUND_ROUTE_LAYER", ground_layer)
+    print("LEGACY_GENERIC_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in generic_path))
+    print("LEGACY_GENERIC_ROUTE_LAYER", generic_layer)
     print("ROUTE_STUDY_FAILURES", " | ".join(routing_failures))
 
 
