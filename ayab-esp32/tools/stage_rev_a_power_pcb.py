@@ -225,9 +225,9 @@ def main() -> None:
     # below the divider.  The remaining raw-power and sense runs are kept out
     # of this narrow stage until their longer corridors are independently
     # checked.
-    add_segment((298.50, u403_p6[1]), (297.80, u403_p6[1]), "+5V")
-    add_segment((297.80, u403_p6[1]), (297.80, 148.00), "+5V")
-    add_segment((297.80, 148.00), (301.09, 147.99), "+5V")
+    add_segment((298.50, u403_p6[1]), (296.50, u403_p6[1]), "+5V")
+    add_segment((296.50, u403_p6[1]), (296.50, 146.63), "+5V")
+    add_segment((296.50, 146.63), (299.73, 146.63), "+5V")
     r216_p2 = pad_position("R216", "2")
     add_segment(r216_p2, (r216_p2[0], 141.00), "GND")
     add_segment((r216_p2[0], 141.00), (228.50, 141.00), "GND")
