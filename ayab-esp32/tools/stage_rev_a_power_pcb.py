@@ -80,11 +80,11 @@ def remove_footprint(text: str, reference: str) -> tuple[str, list[tuple[float, 
 
 def remove_tracks_touching(text: str, points: list[tuple[float, float]]) -> tuple[str, int]:
     removals = []
-    for start, end, block in u.blocks(text, "(segment "):
+    for start, end, block in u.blocks(text, "(segment"):
         details = u.seg_points(block)
         if details and any(u.close(details[0], point) or u.close(details[1], point) for point in points):
             removals.append((start, end))
-    for start, end, block in u.blocks(text, "(via "):
+    for start, end, block in u.blocks(text, "(via"):
         at = re.search(r"\(at\s+([-\d.]+)\s+([-\d.]+)\)", block)
         if at and any(u.close((float(at.group(1)), float(at.group(2))), point) for point in points):
             removals.append((start, end))
@@ -96,7 +96,7 @@ def remove_tracks_touching(text: str, points: list[tuple[float, float]]) -> tupl
 def remove_gpio4_branch(text: str) -> tuple[str, int]:
     target = ((209.785, 129.675), (217.125, 129.675))
     removals = []
-    for start, end, block in u.blocks(text, "(segment "):
+    for start, end, block in u.blocks(text, "(segment"):
         details = u.seg_points(block)
         if not details:
             continue
