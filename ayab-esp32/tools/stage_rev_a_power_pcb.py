@@ -230,8 +230,8 @@ def main() -> None:
         board.Add(via)
 
     def route_b_cu(start: tuple[float, float], goal: tuple[float, float], net_name: str,
-                   bounds: tuple[float, float, float, float]) -> list[tuple[float, float]]:
-        """Route one low-current net on B.Cu around board-native obstacles.
+                   bounds: tuple[float, float, float, float], layer=pcbnew.B_Cu) -> list[tuple[float, float]]:
+        """Route one low-current net on a signal layer around native obstacles.
 
         This deliberately operates only on the disposable candidate.  DRC is
         still the authority; the coarse grid simply avoids blindly drawing a
@@ -268,14 +268,14 @@ def main() -> None:
         for item in board.GetTracks():
             if item.GetNetCode() == own:
                 continue
-            if isinstance(item, pcbnew.PCB_VIA) or item.GetLayer() == pcbnew.B_Cu:
+            if isinstance(item, pcbnew.PCB_VIA) or item.GetLayer() == layer:
                 raster(item)
         for footprint in board.GetFootprints():
             for pad in footprint.Pads():
                 if pad.GetNetCode() == own:
                     continue
                 try:
-                    on_bottom = pad.IsOnLayer(pcbnew.B_Cu)
+                    on_bottom = pad.IsOnLayer(layer)
                 except AttributeError:
                     on_bottom = True
                 if on_bottom:
@@ -315,7 +315,14 @@ def main() -> None:
                         reduced.append(point)
                         old_direction = direction
                 for first, second in zip(reduced, reduced[1:]):
-                    add_segment(first, second, net_name)
+                    code = board.GetNetcodeFromNetname(net_name)
+                    track = pcbnew.PCB_TRACK(board)
+                    track.SetStart(pcbnew.VECTOR2I_MM(*first))
+                    track.SetEnd(pcbnew.VECTOR2I_MM(*second))
+                    track.SetWidth(pcbnew.FromMM(0.25))
+                    track.SetLayer(layer)
+                    track.SetNetCode(code)
+                    board.Add(track)
                 return reduced
             for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 nxt = current[0] + dx, current[1] + dy
@@ -327,7 +334,7 @@ def main() -> None:
                     parent[nxt] = current
                     distance = abs(nxt[0] - target[0]) + abs(nxt[1] - target[1])
                     heapq.heappush(queue, (next_cost + distance, next_cost, nxt))
-        raise RuntimeError(f"no B.Cu route for {net_name} from {start} to {goal}")
+        raise RuntimeError(f"no route for {net_name} from {start} to {goal} on layer {layer}")
 
     # These three ties are wholly inside the new low-voltage island.  The two
     # detours preserve clearance to U403's GND pads and R216's grounded end.
@@ -372,7 +379,10 @@ def main() -> None:
     # routed independently of the MCU sense leg so its high-voltage source is
     # not obscured by the dense end-stop escape geometry.
     plus12_endpoint = (303.40, 153.33)
-    plus12_path = route_b_cu(pad_position("R215", "1"), plus12_endpoint, "+12V", (225.0, 135.0, 320.0, 165.0))
+    plus12_start = (231.50, 141.50)
+    add_segment(pad_position("R215", "1"), plus12_start, "+12V")
+    add_via(plus12_start, "+12V")
+    plus12_path = route_b_cu(plus12_start, plus12_endpoint, "+12V", (225.0, 135.0, 320.0, 165.0), pcbnew.In1_Cu)
     add_via(plus12_endpoint, "+12V")
 
     board.BuildConnectivity()
