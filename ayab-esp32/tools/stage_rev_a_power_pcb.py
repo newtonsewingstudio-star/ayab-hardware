@@ -98,7 +98,7 @@ def remove_gpio4_branch(text: str) -> tuple[str, int]:
     removals = []
     for start, end, block in u.blocks(text, "(segment "):
         details = u.seg_points(block)
-        if not details or details[2] != 30:
+        if not details:
             continue
         if (u.close(details[0], target[0]) and u.close(details[1], target[1])) or (u.close(details[0], target[1]) and u.close(details[1], target[0])):
             removals.append((start, end))
