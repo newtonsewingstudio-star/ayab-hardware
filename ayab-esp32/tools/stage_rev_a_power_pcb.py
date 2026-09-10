@@ -396,11 +396,13 @@ def main() -> None:
     except RuntimeError as exc:
         sense_path = []
         routing_failures.append(str(exc))
-    add_via(r215_p1, "+12V")
-    plus12_endpoint = (303.40, 153.33)
+    # The 12 V distribution spine already crosses the board on B.Cu at the
+    # lower edge.  Use its nearby native section rather than trying to cross
+    # the front-side solenoid corridor from the PSU island.
+    plus12_endpoint = (230.00, 163.10)
     try:
         plus12_path = route_b_cu(
-            r215_p1, plus12_endpoint, "+12V", (220.0, 120.0, 315.0, 160.0), pcbnew.F_Cu
+            r215_p1, plus12_endpoint, "+12V", (220.0, 120.0, 235.0, 164.0), pcbnew.B_Cu
         )
     except RuntimeError as exc:
         plus12_path = []
