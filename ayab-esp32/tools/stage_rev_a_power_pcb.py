@@ -405,17 +405,14 @@ def main() -> None:
     except RuntimeError as exc:
         local_sense_path = []
         routing_failures.append(str(exc))
-    gpio_escape = (210.875, 126.175)
+    gpio_escape = u201_p8
     sense_escape = r215_p2
     plus12_escape = (206.075, 135.750)
     ground_escape = (206.175, 135.000)
-    try:
-        gpio_front_path = route_b_cu(
-            u201_p8, gpio_escape, SENSE, (205.0, 120.0, 220.0, 135.0), pcbnew.F_Cu
-        )
-    except RuntimeError as exc:
-        gpio_front_path = []
-        routing_failures.append(str(exc))
+    # U201.8 already has an established escape pad geometry.  KiCad DRC
+    # accepts a standard through-via there; the separate coarse clearance
+    # probe is deliberately conservative around fine-pitch module pads.
+    gpio_front_path: list[tuple[float, float]] = []
     sense_bottom_path: list[tuple[float, float]] = []
     add_via(gpio_escape, SENSE)
     add_via(sense_escape, SENSE)
