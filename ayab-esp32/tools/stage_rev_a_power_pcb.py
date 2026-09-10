@@ -121,8 +121,13 @@ def migrate_legacy_gpio4_branch(text: str, sense_code: int) -> tuple[str, int]:
         "0b0b05f3-c43f-4117-84c2-1f32771f5b48",
     }
     obsolete = {
+        "1ca24a7c-e5bd-45aa-8151-57d10658606e",
+        "3548e073-eda2-46da-b4f3-711a0330dd08",
         "65f9136a-8580-4e01-8edb-36f49b08d509",
         "540fd51e-0690-4bf9-81c8-524f3e1a6e64",
+        "79032982-cb89-4a2e-b13f-d4d3cc63adde",
+        "8d88b049-9a7b-45e7-ac0d-cec054d9a842",
+        "dcaadd28-13b0-44f6-8fd7-82a0e23808fb",
     }
     replacements = []
     removals = []
@@ -419,13 +424,14 @@ def main() -> None:
         routing_failures.append(str(exc))
     gpio_escape = (207.490, 131.970)
     sense_escape = r215_p2
-    plus12_escape = (207.075, 137.000)
-    ground_escape = (208.425, 134.500)
+    plus12_escape = r215_p1
+    ground_escape = r216_p2
     # Reuse the source-board's already-validated U201.8 front-layer route and
     # its via at gpio_escape.  A new via directly on U201.8 intersects unrelated
     # inner-layer traces and is intentionally forbidden.
     gpio_front_path: list[tuple[float, float]] = []
     sense_bottom_path: list[tuple[float, float]] = []
+    add_via(sense_escape, SENSE)
     try:
         sense_path, sense_layer = route_any_signal_layer(
             gpio_escape, sense_escape, SENSE, (200.0, 120.0, 215.0, 140.0)
@@ -435,12 +441,7 @@ def main() -> None:
         sense_layer = -1
         routing_failures.append(str(exc))
     plus12_endpoint = (207.00, 163.10)
-    try:
-        add_segment(r215_p1, plus12_escape, "+12V")
-        plus12_bottom_path = [r215_p1, plus12_escape]
-    except RuntimeError as exc:
-        plus12_bottom_path = []
-        routing_failures.append(str(exc))
+    plus12_bottom_path = []
     add_via(plus12_escape, "+12V")
     add_via(plus12_endpoint, "+12V")
     try:
@@ -451,12 +452,7 @@ def main() -> None:
         plus12_path = []
         plus12_layer = -1
         routing_failures.append(str(exc))
-    try:
-        add_segment(r216_p2, ground_escape, "GND")
-        ground_bottom_path = [r216_p2, ground_escape]
-    except RuntimeError as exc:
-        ground_bottom_path = []
-        routing_failures.append(str(exc))
+    ground_bottom_path = []
     add_via(ground_escape, "GND")
     try:
         ground_path, ground_layer = route_any_signal_layer(
