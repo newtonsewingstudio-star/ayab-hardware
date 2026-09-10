@@ -2,6 +2,16 @@ name: KH910 Rev A Prototype Power PCB Parity
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/ayab-esp32.kicad_sch'
+      - 'ayab-esp32/psu.kicad_sch'
+      - 'ayab-esp32/mcu.kicad_sch'
+      - 'ayab-esp32/ayab-esp32.kicad_pcb'
+      - 'ayab-esp32/tools/audit_rev_a_power_pcb_parity.py'
+      - '.github/workflows/kh910-rev-a-power-pcb-parity.yml'
 
 jobs:
   audit:
