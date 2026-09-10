@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PSU = ROOT / "psu.kicad_sch"
 MCU = ROOT / "mcu.kicad_sch"
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
-PLACEMENTS = {"U403": (300.0, 155.0), "R215": (206.5, 160.0), "R216": (210.0, 160.0)}
+PLACEMENTS = {"U403": (300.0, 155.0), "R215": (204.5, 160.0), "R216": (208.0, 160.0)}
 
 
 def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
@@ -198,7 +198,7 @@ def main() -> None:
         "1": (names["+12V"], "+12V"), "2": (sense_code, SENSE),
     })
     x, y = PLACEMENTS["R216"]
-    r216 = clone9(r206, "R216", "10k", x, y, 180, path_r216, "C25804", {
+    r216 = clone9(r206, "R216", "10k", x, y, 0, path_r216, "C25804", {
         "1": (sense_code, SENSE), "2": (names["GND"], "GND"),
     })
     text = insert_before_root_item(text, "footprint", f'\t(net {sense_code} "{SENSE}")')
@@ -415,29 +415,17 @@ def main() -> None:
     r216_p2 = pad_position("R216", "2")
     routing_failures: list[str] = []
     legacy_sense_end = (211.1674, 158.717302)
-    try:
-        sense_path = route_b_cu(
-            legacy_sense_end, r215_p2, SENSE, (204.0, 157.0, 212.0, 162.5), pcbnew.B_Cu
-        )
-        local_sense_path = route_b_cu(
-            r215_p2, r216_p1, SENSE, (204.0, 157.0, 212.0, 162.5), pcbnew.B_Cu
-        )
-        sense_layer = pcbnew.B_Cu
-    except RuntimeError as exc:
-        sense_path = []
-        local_sense_path = []
-        sense_layer = -1
-        routing_failures.append(str(exc))
+    sense_path = [legacy_sense_end, (211.40, 158.95), (211.40, 161.75), (r216_p1[0], 161.75), r216_p1]
+    local_sense_path = [r216_p1, (r216_p1[0], 158.25), (r215_p2[0], 158.25), r215_p2]
+    for first, second in zip(sense_path, sense_path[1:]):
+        add_segment(first, second, SENSE)
+    for first, second in zip(local_sense_path, local_sense_path[1:]):
+        add_segment(first, second, SENSE)
+    sense_layer = pcbnew.B_Cu
     plus12_endpoint = (r215_p1[0], 163.10)
-    try:
-        plus12_path = route_b_cu(
-            r215_p1, plus12_endpoint, "+12V", (204.0, 157.0, 212.0, 164.0), pcbnew.B_Cu
-        )
-        plus12_layer = pcbnew.B_Cu
-    except RuntimeError as exc:
-        plus12_path = []
-        plus12_layer = -1
-        routing_failures.append(str(exc))
+    plus12_path = [r215_p1, plus12_endpoint]
+    add_segment(r215_p1, plus12_endpoint, "+12V")
+    plus12_layer = pcbnew.B_Cu
     plus12_bottom_path = plus12_path
     ground_bottom_path = []
     ground_path = []
