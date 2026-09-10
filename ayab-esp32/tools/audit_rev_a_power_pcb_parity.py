@@ -20,20 +20,22 @@ import pcbnew
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TOP = ROOT / "ayab-esp32.kicad_sch"
 PCB = ROOT / "ayab-esp32.kicad_pcb"
 
 # These are the deliberate Rev A additions that make USB-service power safe
 # and allow firmware to recognize machine power.  The complete support set is
 # derived from their non-global nets instead of being maintained by hand.
-SEEDS = {"U401", "U402", "U403", "R215", "R216", "TP403"}
+SEED_SHEETS = {
+    ROOT / "psu.kicad_sch": {"U401", "U402", "U403", "TP403"},
+    ROOT / "mcu.kicad_sch": {"R215", "R216"},
+}
 GLOBAL_NETS = {"", "GND", "+12V", "+5V", "+3V3", "5V", "3V3"}
 
 
-def export_netlist(destination: Path) -> None:
+def export_netlist(schematic: Path, destination: Path) -> None:
     command = [
         "kicad-cli", "sch", "export", "netlist", "--format", "kicadxml",
-        "-o", str(destination), str(TOP),
+        "-o", str(destination), str(schematic),
     ]
     result = subprocess.run(command, text=True, capture_output=True)
     if result.returncode:
@@ -65,18 +67,24 @@ def board_parts() -> dict[str, str]:
     return {footprint.GetReference(): footprint.GetValue() for footprint in board.GetFootprints()}
 
 
-def render_report(values: dict[str, str], net_members: dict[str, set[str]], placed: dict[str, str]) -> str:
-    absent_seeds = sorted(SEEDS - set(values))
-    if absent_seeds:
-        raise RuntimeError(f"power seed(s) absent from authoritative netlist: {', '.join(absent_seeds)}")
-
-    seed_nets = {
-        name: members for name, members in net_members.items()
-        if name not in GLOBAL_NETS and members & SEEDS
-    }
-    expected = set(SEEDS)
-    for members in seed_nets.values():
-        expected.update(members)
+def render_report(sheets: list[tuple[Path, dict[str, str], dict[str, set[str]]]], placed: dict[str, str]) -> str:
+    expected: set[str] = set()
+    seed_nets: list[tuple[Path, str, set[str]]] = []
+    values: dict[str, str] = {}
+    for schematic, sheet_values, net_members in sheets:
+        seeds = SEED_SHEETS[schematic]
+        absent_seeds = sorted(seeds - set(sheet_values))
+        if absent_seeds:
+            raise RuntimeError(
+                f"power seed(s) absent from {schematic.name}: {', '.join(absent_seeds)}"
+            )
+        values.update({ref: sheet_values[ref] for ref in seeds})
+        expected.update(seeds)
+        for name, members in net_members.items():
+            if name not in GLOBAL_NETS and members & seeds:
+                seed_nets.append((schematic, name, members))
+                expected.update(members)
+                values.update({ref: sheet_values.get(ref, "") for ref in members})
 
     missing = sorted(expected - set(placed))
     mismatched = sorted(
@@ -90,12 +98,15 @@ def render_report(values: dict[str, str], net_members: dict[str, set[str]], plac
         "## Seed components",
         "",
     ]
-    for ref in sorted(SEEDS):
+    for ref in sorted(ref for seeds in SEED_SHEETS.values() for ref in seeds):
         lines.append(f"- {ref}: schematic `{values[ref]}`; " + ("PCB present" if ref in placed else "**PCB MISSING**"))
 
     lines += ["", "## Local power nets and directly attached components", ""]
-    for net, members in sorted(seed_nets.items()):
-        lines.append(f"- `{net}`: " + ", ".join(f"`{ref}`" for ref in sorted(members)))
+    for schematic, net, members in sorted(seed_nets, key=lambda row: (row[0].name, row[1])):
+        lines.append(
+            f"- {schematic.name} `{net}`: "
+            + ", ".join(f"`{ref}`" for ref in sorted(members))
+        )
 
     lines += ["", "## Required PCB parity", ""]
     for ref in sorted(expected):
@@ -127,10 +138,13 @@ def main() -> None:
     args = parser.parse_args()
     try:
         with tempfile.TemporaryDirectory() as temp_dir:
-            netlist = Path(temp_dir) / "rev-a-power.net"
-            export_netlist(netlist)
-            values, net_members = parse_netlist(netlist)
-        report = render_report(values, net_members, board_parts())
+            sheets = []
+            for schematic in SEED_SHEETS:
+                netlist = Path(temp_dir) / f"{schematic.stem}.net"
+                export_netlist(schematic, netlist)
+                values, net_members = parse_netlist(netlist)
+                sheets.append((schematic, values, net_members))
+        report = render_report(sheets, board_parts())
     except Exception as exc:
         report = (
             "# KH910 Rev A — Prototype Power PCB Parity Audit\n\n"
