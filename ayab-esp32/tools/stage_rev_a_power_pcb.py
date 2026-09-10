@@ -391,7 +391,11 @@ def main() -> None:
     add_front_segment(u201_p8, sense_corner, SENSE)
     add_front_segment(sense_corner, sense_via, SENSE)
     add_via(sense_via, SENSE)
-    sense_path = route_b_cu(sense_via, r215_p2, SENSE, (190.0, 125.0, 240.0, 160.0))
+    sense_divider_via = (r215_p2[0], 143.00)
+    add_via(sense_divider_via, SENSE)
+    sense_path = route_b_cu(
+        sense_via, sense_divider_via, SENSE, (190.0, 125.0, 240.0, 160.0), pcbnew.In1_Cu
+    )
 
     # No safe source corridor for the divider's +12-V leg has been found on
     # this board partition.  Leave it deliberately open in the candidate;
