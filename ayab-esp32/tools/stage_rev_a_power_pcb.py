@@ -106,31 +106,43 @@ def remove_tracks_touching(text: str, points: list[tuple[float, float]]) -> tupl
     return text, len(removals)
 
 
-def remove_legacy_gpio4_branch(text: str) -> tuple[str, int]:
-    """Remove only the old U201 branch, retaining J701-to-U701 copper.
+def migrate_legacy_gpio4_branch(text: str, sense_code: int) -> tuple[str, int]:
+    """Reuse GPIO4's proven front-layer escape and retain J701-to-U701.
 
-    Net 30 has a direct F.Cu J701-to-U701 path plus a branch through a via to
-    U201.8.  GPIO4 is now the sense input, so only the five branch items are
-    retired; removing the whole net would unnecessarily disconnect J701/U701.
+    The two F.Cu segments and via from U201.8 to (207.49, 131.97) already pass
+    source-board DRC.  Retag those three items for MACHINE_PWR_SENSE and remove
+    only the two B.Cu segments that formerly continued toward the local B7
+    header channel.  This avoids placing a new through-via on the fine-pitch
+    ESP32 pad, where it would intersect unrelated inner-layer routing.
     """
-    obsolete = {
+    reuse = {
         "8bac310c-0660-4140-ad94-917957d62621",
         "f6a7ea09-b6e6-4db1-860f-d027f6ed01d4",
         "0b0b05f3-c43f-4117-84c2-1f32771f5b48",
+    }
+    obsolete = {
         "65f9136a-8580-4e01-8edb-36f49b08d509",
         "540fd51e-0690-4bf9-81c8-524f3e1a6e64",
     }
+    replacements = []
     removals = []
     for start, end, block in u.blocks(text, "(segment"):
+        if any(f'(uuid "{item}")' in block for item in reuse):
+            replacements.append((start, end, re.sub(r"\(net\s+30\)", f"(net {sense_code})", block, count=1)))
         if any(f'(uuid "{item}")' in block for item in obsolete):
             removals.append((start, end))
     for start, end, block in u.blocks(text, "(via"):
+        if any(f'(uuid "{item}")' in block for item in reuse):
+            replacements.append((start, end, re.sub(r"\(net\s+30\)", f"(net {sense_code})", block, count=1)))
         if any(f'(uuid "{item}")' in block for item in obsolete):
             removals.append((start, end))
+    if len(replacements) != len(reuse):
+        raise RuntimeError(f"expected {len(reuse)} reusable GPIO4 items, found {len(replacements)}")
     if len(removals) != len(obsolete):
         raise RuntimeError(f"expected {len(obsolete)} legacy GPIO4 branch items, found {len(removals)}")
-    for start, end in reversed(sorted(removals)):
-        text = text[:start] + text[end:]
+    edits = [(start, end, "") for start, end in removals] + replacements
+    for start, end, replacement in reversed(sorted(edits)):
+        text = text[:start] + replacement + text[end:]
     return text, len(removals)
 
 
@@ -158,7 +170,7 @@ def main() -> None:
     _, _, u201 = u.find_fp(text, "U201")
     u201 = u.replace_pad_net(u201, "8", sense_code, SENSE)
     text = u.replace_fp(text, "U201", u201)
-    text, removed_gpio4_tracks = remove_legacy_gpio4_branch(text)
+    text, removed_gpio4_tracks = migrate_legacy_gpio4_branch(text, sense_code)
 
     _, _, q501 = u.find_fp(text, "Q501")
     _, _, r206 = u.find_fp(text, "R206")
@@ -405,17 +417,15 @@ def main() -> None:
     except RuntimeError as exc:
         local_sense_path = []
         routing_failures.append(str(exc))
-    gpio_escape = u201_p8
+    gpio_escape = (207.490, 131.970)
     sense_escape = r215_p2
-    plus12_escape = (206.075, 135.750)
-    ground_escape = (206.175, 135.000)
-    # U201.8 already has an established escape pad geometry.  KiCad DRC
-    # accepts a standard through-via there; the separate coarse clearance
-    # probe is deliberately conservative around fine-pitch module pads.
+    plus12_escape = (207.075, 137.000)
+    ground_escape = (208.425, 134.500)
+    # Reuse the source-board's already-validated U201.8 front-layer route and
+    # its via at gpio_escape.  A new via directly on U201.8 intersects unrelated
+    # inner-layer traces and is intentionally forbidden.
     gpio_front_path: list[tuple[float, float]] = []
     sense_bottom_path: list[tuple[float, float]] = []
-    add_via(gpio_escape, SENSE)
-    add_via(sense_escape, SENSE)
     try:
         sense_path, sense_layer = route_any_signal_layer(
             gpio_escape, sense_escape, SENSE, (200.0, 120.0, 215.0, 140.0)
@@ -426,9 +436,8 @@ def main() -> None:
         routing_failures.append(str(exc))
     plus12_endpoint = (207.00, 163.10)
     try:
-        plus12_bottom_path = route_b_cu(
-            r215_p1, plus12_escape, "+12V", (202.0, 132.0, 210.0, 140.0), pcbnew.B_Cu
-        )
+        add_segment(r215_p1, plus12_escape, "+12V")
+        plus12_bottom_path = [r215_p1, plus12_escape]
     except RuntimeError as exc:
         plus12_bottom_path = []
         routing_failures.append(str(exc))
@@ -443,9 +452,8 @@ def main() -> None:
         plus12_layer = -1
         routing_failures.append(str(exc))
     try:
-        ground_bottom_path = route_b_cu(
-            r216_p2, ground_escape, "GND", (202.0, 132.0, 212.0, 140.0), pcbnew.B_Cu
-        )
+        add_segment(r216_p2, ground_escape, "GND")
+        ground_bottom_path = [r216_p2, ground_escape]
     except RuntimeError as exc:
         ground_bottom_path = []
         routing_failures.append(str(exc))

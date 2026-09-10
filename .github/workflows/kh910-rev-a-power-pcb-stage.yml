@@ -27,6 +27,7 @@ jobs:
           sudo apt-get install -qy --no-install-recommends kicad
       - name: Stage disposable power integration board
         run: |
+          cp ayab-esp32/ayab-esp32.kicad_pro /tmp/rev-a-power-stage.kicad_pro
           python3 ayab-esp32/tools/stage_rev_a_power_pcb.py \
             ayab-esp32/ayab-esp32.kicad_pcb /tmp/rev-a-power-stage.kicad_pcb \
             > /tmp/rev-a-power-stage.log 2>&1
