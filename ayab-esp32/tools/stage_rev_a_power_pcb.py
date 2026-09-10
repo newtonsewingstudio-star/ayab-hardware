@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PSU = ROOT / "psu.kicad_sch"
 MCU = ROOT / "mcu.kicad_sch"
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
-PLACEMENTS = {"U403": (300.0, 155.0), "R215": (206.25, 135.75), "R216": (209.25, 135.75)}
+PLACEMENTS = {"U403": (300.0, 155.0), "R215": (207.5, 160.0), "R216": (209.5, 160.0)}
 
 
 def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
@@ -109,26 +109,24 @@ def remove_tracks_touching(text: str, points: list[tuple[float, float]]) -> tupl
 def migrate_legacy_gpio4_branch(text: str, sense_code: int) -> tuple[str, int]:
     """Reuse GPIO4's proven front-layer escape and retain J701-to-U701.
 
-    The two F.Cu segments and via from U201.8 to (207.49, 131.97) already pass
-    source-board DRC.  Retag those three items for MACHINE_PWR_SENSE and remove
-    only the two B.Cu segments that formerly continued toward the local B7
-    header channel.  This avoids placing a new through-via on the fine-pitch
-    ESP32 pad, where it would intersect unrelated inner-layer routing.
+    The existing U201.8 corridor already passes source-board DRC and reaches the
+    lower centre beside the raw +12 V bus.  Retag that corridor for
+    MACHINE_PWR_SENSE, but remove its one segment attached to J701.7.  The
+    independent F.Cu J701.7-to-U701.15 connection remains intact as a local B7
+    level-shifter channel.
     """
     reuse = {
         "8bac310c-0660-4140-ad94-917957d62621",
         "f6a7ea09-b6e6-4db1-860f-d027f6ed01d4",
         "0b0b05f3-c43f-4117-84c2-1f32771f5b48",
-    }
-    obsolete = {
         "1ca24a7c-e5bd-45aa-8151-57d10658606e",
         "3548e073-eda2-46da-b4f3-711a0330dd08",
         "65f9136a-8580-4e01-8edb-36f49b08d509",
         "540fd51e-0690-4bf9-81c8-524f3e1a6e64",
-        "79032982-cb89-4a2e-b13f-d4d3cc63adde",
         "8d88b049-9a7b-45e7-ac0d-cec054d9a842",
         "dcaadd28-13b0-44f6-8fd7-82a0e23808fb",
     }
+    obsolete = {"79032982-cb89-4a2e-b13f-d4d3cc63adde"}
     replacements = []
     removals = []
     for start, end, block in u.blocks(text, "(segment"):
@@ -404,71 +402,42 @@ def main() -> None:
     raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
-    # This compact back-side location passed the placement probe without a
-    # short.  It sits beside the released GPIO4 escape, while the existing 12
-    # V spine runs below it on B.Cu.  Test these two board-native corridors
-    # before treating the location as a real layout change.
-    u201_p8 = pad_position("U201", "8")
+    # Put the divider at the isolated end of GPIO4's proven legacy corridor,
+    # immediately above the existing raw +12 V B.Cu bus.  This avoids all new
+    # through-vias in the dense ESP32 fanout.
     r215_p2 = pad_position("R215", "2")
     r215_p1 = pad_position("R215", "1")
     r216_p1 = pad_position("R216", "1")
     r216_p2 = pad_position("R216", "2")
-    r815_p2 = pad_position("R815", "2")
     routing_failures: list[str] = []
+    legacy_sense_end = (211.1674, 158.717302)
     try:
+        sense_path = route_b_cu(
+            legacy_sense_end, r215_p2, SENSE, (204.0, 157.0, 212.0, 162.5), pcbnew.B_Cu
+        )
         local_sense_path = route_b_cu(
-            r215_p2, r216_p1, SENSE, (203.0, 133.0, 214.0, 142.0), pcbnew.B_Cu
+            r215_p2, r216_p1, SENSE, (204.0, 157.0, 212.0, 162.5), pcbnew.B_Cu
         )
-    except RuntimeError as exc:
-        local_sense_path = []
-        routing_failures.append(str(exc))
-    gpio_escape = (207.490, 131.970)
-    sense_escape = r215_p2
-    plus12_escape = (206.325, 135.750)
-    ground_escape = (206.175, 134.250)
-    # Reuse the source-board's already-validated U201.8 front-layer route and
-    # its via at gpio_escape.  A new via directly on U201.8 intersects unrelated
-    # inner-layer traces and is intentionally forbidden.
-    gpio_front_path: list[tuple[float, float]] = []
-    sense_bottom_path: list[tuple[float, float]] = []
-    add_via(sense_escape, SENSE)
-    try:
-        sense_path, sense_layer = route_any_signal_layer(
-            gpio_escape, sense_escape, SENSE, (200.0, 120.0, 215.0, 140.0)
-        )
+        sense_layer = pcbnew.B_Cu
     except RuntimeError as exc:
         sense_path = []
+        local_sense_path = []
         sense_layer = -1
         routing_failures.append(str(exc))
-    plus12_endpoint = (207.00, 163.10)
-    add_segment(r215_p1, plus12_escape, "+12V")
-    plus12_bottom_path = [r215_p1, plus12_escape]
-    add_via(plus12_escape, "+12V")
-    add_via(plus12_endpoint, "+12V")
+    plus12_endpoint = (r215_p1[0], 163.10)
     try:
-        plus12_path, plus12_layer = route_any_signal_layer(
-            plus12_escape, plus12_endpoint, "+12V", (200.0, 132.0, 215.0, 164.0)
+        plus12_path = route_b_cu(
+            r215_p1, plus12_endpoint, "+12V", (204.0, 157.0, 212.0, 164.0), pcbnew.B_Cu
         )
+        plus12_layer = pcbnew.B_Cu
     except RuntimeError as exc:
         plus12_path = []
         plus12_layer = -1
         routing_failures.append(str(exc))
-    try:
-        ground_bottom_path = route_b_cu(
-            r216_p2, ground_escape, "GND", (203.0, 132.0, 212.0, 140.0), pcbnew.B_Cu
-        )
-    except RuntimeError as exc:
-        ground_bottom_path = []
-        routing_failures.append(str(exc))
-    add_via(ground_escape, "GND")
-    try:
-        ground_path, ground_layer = route_any_signal_layer(
-            ground_escape, r815_p2, "GND", (202.0, 132.0, 216.0, 145.0)
-        )
-    except RuntimeError as exc:
-        ground_path = []
-        ground_layer = -1
-        routing_failures.append(str(exc))
+    plus12_bottom_path = plus12_path
+    ground_bottom_path = []
+    ground_path = []
+    ground_layer = pcbnew.B_Cu
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
@@ -478,8 +447,8 @@ def main() -> None:
     print("REMOVED_GPIO4_TRACKS", removed_gpio4_tracks)
     print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
     print("LOCAL_SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in local_sense_path))
-    print("GPIO_FRONT_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in gpio_front_path))
-    print("SENSE_BOTTOM_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_bottom_path))
+    print("GPIO_FRONT_ROUTE_POINTS", "reused-source-corridor")
+    print("SENSE_BOTTOM_ROUTE_POINTS", "reused-source-corridor")
     print("SENSE_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in sense_path))
     print("SENSE_ROUTE_LAYER", sense_layer)
     print("PLUS12_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in plus12_path))
