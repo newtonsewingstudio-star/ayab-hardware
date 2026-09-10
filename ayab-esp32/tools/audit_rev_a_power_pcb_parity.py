@@ -48,7 +48,7 @@ def export_netlist(destination: Path) -> None:
         )
 
 
-def parse_netlist(path: Path) -> tuple[dict[str, str], dict[str, set[str]]]:
+def parse_netlist(path: Path) -> tuple[dict[str, str], dict[str, set[str]], dict[tuple[str, str], str]]:
     root = ET.parse(path).getroot()
     values = {
         comp.attrib["ref"]: (comp.findtext("value") or "")
@@ -59,17 +59,31 @@ def parse_netlist(path: Path) -> tuple[dict[str, str], dict[str, set[str]]]:
         net_members[net.attrib.get("name", "")] = {
             node.attrib["ref"] for node in net.findall("node") if "ref" in node.attrib
         }
-    return values, net_members
+    pin_nets = {
+        (node.attrib["ref"], node.attrib["pin"]): net.attrib.get("name", "")
+        for net in root.findall("./nets/net")
+        for node in net.findall("node")
+        if "ref" in node.attrib and "pin" in node.attrib
+    }
+    return values, net_members, pin_nets
 
 
-def board_parts() -> dict[str, str]:
+def board_parts() -> tuple[dict[str, str], dict[tuple[str, str], str]]:
     board = pcbnew.LoadBoard(str(PCB))
     if board is None:
         raise RuntimeError(f"could not load {PCB}")
-    return {footprint.GetReference(): footprint.GetValue() for footprint in board.GetFootprints()}
+    values = {footprint.GetReference(): footprint.GetValue() for footprint in board.GetFootprints()}
+    pin_nets = {
+        (footprint.GetReference(), pad.GetNumber()): pad.GetNetname()
+        for footprint in board.GetFootprints()
+        for pad in footprint.Pads()
+    }
+    return values, pin_nets
 
 
-def render_report(values: dict[str, str], net_members: dict[str, set[str]], placed: dict[str, str]) -> str:
+def render_report(values: dict[str, str], net_members: dict[str, set[str]],
+                  schematic_pins: dict[tuple[str, str], str], placed: dict[str, str],
+                  board_pins: dict[tuple[str, str], str]) -> str:
     absent_seeds = sorted(SEEDS - set(values))
     if absent_seeds:
         raise RuntimeError(
@@ -88,6 +102,21 @@ def render_report(values: dict[str, str], net_members: dict[str, set[str]], plac
     mismatched = sorted(
         ref for ref in expected & set(placed) if values.get(ref, "") != placed[ref]
     )
+    topology_mismatches = []
+    for key, actual in sorted(board_pins.items()):
+        if key[0] not in SEEDS:
+            continue
+        expected_net = schematic_pins.get(key, "")
+        if actual != expected_net:
+            topology_mismatches.append((key[0], key[1], expected_net, actual))
+    preserved_checks = [
+        ("GPIO4 is machine-power sense", board_pins.get(("U201", "8")) == "/ESP32/MACHINE_PWR_SENSE"),
+        ("active right end-stop remains on GPIO17",
+         board_pins.get(("U201", "21")) == "/BROTHER-CONNECTORS/EOL_R_N"),
+        ("J701.7 remains tied locally to U701.15",
+         board_pins.get(("J701", "7")) == board_pins.get(("U701", "15"))
+         and board_pins.get(("J701", "7")) not in (None, "", "/ESP32/MACHINE_PWR_SENSE")),
+    ]
     lines = [
         "# KH910 Rev A — Prototype Power PCB Parity Audit",
         "",
@@ -115,13 +144,31 @@ def render_report(values: dict[str, str], net_members: dict[str, set[str]], plac
             status = "present"
         lines.append(f"- {ref} `{expected_value}`: {status}")
 
+    lines += ["", "## Pin-level power topology", ""]
+    for ref in sorted(SEEDS):
+        for key, expected_net in sorted(schematic_pins.items()):
+            if key[0] != ref:
+                continue
+            actual = board_pins.get(key, "")
+            status = "matches" if actual == expected_net else f"**PCB `{actual or 'unconnected'}`**"
+            lines.append(f"- {ref}.{key[1]}: schematic `{expected_net or 'unconnected'}`; {status}")
+
+    lines += ["", "## Preserved GPIO/control topology", ""]
+    for label, passed in preserved_checks:
+        lines.append(f"- {label}: " + ("**PASS**" if passed else "**FAIL**"))
+
     lines += ["", "## Result", ""]
-    if missing or mismatched:
+    if missing or mismatched or topology_mismatches or not all(passed for _, passed in preserved_checks):
         lines.append("**BLOCKED:** the prototype power circuit is not fully represented on the PCB.")
         if missing:
             lines.append("- Missing footprints: " + ", ".join(f"`{ref}`" for ref in missing))
         if mismatched:
             lines.append("- Value mismatches: " + ", ".join(f"`{ref}`" for ref in mismatched))
+        for ref, pin, expected_net, actual in topology_mismatches:
+            lines.append(
+                f"- Topology mismatch: `{ref}.{pin}` expected `{expected_net or 'unconnected'}`, "
+                f"found `{actual or 'unconnected'}`"
+            )
     else:
         lines.append("**PASS:** every schematic-derived local power part has a matching physical footprint.")
     return "\n".join(lines) + "\n"
@@ -135,8 +182,9 @@ def main() -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             netlist = Path(temp_dir) / "rev-a-power.net"
             export_netlist(netlist)
-            values, net_members = parse_netlist(netlist)
-        report = render_report(values, net_members, board_parts())
+            values, net_members, schematic_pins = parse_netlist(netlist)
+        placed, board_pins = board_parts()
+        report = render_report(values, net_members, schematic_pins, placed, board_pins)
     except Exception as exc:
         report = (
             "# KH910 Rev A — Prototype Power PCB Parity Audit\n\n"

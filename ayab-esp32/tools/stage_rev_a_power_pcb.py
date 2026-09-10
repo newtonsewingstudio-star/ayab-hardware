@@ -52,10 +52,20 @@ def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
     if count != 1:
         raise RuntimeError(f"value property missing in {new_ref}")
     if '(property "LCSC ID"' in out:
-        out = re.sub(r'\(property "LCSC ID" "[^"]*"\)', f'(property "LCSC ID" "{lcsc}")', out, count=1)
+        out = re.sub(r'(\(property "LCSC ID" ")[^"]*', rf'\g<1>{lcsc}', out, count=1)
     for number, (net, name) in padmap.items():
         out = u.replace_pad_net(out, number, net, name)
     return out
+
+
+def replace_property(block: str, name: str, value: str) -> str:
+    block, count = re.subn(
+        rf'(\(property "{re.escape(name)}" ")[^"]*',
+        rf'\g<1>{value}', block, count=1,
+    )
+    if count != 1:
+        raise RuntimeError(f"footprint property missing: {name}")
+    return block
 
 
 def clear_pad_net(block: str, number: str) -> str:
@@ -193,11 +203,22 @@ def main() -> None:
         "3": (names["+5V"], "+5V"), "4": (names["+5V"], "+5V"),
         "5": (names["GND"], "GND"), "6": (names["+5V"], "+5V"),
     })
+    for name, value in {
+        "Datasheet": "https://www.ti.com/lit/ds/symlink/lm66100.pdf",
+        "Description": "LM66100 5.5-V 1.5-A ideal diode with reverse-current blocking",
+        "OEM": "Texas Instruments",
+        "OEM PN": "LM66100DCKR",
+        "Package": "SC-70-6 (DCK)",
+    }.items():
+        u403 = replace_property(u403, name, value)
+    u403 = re.sub(r'(\(sheetname ")[^"]*', r'\g<1>PSU', u403, count=1)
+    u403 = re.sub(r'(\(sheetfile ")[^"]*', r'\g<1>psu.kicad_sch', u403, count=1)
     u403 = clear_pad_net(u403, "4")
     x, y = PLACEMENTS["R215"]
     r215 = clone9(r206, "R215", "47k", x, y, 0, path_r215, "C25819", {
         "1": (names["+12V"], "+12V"), "2": (sense_code, SENSE),
     })
+    r215 = replace_property(r215, "OEM PN", "0603WAF4702T5E")
     x, y = PLACEMENTS["R216"]
     r216 = clone9(r206, "R216", "10k", x, y, 0, path_r216, "C25804", {
         "1": (sense_code, SENSE), "2": (names["GND"], "GND"),

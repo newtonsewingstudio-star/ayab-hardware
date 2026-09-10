@@ -69750,7 +69750,7 @@
 				(justify mirror)
 			)
 		)
-		(property "LCSC ID" "C25804"
+		(property "LCSC ID" "C25819"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -69776,7 +69776,7 @@
 				(justify mirror)
 			)
 		)
-		(property "OEM PN" "0603WAF1002T5E"
+		(property "OEM PN" "0603WAF4702T5E"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -70262,7 +70262,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/lm66100.pdf"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -70275,7 +70275,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Description" "Dual PNP transistor, 6 pin package"
+		(property "Description" "LM66100 5.5-V 1.5-A ideal diode with reverse-current blocking"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -70288,7 +70288,7 @@
 				(justify mirror)
 			)
 		)
-		(property "LCSC ID" "C105887"
+		(property "LCSC ID" "C2869734"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -70301,7 +70301,7 @@
 				(justify mirror)
 			)
 		)
-		(property "OEM" "Nexperia"
+		(property "OEM" "Texas Instruments"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -70314,7 +70314,7 @@
 				(justify mirror)
 			)
 		)
-		(property "OEM PN" "BCM857BS,115"
+		(property "OEM PN" "LM66100DCKR"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -70327,7 +70327,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Package" "SOT-363"
+		(property "Package" "SC-70-6 (DCK)"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -70341,8 +70341,8 @@
 			)
 		)
 		(path "/512b1de4-f8f4-4173-a7be-69b46f59a5e5/b357709c-b314-4ba7-b983-0d0aaf723a6b")
-		(sheetname "USB")
-		(sheetfile "usb.kicad_sch")
+		(sheetname "PSU")
+		(sheetfile "psu.kicad_sch")
 		(attr smd)
 		(fp_line
 			(start 0.7 1.16)

@@ -14,6 +14,9 @@ on:
       - 'ayab-esp32/tools/audit_rev_a_power_pcb_layout.py'
       - '.github/workflows/kh910-rev-a-power-pcb-parity.yml'
 
+permissions:
+  contents: write
+
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -32,6 +35,35 @@ jobs:
         run: python3 ayab-esp32/tools/audit_rev_a_power_pcb_layout.py --output /tmp/rev-a-power-pcb-layout.md
       - name: Derive full Rev A power support set and require PCB parity
         run: python3 ayab-esp32/tools/audit_rev_a_power_pcb_parity.py --output /tmp/rev-a-power-pcb-parity.md
+      - name: Require clean board and solenoid fail-safe topology
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/rev-a-integrated-drc.rpt ayab-esp32/ayab-esp32.kicad_pcb
+          python3 ayab-esp32/tools/audit_rev_a_solenoid_gate_source.py
+          python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py \
+            ayab-esp32/ayab-esp32.kicad_pcb
+      - name: Publish source-level review evidence
+        run: |
+          REVIEW=ayab-esp32/review
+          mkdir -p "$REVIEW"
+          cp /tmp/rev-a-power-pcb-layout.md "$REVIEW/KH910_REV_A_POWER_LAYOUT.md"
+          cp /tmp/rev-a-power-pcb-parity.md "$REVIEW/KH910_REV_A_POWER_TOPOLOGY.md"
+          cp /tmp/rev-a-integrated-drc.rpt "$REVIEW/KH910_REV_A_INTEGRATED_DRC.rpt"
+          kicad-cli pcb render --side top \
+            --output "$REVIEW/KH910_REV_A_TOP.png" ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb render --side bottom \
+            --output "$REVIEW/KH910_REV_A_BOTTOM.png" ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb export svg --output "$REVIEW/KH910_REV_A_TOP_COPPER.svg" \
+            --layers F.Cu --common-layers F.Mask,F.SilkS,Edge.Cuts ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb export svg --output "$REVIEW/KH910_REV_A_BOTTOM_COPPER.svg" \
+            --layers B.Cu --common-layers B.Mask,B.SilkS,Edge.Cuts ayab-esp32/ayab-esp32.kicad_pcb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$REVIEW"
+          if ! git diff --cached --quiet; then
+            git commit -m "Record Rev A PCB review evidence [skip ci]"
+            git push origin HEAD:ayab-esp32-kh910-rev-a
+          fi
       - name: Archive audit report
         if: always()
         uses: actions/upload-artifact@v4
@@ -40,3 +72,4 @@ jobs:
           path: |
             /tmp/rev-a-power-pcb-parity.md
             /tmp/rev-a-power-pcb-layout.md
+            /tmp/rev-a-integrated-drc.rpt
