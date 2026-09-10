@@ -32,7 +32,13 @@ GLOBAL_NETS = {"", "GND", "+12V", "+5V", "+3V3", "5V", "3V3"}
 
 def export_netlist(destination: Path) -> None:
     command = ["kicad-cli", "sch", "export", "netlist", "-o", str(destination), str(TOP)]
-    subprocess.run(command, check=True)
+    result = subprocess.run(command, text=True, capture_output=True)
+    if result.returncode:
+        raise RuntimeError(
+            "netlist export failed:\n"
+            + " ".join(command)
+            + f"\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+        )
 
 
 def parse_netlist(path: Path) -> tuple[dict[str, str], dict[str, set[str]]]:
@@ -116,11 +122,23 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        netlist = Path(temp_dir) / "rev-a-power.net"
-        export_netlist(netlist)
-        values, net_members = parse_netlist(netlist)
-    report = render_report(values, net_members, board_parts())
+    try:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            netlist = Path(temp_dir) / "rev-a-power.net"
+            export_netlist(netlist)
+            values, net_members = parse_netlist(netlist)
+        report = render_report(values, net_members, board_parts())
+    except Exception as exc:
+        report = (
+            "# KH910 Rev A — Prototype Power PCB Parity Audit\n\n"
+            "**AUDIT EXECUTION FAILED:** the power circuit was not evaluated.\n\n"
+            "```text\n"
+            + str(exc)
+            + "\n```\n"
+        )
+        args.output.write_text(report, encoding="utf-8")
+        print(args.output)
+        raise
     args.output.write_text(report, encoding="utf-8")
     print(args.output)
     if "**BLOCKED:**" in report:
