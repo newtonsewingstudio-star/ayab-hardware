@@ -392,6 +392,152 @@ def main() -> None:
                 failures.append(str(exc))
         raise RuntimeError("; ".join(failures))
 
+    def route_multilayer(start: tuple[float, float], goal: tuple[float, float], net_name: str,
+                         bounds: tuple[float, float, float, float]) -> list[tuple[float, float, int]]:
+        """Route across signal layers, changing layers only at all-layer-clear cells."""
+        step = 0.25
+        x0, y0, x1, y1 = bounds
+        nx = int(round((x1 - x0) / step)) + 1
+        ny = int(round((y1 - y0) / step)) + 1
+        layers = (pcbnew.B_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.F_Cu)
+        own = board.GetNetcodeFromNetname(net_name)
+
+        def xy(cell: tuple[int, int]) -> tuple[float, float]:
+            return x0 + cell[0] * step, y0 + cell[1] * step
+
+        def cell(point: tuple[float, float]) -> tuple[int, int]:
+            return int(round((point[0] - x0) / step)), int(round((point[1] - y0) / step))
+
+        def raster(blocked: set[tuple[int, int]], item, expand: float) -> None:
+            box = item.GetBoundingBox()
+            bx0 = pcbnew.ToMM(box.GetX()) - expand
+            by0 = pcbnew.ToMM(box.GetY()) - expand
+            bx1 = pcbnew.ToMM(box.GetX() + box.GetWidth()) + expand
+            by1 = pcbnew.ToMM(box.GetY() + box.GetHeight()) + expand
+            ix0 = max(0, int(math.floor((bx0 - x0) / step)))
+            iy0 = max(0, int(math.floor((by0 - y0) / step)))
+            ix1 = min(nx - 1, int(math.ceil((bx1 - x0) / step)))
+            iy1 = min(ny - 1, int(math.ceil((by1 - y0) / step)))
+            for ix in range(ix0, ix1 + 1):
+                for iy in range(iy0, iy1 + 1):
+                    blocked.add((ix, iy))
+
+        blocked_by_layer = {layer: set() for layer in layers}
+        for layer in layers:
+            blocked = blocked_by_layer[layer]
+            for item in board.GetTracks():
+                if item.GetNetCode() != own and (isinstance(item, pcbnew.PCB_VIA) or item.GetLayer() == layer):
+                    raster(blocked, item, 0.24)
+            for footprint in board.GetFootprints():
+                for pad in footprint.Pads():
+                    if pad.GetNetCode() == own:
+                        continue
+                    try:
+                        on_layer = pad.IsOnLayer(layer)
+                    except AttributeError:
+                        on_layer = True
+                    if on_layer:
+                        raster(blocked, pad, 0.24)
+            for drawing in board.GetDrawings():
+                if drawing.GetLayer() == pcbnew.Edge_Cuts:
+                    raster(blocked, drawing, 0.45)
+            for zone in board.Zones():
+                if zone.GetIsRuleArea():
+                    raster(blocked, zone, 0.24)
+
+        origin = cell(start)
+        target = cell(goal)
+        for blocked in blocked_by_layer.values():
+            for centre in (origin, target):
+                for dx in range(-1, 2):
+                    for dy in range(-1, 2):
+                        blocked.discard((centre[0] + dx, centre[1] + dy))
+        via_clear = set.intersection(*(set((ix, iy) for ix in range(nx) for iy in range(ny)) - blocked
+                                       for blocked in blocked_by_layer.values()))
+
+        starts = [(index, origin[0], origin[1]) for index in range(len(layers))]
+        queue = []
+        cost = {}
+        parent = {}
+        for state in starts:
+            estimate = abs(state[1] - target[0]) + abs(state[2] - target[1])
+            heapq.heappush(queue, (estimate, 0.0, state))
+            cost[state] = 0.0
+        selected = None
+        while queue:
+            _estimate, current_cost, current = heapq.heappop(queue)
+            if current_cost != cost.get(current):
+                continue
+            layer_index, ix, iy = current
+            if (ix, iy) == target:
+                selected = current
+                break
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nxt = (layer_index, ix + dx, iy + dy)
+                if not (0 <= nxt[1] < nx and 0 <= nxt[2] < ny):
+                    continue
+                if (nxt[1], nxt[2]) in blocked_by_layer[layers[layer_index]]:
+                    continue
+                next_cost = current_cost + 1.0
+                if next_cost < cost.get(nxt, float("inf")):
+                    cost[nxt] = next_cost
+                    parent[nxt] = current
+                    distance = abs(nxt[1] - target[0]) + abs(nxt[2] - target[1])
+                    heapq.heappush(queue, (next_cost + distance, next_cost, nxt))
+            if (ix, iy) in via_clear:
+                for next_layer in range(len(layers)):
+                    if next_layer == layer_index:
+                        continue
+                    nxt = (next_layer, ix, iy)
+                    next_cost = current_cost + 40.0
+                    if next_cost < cost.get(nxt, float("inf")):
+                        cost[nxt] = next_cost
+                        parent[nxt] = current
+                        distance = abs(ix - target[0]) + abs(iy - target[1])
+                        heapq.heappush(queue, (next_cost + distance, next_cost, nxt))
+        if selected is None:
+            raise RuntimeError(f"no multilayer route for {net_name} from {start} to {goal}")
+
+        states = [selected]
+        while states[-1] not in starts:
+            states.append(parent[states[-1]])
+        states.reverse()
+        points = [(start[0], start[1], layers[states[0][0]])]
+        for state in states[1:-1]:
+            qx, qy = xy((state[1], state[2]))
+            points.append((qx, qy, layers[state[0]]))
+        points.append((goal[0], goal[1], layers[states[-1][0]]))
+
+        reduced = [points[0]]
+        previous_direction = None
+        for point in points[1:]:
+            prior = reduced[-1]
+            if point[2] != prior[2]:
+                reduced.append(point)
+                previous_direction = None
+                continue
+            dx, dy = point[0] - prior[0], point[1] - prior[1]
+            direction = (0 if abs(dx) < 1e-6 else int(math.copysign(1, dx)),
+                         0 if abs(dy) < 1e-6 else int(math.copysign(1, dy)))
+            if previous_direction == direction and len(reduced) > 1 and reduced[-2][2] == point[2]:
+                reduced[-1] = point
+            else:
+                reduced.append(point)
+                previous_direction = direction
+        for first, second in zip(reduced, reduced[1:]):
+            if first[2] != second[2]:
+                add_via((first[0], first[1]), net_name)
+                continue
+            code = board.GetNetcodeFromNetname(net_name)
+            track = pcbnew.PCB_TRACK(board)
+            track.SetStart(pcbnew.VECTOR2I_MM(first[0], first[1]))
+            track.SetEnd(pcbnew.VECTOR2I_MM(second[0], second[1]))
+            track.SetWidth(pcbnew.FromMM(0.25))
+            track.SetLayer(first[2])
+            track.SetNetCode(code)
+            board.Add(track)
+        return reduced
+
     # These three ties are wholly inside the new low-voltage island.  The two
     # detours preserve clearance to U403's GND pads and R216's grounded end.
     # Keeping them local first lets CI distinguish their geometry from the
@@ -430,9 +576,11 @@ def main() -> None:
     legacy_sense_escape = (207.490, 131.970)
     add_via(r215_p2, SENSE)
     try:
-        sense_path, sense_layer = route_any_signal_layer(
+        sense_route = route_multilayer(
             legacy_sense_escape, r215_p2, SENSE, (62.0, 122.50, 335.0, 164.0)
         )
+        sense_path = [(x, y) for x, y, _layer in sense_route]
+        sense_layer = ",".join(board.GetLayerName(layer) for _x, _y, layer in sense_route)
     except RuntimeError as exc:
         sense_path = []
         sense_layer = -1
