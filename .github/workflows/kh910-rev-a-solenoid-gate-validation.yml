@@ -34,3 +34,13 @@ jobs:
           cat /tmp/solenoid-gate-integrated-drc.rpt
       - name: Require integrated solenoid fail-safe topology
         run: python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py ayab-esp32/ayab-esp32.kicad_pcb
+      - name: Export PCB views for visual review
+        run: |
+          mkdir -p /tmp/solenoid-gate-views/top /tmp/solenoid-gate-views/bottom
+          kicad-cli pcb export png --output /tmp/solenoid-gate-views/top --layers F.Cu --common-layers F.Mask,F.SilkS,Edge.Cuts --dpi 300 ayab-esp32/ayab-esp32.kicad_pcb
+          kicad-cli pcb export png --output /tmp/solenoid-gate-views/bottom --layers B.Cu --common-layers B.Mask,B.SilkS,Edge.Cuts --dpi 300 ayab-esp32/ayab-esp32.kicad_pcb
+      - name: Archive PCB views for visual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-solenoid-gate-integrated-views
+          path: /tmp/solenoid-gate-views
