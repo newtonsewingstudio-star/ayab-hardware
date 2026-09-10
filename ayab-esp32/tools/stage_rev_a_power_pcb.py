@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PSU = ROOT / "psu.kicad_sch"
 MCU = ROOT / "mcu.kicad_sch"
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
-PLACEMENTS = {"U403": (300.0, 155.0), "R215": (207.5, 160.0), "R216": (209.5, 160.0)}
+PLACEMENTS = {"U403": (300.0, 155.0), "R215": (206.5, 160.0), "R216": (210.0, 160.0)}
 
 
 def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
