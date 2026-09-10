@@ -13,11 +13,10 @@ from pathlib import Path
 import pcbnew
 
 
-FOOTPRINT_ROOT = "/usr/share/kicad/footprints"
 PLACEMENTS = {
-    "U403": ("Package_TO_SOT_SMD.pretty", "SOT-363_SC-70-6", (310.120, 136.890)),
-    "R215": ("Resistor_SMD.pretty", "R_0603_1608Metric", (210.600, 129.400)),
-    "R216": ("Resistor_SMD.pretty", "R_0603_1608Metric", (210.600, 131.100)),
+    "U403": ("Q501", (310.120, 136.890)),
+    "R215": ("R206", (210.600, 129.400)),
+    "R216": ("R206", (210.600, 131.100)),
 }
 VALUES = {"U403": "LM66100DCKR", "R215": "47k", "R216": "10k"}
 
@@ -26,12 +25,19 @@ def point(x: float, y: float) -> pcbnew.VECTOR2I:
     return pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y))
 
 
-def load(prettydir: str, footprint: str):
-    full_path = str(Path(FOOTPRINT_ROOT) / prettydir)
-    loaded = pcbnew.FootprintLoad(full_path, footprint)
-    if loaded is None:
-        raise RuntimeError(f"could not load {footprint} from {full_path}")
-    return loaded
+def clone_template(board: pcbnew.BOARD, reference: str) -> pcbnew.FOOTPRINT:
+    """Copy a footprint already embedded in the validated source board.
+
+    The CI KiCad runtime deliberately has no configured global footprint-table,
+    so ``FootprintLoad`` cannot load a standard-library module by pathname.
+    Q501 and R206 are the exact standard SOT-363 and 0603 land patterns used
+    by this board.  The native copy constructor preserves their geometry while
+    keeping this probe independent of a runner-specific library installation.
+    """
+    for footprint in board.GetFootprints():
+        if footprint.GetReference() == reference:
+            return pcbnew.FOOTPRINT(footprint)
+    raise RuntimeError(f"template footprint not found: {reference}")
 
 
 def main() -> None:
@@ -47,8 +53,8 @@ def main() -> None:
     if conflicts:
         raise RuntimeError(f"baseline already contains {', '.join(conflicts)}")
 
-    for reference, (library, name, xy) in PLACEMENTS.items():
-        footprint = load(library, name)
+    for reference, (template_ref, xy) in PLACEMENTS.items():
+        footprint = clone_template(board, template_ref)
         footprint.SetReference(reference)
         footprint.SetValue(VALUES[reference])
         footprint.SetPosition(point(*xy))
@@ -57,7 +63,10 @@ def main() -> None:
         for pad in footprint.Pads():
             pos = pad.GetPosition()
             pads.append(f"{pad.GetNumber()}=({pcbnew.ToMM(pos.x):.3f},{pcbnew.ToMM(pos.y):.3f})")
-        print("PLACED", reference, name, f"at=({xy[0]:.3f},{xy[1]:.3f})", "pads=" + ",".join(pads))
+        print(
+            "PLACED", reference, f"template={template_ref}",
+            f"at=({xy[0]:.3f},{xy[1]:.3f})", "pads=" + ",".join(pads),
+        )
 
     pcbnew.SaveBoard(str(args.output), board)
     print("PLACEMENT_PROBE_OK", args.output)
