@@ -113,24 +113,25 @@ def remove_tracks_touching(text: str, points: list[tuple[float, float]]) -> tupl
 def migrate_legacy_gpio4_branch(text: str, sense_code: int) -> tuple[str, int]:
     """Reuse GPIO4's proven front-layer escape and retain J701-to-U701.
 
-    The existing U201.8 corridor already passes source-board DRC and reaches the
-    lower centre beside the raw +12 V bus.  Retag that corridor for
-    MACHINE_PWR_SENSE, but remove its one segment attached to J701.7.  The
-    independent F.Cu J701.7-to-U701.15 connection remains intact as a local B7
-    level-shifter channel.
+    The two F.Cu segments and existing via at (207.49, 131.97) already pass
+    source-board DRC.  Retag those items for MACHINE_PWR_SENSE and remove the
+    former B.Cu branch to J701.7.  The independent F.Cu J701.7-to-U701.15
+    connection remains intact as a local B7 level-shifter channel.
     """
     reuse = {
         "8bac310c-0660-4140-ad94-917957d62621",
         "f6a7ea09-b6e6-4db1-860f-d027f6ed01d4",
         "0b0b05f3-c43f-4117-84c2-1f32771f5b48",
+    }
+    obsolete = {
         "1ca24a7c-e5bd-45aa-8151-57d10658606e",
         "3548e073-eda2-46da-b4f3-711a0330dd08",
         "65f9136a-8580-4e01-8edb-36f49b08d509",
         "540fd51e-0690-4bf9-81c8-524f3e1a6e64",
+        "79032982-cb89-4a2e-b13f-d4d3cc63adde",
         "8d88b049-9a7b-45e7-ac0d-cec054d9a842",
         "dcaadd28-13b0-44f6-8fd7-82a0e23808fb",
     }
-    obsolete = {"79032982-cb89-4a2e-b13f-d4d3cc63adde"}
     replacements = []
     removals = []
     for start, end, block in u.blocks(text, "(segment"):
@@ -414,14 +415,11 @@ def main() -> None:
     r216_p1 = pad_position("R216", "1")
     r216_p2 = pad_position("R216", "2")
     routing_failures: list[str] = []
-    legacy_sense_end = (211.1674, 158.717302)
-    legacy_sense_escape = (211.667, 159.717)
-    add_segment(legacy_sense_end, legacy_sense_escape, SENSE)
-    add_via(legacy_sense_escape, SENSE)
+    legacy_sense_escape = (207.490, 131.970)
     add_via(r215_p2, SENSE)
     try:
         sense_path, sense_layer = route_any_signal_layer(
-            legacy_sense_escape, r215_p2, SENSE, (209.0, 154.0, 231.0, 164.0)
+            legacy_sense_escape, r215_p2, SENSE, (200.0, 120.0, 235.0, 164.0)
         )
     except RuntimeError as exc:
         sense_path = []
