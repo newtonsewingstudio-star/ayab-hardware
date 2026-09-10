@@ -394,7 +394,7 @@ def main() -> None:
     sense_divider_via = (r215_p2[0], 143.00)
     add_via(sense_divider_via, SENSE)
     sense_path = route_b_cu(
-        sense_via, sense_divider_via, SENSE, (190.0, 125.0, 240.0, 160.0), pcbnew.In1_Cu
+        sense_via, sense_divider_via, SENSE, (190.0, 125.0, 240.0, 160.0), pcbnew.In2_Cu
     )
 
     # No safe source corridor for the divider's +12-V leg has been found on
