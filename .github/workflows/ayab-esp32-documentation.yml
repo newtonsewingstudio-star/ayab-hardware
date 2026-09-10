@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   
   push:
+    branches-ignore:
+      - ayab-esp32-kh910-rev-a
     paths:
       - ayab-esp32/**
 
