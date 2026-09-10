@@ -30,7 +30,11 @@ PLACEMENTS = {"U403": (300.0, 155.0), "R215": (207.5, 160.0), "R216": (209.5, 16
 
 def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
     """Clone an embedded footprint with fresh KiCad identities."""
-    out = re.sub(r"\((uuid|tstamp) [0-9a-f-]+\)", lambda m: f"({m.group(1)} {u.uid()})", template)
+    out = re.sub(
+        r'\((uuid|tstamp)\s+"?[0-9a-f-]+"?\)',
+        lambda m: f'({m.group(1)} "{u.uid()}")',
+        template,
+    )
     out, count = re.subn(
         r"^(\(footprint.*?)(\(at\s+[-\d.]+\s+[-\d.]+(?:\s+[-\d.]+)?\))",
         lambda m: m.group(1) + f"(at {x:g} {y:g} {angle:g})",
