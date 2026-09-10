@@ -196,7 +196,7 @@ def main() -> None:
         "1": (names["+12V"], "+12V"), "2": (sense_code, SENSE),
     })
     x, y = PLACEMENTS["R216"]
-    r216 = clone9(r206, "R216", "10k", x, y, 0, path_r216, "C25804", {
+    r216 = clone9(r206, "R216", "10k", x, y, 180, path_r216, "C25804", {
         "1": (sense_code, SENSE), "2": (names["GND"], "GND"),
     })
     text = insert_before_root_item(text, "footprint", f'\t(net {sense_code} "{SENSE}")')
@@ -424,8 +424,8 @@ def main() -> None:
         routing_failures.append(str(exc))
     gpio_escape = (207.490, 131.970)
     sense_escape = r215_p2
-    plus12_escape = r215_p1
-    ground_escape = r216_p2
+    plus12_escape = (206.325, 135.750)
+    ground_escape = (206.175, 134.250)
     # Reuse the source-board's already-validated U201.8 front-layer route and
     # its via at gpio_escape.  A new via directly on U201.8 intersects unrelated
     # inner-layer traces and is intentionally forbidden.
@@ -441,7 +441,8 @@ def main() -> None:
         sense_layer = -1
         routing_failures.append(str(exc))
     plus12_endpoint = (207.00, 163.10)
-    plus12_bottom_path = []
+    add_segment(r215_p1, plus12_escape, "+12V")
+    plus12_bottom_path = [r215_p1, plus12_escape]
     add_via(plus12_escape, "+12V")
     add_via(plus12_endpoint, "+12V")
     try:
@@ -452,7 +453,13 @@ def main() -> None:
         plus12_path = []
         plus12_layer = -1
         routing_failures.append(str(exc))
-    ground_bottom_path = []
+    try:
+        ground_bottom_path = route_b_cu(
+            r216_p2, ground_escape, "GND", (203.0, 132.0, 212.0, 140.0), pcbnew.B_Cu
+        )
+    except RuntimeError as exc:
+        ground_bottom_path = []
+        routing_failures.append(str(exc))
     add_via(ground_escape, "GND")
     try:
         ground_path, ground_layer = route_any_signal_layer(
