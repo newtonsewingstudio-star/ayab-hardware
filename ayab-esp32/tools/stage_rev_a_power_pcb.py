@@ -203,6 +203,18 @@ def main() -> None:
         track.SetNetCode(code)
         board.Add(track)
 
+    def add_via(position: tuple[float, float], net_name: str) -> None:
+        code = board.GetNetcodeFromNetname(net_name)
+        if code <= 0:
+            raise RuntimeError(f"staged net missing: {net_name}")
+        via = pcbnew.PCB_VIA(board)
+        via.SetPosition(pcbnew.VECTOR2I_MM(*position))
+        via.SetWidth(pcbnew.FromMM(0.60))
+        via.SetDrill(pcbnew.FromMM(0.30))
+        via.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+        via.SetNetCode(code)
+        board.Add(via)
+
     # These three ties are wholly inside the new low-voltage island.  The two
     # detours preserve clearance to U403's GND pads and R216's grounded end.
     # Keeping them local first lets CI distinguish their geometry from the
@@ -230,9 +242,19 @@ def main() -> None:
     add_segment((296.50, 146.63), (299.73, 146.63), "+5V")
     r216_p2 = pad_position("R216", "2")
     add_segment(r216_p2, (r216_p2[0], 141.00), "GND")
-    add_segment((r216_p2[0], 141.00), (228.50, 141.00), "GND")
-    add_segment((228.50, 141.00), (228.50, 145.30), "GND")
-    add_segment((228.50, 145.30), (230.41, 145.30), "GND")
+    add_segment((r216_p2[0], 141.00), (227.80, 141.00), "GND")
+    add_segment((227.80, 141.00), (227.80, 145.30), "GND")
+    add_segment((227.80, 145.30), (230.41, 145.30), "GND")
+
+    # The obsolete bypass left a filtered-5-V endpoint on F.Cu.  This route
+    # stays to the right of the ground-via grid, clears the +5-V B.Cu spine,
+    # and returns through a manufacturing-rule-compliant via at that endpoint.
+    u403_p1 = pad_position("U403", "1")
+    raw_endpoint = (307.2346, 134.89)
+    add_segment(u403_p1, (307.50, u403_p1[1]), "/PSU/5V_SW")
+    add_segment((307.50, u403_p1[1]), (307.50, raw_endpoint[1]), "/PSU/5V_SW")
+    add_segment((307.50, raw_endpoint[1]), raw_endpoint, "/PSU/5V_SW")
+    add_via(raw_endpoint, "/PSU/5V_SW")
 
     board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
