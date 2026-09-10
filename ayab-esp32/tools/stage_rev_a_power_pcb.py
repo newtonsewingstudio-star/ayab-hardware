@@ -178,6 +178,39 @@ def main() -> None:
         if footprint.GetReference() in PLACEMENTS:
             footprint.Flip(footprint.GetPosition(), False)
     board.BuildConnectivity()
+
+    footprints = {footprint.GetReference(): footprint for footprint in board.GetFootprints()}
+
+    def pad_position(reference: str, number: str) -> tuple[float, float]:
+        footprint = footprints.get(reference)
+        if footprint is None:
+            raise RuntimeError(f"staged footprint missing: {reference}")
+        pad = next((item for item in footprint.Pads() if item.GetNumber() == number), None)
+        if pad is None:
+            raise RuntimeError(f"staged pad missing: {reference}.{number}")
+        point = pad.GetPosition()
+        return pcbnew.ToMM(point.x), pcbnew.ToMM(point.y)
+
+    def add_segment(start: tuple[float, float], end: tuple[float, float], net_name: str) -> None:
+        code = board.GetNetcodeFromNetname(net_name)
+        if code <= 0:
+            raise RuntimeError(f"staged net missing: {net_name}")
+        track = pcbnew.PCB_TRACK(board)
+        track.SetStart(pcbnew.VECTOR2I_MM(*start))
+        track.SetEnd(pcbnew.VECTOR2I_MM(*end))
+        track.SetWidth(pcbnew.FromMM(0.25))
+        track.SetLayer(pcbnew.B_Cu)
+        track.SetNetCode(code)
+        board.Add(track)
+
+    # These three ties are wholly inside the new low-voltage island.  Keeping
+    # them local first lets CI distinguish their geometry from the remaining
+    # long runs back to the existing 5 V, 12 V, GND and MCU copper.
+    add_segment(pad_position("U403", "2"), pad_position("U403", "5"), "GND")
+    add_segment(pad_position("U403", "3"), pad_position("U403", "6"), "+5V")
+    add_segment(pad_position("R215", "2"), pad_position("R216", "1"), SENSE)
+
+    board.BuildConnectivity()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(args.output), board)
     print("POWER_STAGE_OK", args.output)
