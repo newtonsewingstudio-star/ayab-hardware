@@ -313,6 +313,18 @@ def main() -> None:
                     on_bottom = True
                 if on_bottom:
                     raster(pad)
+        # Keep the disposable route inside the real board outline and out of
+        # all rule/keepout areas.  DRC remains authoritative, but these are
+        # hard geometric constraints rather than ordinary copper obstacles.
+        edge_clearance = clearance
+        clearance = 0.45
+        for drawing in board.GetDrawings():
+            if drawing.GetLayer() == pcbnew.Edge_Cuts:
+                raster(drawing)
+        clearance = edge_clearance
+        for zone in board.Zones():
+            if zone.GetIsRuleArea():
+                raster(zone)
 
         origin = cell(start)
         target = cell(goal)
@@ -419,7 +431,7 @@ def main() -> None:
     add_via(r215_p2, SENSE)
     try:
         sense_path, sense_layer = route_any_signal_layer(
-            legacy_sense_escape, r215_p2, SENSE, (62.0, 116.0, 335.0, 164.0)
+            legacy_sense_escape, r215_p2, SENSE, (62.0, 122.50, 335.0, 164.0)
         )
     except RuntimeError as exc:
         sense_path = []
