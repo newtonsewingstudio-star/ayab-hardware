@@ -381,21 +381,11 @@ def main() -> None:
     raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
-    # The former GPIO4 copper is now deliberately absent, so the two original
-    # F.Cu escape segments can become the protected sense route without
-    # intersecting a retained end-stop signal.  B.Cu then reaches the divider
-    # using the same board-native obstacle search as the filtered power route.
-    sense_corner = (209.785, 129.675)
-    sense_via = (207.490, 131.970)
-    u201_p8 = pad_position("U201", "8")
-    add_front_segment(u201_p8, sense_corner, SENSE)
-    add_front_segment(sense_corner, sense_via, SENSE)
-    add_via(sense_via, SENSE)
-    sense_divider_via = (r215_p2[0], 143.00)
-    add_via(sense_divider_via, SENSE)
-    sense_path = route_b_cu(
-        sense_via, sense_divider_via, SENSE, (190.0, 125.0, 240.0, 160.0), pcbnew.In2_Cu
-    )
+    # Both inner layers are fully partitioned between the released GPIO4
+    # corridor and this divider location.  Keep the staged candidate open
+    # rather than retaining an unsafe crossing; the next placement pass will
+    # move the divider to a routeable single-board location.
+    sense_path: list[tuple[float, float]] = []
 
     # No safe source corridor for the divider's +12-V leg has been found on
     # this board partition.  Leave it deliberately open in the candidate;
