@@ -25,7 +25,7 @@ ROUTE_STUDY_FAILURES no route for /ESP32/MACHINE_PWR_SENSE from (211.1674, 158.7
 ## Source-board DRC
 ```text
 ** Drc report for ayab-esp32.kicad_pcb **
-** Created on 2026-09-10T22:47:58+0000 **
+** Created on 2026-09-10T22:50:28+0000 **
 ** Report includes: Errors, Warnings **
 
 ** Found 0 DRC violations **
@@ -40,21 +40,21 @@ ROUTE_STUDY_FAILURES no route for /ESP32/MACHINE_PWR_SENSE from (211.1674, 158.7
 ## Staged-board DRC
 ```text
 ** Drc report for rev-a-power-stage.kicad_pcb **
-** Created on 2026-09-10T22:48:00+0000 **
+** Created on 2026-09-10T22:50:30+0000 **
 ** Report includes: Errors, Warnings **
 
 ** Found 4 DRC violations **
 [solder_mask_bridge]: Rear solder mask aperture bridges items with different nets
     Rule: board setup solder mask min width; error
-    @(208.6750 mm, 160.0000 mm): Pad 1 [/ESP32/MACHINE_PWR_SENSE] of R216 on B.Cu
+    @(208.3250 mm, 160.0000 mm): Pad 1 [+12V] of R215 on B.Cu
     @(208.6750 mm, 160.0000 mm): Pad 1 [/ESP32/MACHINE_PWR_SENSE] of R216 on B.Cu
 [courtyards_overlap]: Courtyards overlap
     Rule: board setup constraints courtyard; error
-    @(209.5000 mm, 160.0000 mm): Footprint R216
+    @(207.5000 mm, 160.0000 mm): Footprint R215
     @(209.5000 mm, 160.0000 mm): Footprint R216
 [shorting_items]: Items shorting two nets (nets +12V and /ESP32/MACHINE_PWR_SENSE)
     Local override; error
-    @(208.6750 mm, 160.0000 mm): Pad 1 [/ESP32/MACHINE_PWR_SENSE] of R216 on B.Cu
+    @(208.3250 mm, 160.0000 mm): Pad 1 [+12V] of R215 on B.Cu
     @(208.6750 mm, 160.0000 mm): Pad 1 [/ESP32/MACHINE_PWR_SENSE] of R216 on B.Cu
 [track_dangling]: Track has unconnected end
     Local override; warning
@@ -64,10 +64,10 @@ ROUTE_STUDY_FAILURES no route for /ESP32/MACHINE_PWR_SENSE from (211.1674, 158.7
 [unconnected_items]: Missing connection between items
     Local override; error
     @(116.0625 mm, 161.2000 mm): Pad 2 [+12V] of Q805 on F.Cu
-    @(208.6750 mm, 160.0000 mm): Pad 1 [/ESP32/MACHINE_PWR_SENSE] of R216 on B.Cu
+    @(208.3250 mm, 160.0000 mm): Pad 1 [+12V] of R215 on B.Cu
 [unconnected_items]: Missing connection between items
     Local override; error
-    @(210.3250 mm, 160.0000 mm): Pad 2 [GND] of R216 on B.Cu
+    @(206.6750 mm, 160.0000 mm): Pad 2 [/ESP32/MACHINE_PWR_SENSE] of R215 on B.Cu
     @(208.6750 mm, 160.0000 mm): Pad 1 [/ESP32/MACHINE_PWR_SENSE] of R216 on B.Cu
 [unconnected_items]: Missing connection between items
     Local override; error
