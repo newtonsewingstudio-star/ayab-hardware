@@ -72,6 +72,17 @@ def sheet_prefix(text: str, reference: str) -> str:
     return match.group(1).rsplit("/", 1)[0]
 
 
+def root_net_defs(text: str) -> dict[int, str]:
+    return {int(code): name for code, name in re.findall(r'^\t\(net\s+(\d+)\s+"([^"]+)"\)', text, re.M)}
+
+
+def insert_before_root_item(text: str, item: str, payload: str) -> str:
+    match = re.search(rf"(?m)^\t\({re.escape(item)}\b", text)
+    if not match:
+        raise RuntimeError(f"root {item} insertion anchor missing")
+    return text[:match.start()] + payload + "\n" + text[match.start():]
+
+
 def remove_footprint(text: str, reference: str) -> tuple[str, list[tuple[float, float]]]:
     start, end, block = u.find_fp(text, reference)
     pads = [u.pad_global(block, number) for number in ("1", "2")]
@@ -121,7 +132,7 @@ def main() -> None:
     existing = {ref for ref in ("U403", "R215", "R216") if f'(property "Reference" "{ref}"' in text}
     if existing:
         raise RuntimeError("partial power PCB state already present: " + ", ".join(sorted(existing)))
-    defs = u.net_defs(text)
+    defs = root_net_defs(text)
     names = {name: next((code for code, value in defs.items() if value == name), 0) for name in ("GND", "+5V", "+12V", "/PSU/5V_SW")}
     if any(code <= 0 for code in names.values()):
         raise RuntimeError(f"required board net missing: {names}")
@@ -156,8 +167,8 @@ def main() -> None:
     r216 = clone9(r206, "R216", "10k", x, y, 0, path_r216, "C25804", {
         "1": (sense_code, SENSE), "2": (names["GND"], "GND"),
     })
-    text = u.insert_before_first(text, "  (footprint ", f'  (net {sense_code} "{SENSE}")')
-    text = u.insert_before_first(text, "  (segment ", "\n".join((u403, r215, r216)))
+    text = insert_before_root_item(text, "footprint", f'\t(net {sense_code} "{SENSE}")')
+    text = insert_before_root_item(text, "segment", "\n".join((u403, r215, r216)))
     args.output.write_text(text, encoding="utf-8")
 
     board = pcbnew.LoadBoard(str(args.output))
