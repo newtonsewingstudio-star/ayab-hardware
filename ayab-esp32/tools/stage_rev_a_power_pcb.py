@@ -9,6 +9,8 @@ before any routing or promotion is considered.
 from __future__ import annotations
 
 import argparse
+import heapq
+import math
 import re
 import sys
 from pathlib import Path
@@ -215,6 +217,106 @@ def main() -> None:
         via.SetNetCode(code)
         board.Add(via)
 
+    def route_b_cu(start: tuple[float, float], goal: tuple[float, float], net_name: str,
+                   bounds: tuple[float, float, float, float]) -> list[tuple[float, float]]:
+        """Route one low-current net on B.Cu around board-native obstacles.
+
+        This deliberately operates only on the disposable candidate.  DRC is
+        still the authority; the coarse grid simply avoids blindly drawing a
+        long trace through a known existing conductor.
+        """
+        step = 0.25
+        clearance = 0.24
+        x0, y0, x1, y1 = bounds
+        nx = int(round((x1 - x0) / step)) + 1
+        ny = int(round((y1 - y0) / step)) + 1
+        own = board.GetNetcodeFromNetname(net_name)
+        blocked: set[tuple[int, int]] = set()
+
+        def xy(cell: tuple[int, int]) -> tuple[float, float]:
+            return x0 + cell[0] * step, y0 + cell[1] * step
+
+        def cell(point: tuple[float, float]) -> tuple[int, int]:
+            return int(round((point[0] - x0) / step)), int(round((point[1] - y0) / step))
+
+        def raster(item) -> None:
+            box = item.GetBoundingBox()
+            bx0 = pcbnew.ToMM(box.GetX()) - clearance
+            by0 = pcbnew.ToMM(box.GetY()) - clearance
+            bx1 = pcbnew.ToMM(box.GetX() + box.GetWidth()) + clearance
+            by1 = pcbnew.ToMM(box.GetY() + box.GetHeight()) + clearance
+            ix0 = max(0, int(math.floor((bx0 - x0) / step)))
+            iy0 = max(0, int(math.floor((by0 - y0) / step)))
+            ix1 = min(nx - 1, int(math.ceil((bx1 - x0) / step)))
+            iy1 = min(ny - 1, int(math.ceil((by1 - y0) / step)))
+            for ix in range(ix0, ix1 + 1):
+                for iy in range(iy0, iy1 + 1):
+                    blocked.add((ix, iy))
+
+        for item in board.GetTracks():
+            if item.GetNetCode() == own:
+                continue
+            if isinstance(item, pcbnew.PCB_VIA) or item.GetLayer() == pcbnew.B_Cu:
+                raster(item)
+        for footprint in board.GetFootprints():
+            for pad in footprint.Pads():
+                if pad.GetNetCode() == own:
+                    continue
+                try:
+                    on_bottom = pad.IsOnLayer(pcbnew.B_Cu)
+                except AttributeError:
+                    on_bottom = True
+                if on_bottom:
+                    raster(pad)
+
+        origin = cell(start)
+        target = cell(goal)
+        for centre in (origin, target):
+            for dx in range(-1, 2):
+                for dy in range(-1, 2):
+                    blocked.discard((centre[0] + dx, centre[1] + dy))
+
+        queue = [(0.0, 0.0, origin)]
+        parent: dict[tuple[int, int], tuple[int, int]] = {}
+        cost = {origin: 0.0}
+        while queue:
+            _estimate, current_cost, current = heapq.heappop(queue)
+            if current_cost != cost.get(current):
+                continue
+            if current == target:
+                cells = [current]
+                while current != origin:
+                    current = parent[current]
+                    cells.append(current)
+                cells.reverse()
+                points = [start] + [xy(point) for point in cells[1:-1]] + [goal]
+                reduced = [points[0]]
+                old_direction = None
+                for point in points[1:]:
+                    previous = reduced[-1]
+                    direction = (round(point[0] - previous[0], 6), round(point[1] - previous[1], 6))
+                    direction = (0 if abs(direction[0]) < 1e-6 else int(math.copysign(1, direction[0])),
+                                 0 if abs(direction[1]) < 1e-6 else int(math.copysign(1, direction[1])))
+                    if old_direction == direction and len(reduced) > 1:
+                        reduced[-1] = point
+                    else:
+                        reduced.append(point)
+                        old_direction = direction
+                for first, second in zip(reduced, reduced[1:]):
+                    add_segment(first, second, net_name)
+                return reduced
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nxt = current[0] + dx, current[1] + dy
+                if not (0 <= nxt[0] < nx and 0 <= nxt[1] < ny) or nxt in blocked:
+                    continue
+                next_cost = current_cost + 1
+                if next_cost < cost.get(nxt, float("inf")):
+                    cost[nxt] = next_cost
+                    parent[nxt] = current
+                    distance = abs(nxt[0] - target[0]) + abs(nxt[1] - target[1])
+                    heapq.heappush(queue, (next_cost + distance, next_cost, nxt))
+        raise RuntimeError(f"no B.Cu route for {net_name} from {start} to {goal}")
+
     # These three ties are wholly inside the new low-voltage island.  The two
     # detours preserve clearance to U403's GND pads and R216's grounded end.
     # Keeping them local first lets CI distinguish their geometry from the
@@ -246,28 +348,12 @@ def main() -> None:
     add_segment((227.80, 141.00), (227.80, 145.30), "GND")
     add_segment((227.80, 145.30), (230.41, 145.30), "GND")
 
-    # The obsolete bypass left a filtered-5-V endpoint on F.Cu.  This route
-    # stays to the right of the ground-via grid, clears the +5-V B.Cu spine,
-    # and returns through a manufacturing-rule-compliant via at that endpoint.
+    # The obsolete bypass left a filtered-5-V endpoint on F.Cu.  Let the
+    # candidate router find a B.Cu corridor around the existing +5-V spine,
+    # then use one compliant via at the endpoint.
     u403_p1 = pad_position("U403", "1")
     raw_endpoint = (307.2346, 134.89)
-    add_segment(u403_p1, (307.50, u403_p1[1]), "/PSU/5V_SW")
-    raw_lower_via = (307.50, 151.25)
-    raw_upper_via = (307.50, 146.20)
-    add_segment((307.50, u403_p1[1]), raw_lower_via, "/PSU/5V_SW")
-    add_via(raw_lower_via, "/PSU/5V_SW")
-    # Cross the pre-existing B.Cu +5-V backbone on F.Cu, then return to B.Cu
-    # above it for the final run to the filtered-rail endpoint.
-    raw_code = board.GetNetcodeFromNetname("/PSU/5V_SW")
-    bridge = pcbnew.PCB_TRACK(board)
-    bridge.SetStart(pcbnew.VECTOR2I_MM(*raw_lower_via))
-    bridge.SetEnd(pcbnew.VECTOR2I_MM(*raw_upper_via))
-    bridge.SetWidth(pcbnew.FromMM(0.25))
-    bridge.SetLayer(pcbnew.F_Cu)
-    bridge.SetNetCode(raw_code)
-    board.Add(bridge)
-    add_via(raw_upper_via, "/PSU/5V_SW")
-    add_segment(raw_upper_via, raw_endpoint, "/PSU/5V_SW")
+    raw_path = route_b_cu(u403_p1, raw_endpoint, "/PSU/5V_SW", (280.0, 120.0, 330.0, 160.0))
     add_via(raw_endpoint, "/PSU/5V_SW")
 
     board.BuildConnectivity()
@@ -276,6 +362,7 @@ def main() -> None:
     print("POWER_STAGE_OK", args.output)
     print("REMOVED_BYPASS_TRACKS", removed_bypass_tracks)
     print("REMOVED_GPIO4_TRACKS", removed_gpio4_tracks)
+    print("RAW_ROUTE_POINTS", " ".join(f"{x:.2f},{y:.2f}" for x, y in raw_path))
 
 
 if __name__ == "__main__":
