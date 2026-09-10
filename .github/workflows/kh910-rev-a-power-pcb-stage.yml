@@ -28,6 +28,14 @@ jobs:
             ayab-esp32/ayab-esp32.kicad_pcb /tmp/rev-a-power-stage.kicad_pcb \
             > /tmp/rev-a-power-stage.log 2>&1
           cat /tmp/rev-a-power-stage.log
+      - name: Record source-board DRC baseline
+        run: |
+          set +e
+          kicad-cli pcb drc --exit-code-violations -o /tmp/rev-a-power-baseline-drc.rpt ayab-esp32/ayab-esp32.kicad_pcb
+          status=$?
+          set -e
+          cat /tmp/rev-a-power-baseline-drc.rpt
+          echo "Source-board DRC exit status: $status"
       - name: Record staged DRC
         run: |
           set +e
@@ -36,6 +44,16 @@ jobs:
           set -e
           cat /tmp/rev-a-power-stage-drc.rpt
           echo "Staged DRC exit status: $status"
+      - name: Compare source and staged DRC summaries
+        run: |
+          summary() {
+            label="$1"
+            report="$2"
+            printf '%s: ' "$label"
+            sed -nE 's/^\*\* Found ([0-9]+ DRC violations|[0-9]+ unconnected pads|[0-9]+ Footprint errors) \*\*/\1/p' "$report" | paste -sd '; ' -
+          }
+          summary "Source baseline" /tmp/rev-a-power-baseline-drc.rpt
+          summary "Staged board" /tmp/rev-a-power-stage-drc.rpt
       - name: Render staged board
         run: |
           kicad-cli pcb render --side bottom --output /tmp/rev-a-power-stage-bottom.png /tmp/rev-a-power-stage.kicad_pcb
@@ -47,5 +65,6 @@ jobs:
           path: |
             /tmp/rev-a-power-stage.kicad_pcb
             /tmp/rev-a-power-stage.log
+            /tmp/rev-a-power-baseline-drc.rpt
             /tmp/rev-a-power-stage-drc.rpt
             /tmp/rev-a-power-stage-bottom.png
