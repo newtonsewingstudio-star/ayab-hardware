@@ -76,7 +76,7 @@ jobs:
             cat /tmp/rev-a-power-stage-drc.rpt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-      - name: Publish staged diagnostic evidence only
+      - name: Build staged diagnostic evidence
         run: |
           REPORT=ayab-esp32/KH910_REV_A_POWER_STAGE_DRC.md
           {
