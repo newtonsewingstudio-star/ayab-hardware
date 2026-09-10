@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PSU = ROOT / "psu.kicad_sch"
 MCU = ROOT / "mcu.kicad_sch"
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
-PLACEMENTS = {"U403": (300.0, 155.0), "R215": (207.0, 137.5), "R216": (210.0, 137.5)}
+PLACEMENTS = {"U403": (300.0, 155.0), "R215": (206.25, 135.75), "R216": (209.25, 135.75)}
 
 
 def clone9(template, new_ref, value, x, y, angle, path, lcsc, padmap):
@@ -405,29 +405,23 @@ def main() -> None:
     except RuntimeError as exc:
         local_sense_path = []
         routing_failures.append(str(exc))
-    gpio_escape = (218.875, 135.425)
-    sense_escape = (205.425, 135.750)
-    plus12_escape = (206.325, 134.500)
-    ground_escape = (204.675, 135.000)
+    gpio_escape = (210.875, 126.175)
+    sense_escape = r215_p2
+    plus12_escape = (206.075, 135.750)
+    ground_escape = (206.175, 135.000)
     try:
         gpio_front_path = route_b_cu(
-            u201_p8, gpio_escape, SENSE, (210.0, 120.0, 222.0, 138.0), pcbnew.F_Cu
+            u201_p8, gpio_escape, SENSE, (205.0, 120.0, 220.0, 135.0), pcbnew.F_Cu
         )
     except RuntimeError as exc:
         gpio_front_path = []
         routing_failures.append(str(exc))
-    try:
-        sense_bottom_path = route_b_cu(
-            r215_p2, sense_escape, SENSE, (202.0, 133.0, 208.0, 140.0), pcbnew.B_Cu
-        )
-    except RuntimeError as exc:
-        sense_bottom_path = []
-        routing_failures.append(str(exc))
+    sense_bottom_path: list[tuple[float, float]] = []
     add_via(gpio_escape, SENSE)
     add_via(sense_escape, SENSE)
     try:
         sense_path, sense_layer = route_any_signal_layer(
-            gpio_escape, sense_escape, SENSE, (200.0, 120.0, 222.0, 140.0)
+            gpio_escape, sense_escape, SENSE, (200.0, 120.0, 215.0, 140.0)
         )
     except RuntimeError as exc:
         sense_path = []
@@ -436,7 +430,7 @@ def main() -> None:
     plus12_endpoint = (207.00, 163.10)
     try:
         plus12_bottom_path = route_b_cu(
-            r215_p1, plus12_escape, "+12V", (202.0, 132.0, 209.0, 140.0), pcbnew.B_Cu
+            r215_p1, plus12_escape, "+12V", (202.0, 132.0, 210.0, 140.0), pcbnew.B_Cu
         )
     except RuntimeError as exc:
         plus12_bottom_path = []
