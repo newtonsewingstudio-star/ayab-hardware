@@ -1,0 +1,21 @@
+name: KH910 Rev A Solenoid Gate Source Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ayab-esp32-kh910-rev-a
+    paths:
+      - 'ayab-esp32/solenoids.kicad_sch'
+      - 'ayab-esp32/tools/audit_rev_a_solenoid_gate_source.py'
+      - '.github/workflows/kh910-rev-a-solenoid-gate-source-audit.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Audit source-only solenoid gate
+        run: python3 ayab-esp32/tools/audit_rev_a_solenoid_gate_source.py

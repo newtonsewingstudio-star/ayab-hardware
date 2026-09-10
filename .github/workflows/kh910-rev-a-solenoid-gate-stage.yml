@@ -6,6 +6,7 @@ on:
     branches:
       - ayab-esp32-kh910-rev-a
     paths:
+      - 'ayab-esp32/solenoids.kicad_sch'
       - 'ayab-esp32/tools/stage_rev_a_solenoid_gate_local_v1.py'
       - 'ayab-esp32/tools/fix_rev_a_solenoid_pg_corner.py'
       - 'ayab-esp32/tools/route_rev_a_solenoid_enable_astar.py'
