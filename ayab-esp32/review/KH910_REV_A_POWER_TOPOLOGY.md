@@ -4,6 +4,9 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 
 ## Seed components
 
+- C206: schematic `100n`; PCB present
+- D205: schematic `CDBU0130-HF`; PCB present
+- D206: schematic `CDBU0130-HF`; PCB present
 - R215: schematic `47k`; PCB present
 - R216: schematic `10k`; PCB present
 - TP603: schematic `3V3`; PCB present
@@ -13,7 +16,7 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 
 ## Local power nets and directly attached components
 
-- `/ESP32/MACHINE_PWR_SENSE`: `R215`, `R216`, `U201`
+- `/ESP32/MACHINE_PWR_SENSE`: `C206`, `D205`, `D206`, `R215`, `R216`, `U201`
 - `/PSU/3V3_SW`: `C613`, `C615`, `C617`, `C619`, `C621`, `L602`, `R609`, `R610`, `TP603`
 - `/PSU/5V_SW`: `C612`, `C614`, `C616`, `C618`, `C620`, `L601`, `R608`, `TP602`, `U403`
 - `Net-(D605-K)`: `D605`, `L601`, `U601`
@@ -24,6 +27,7 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 
 ## Required PCB parity
 
+- C206 `100n`: present
 - C612 `220u`: present
 - C613 `220u`: present
 - C614 `3n3`: present
@@ -34,6 +38,8 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 - C619 `10u`: present
 - C620 `10u`: present
 - C621 `10u`: present
+- D205 `CDBU0130-HF`: present
+- D206 `CDBU0130-HF`: present
 - D605 `SS54`: present
 - D606 `SS54`: present
 - L601 `47uH`: present
@@ -54,6 +60,12 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 
 ## Pin-level power topology
 
+- C206.1: schematic `/ESP32/MACHINE_PWR_SENSE`; matches
+- C206.2: schematic `GND`; matches
+- D205.1: schematic `/ESP32/MACHINE_PWR_SENSE`; **PCB `+3V3`**
+- D205.2: schematic `+3V3`; **PCB `/ESP32/MACHINE_PWR_SENSE`**
+- D206.1: schematic `GND`; **PCB `/ESP32/MACHINE_PWR_SENSE`**
+- D206.2: schematic `/ESP32/MACHINE_PWR_SENSE`; **PCB `GND`**
 - R215.1: schematic `+12V`; matches
 - R215.2: schematic `/ESP32/MACHINE_PWR_SENSE`; matches
 - R216.1: schematic `/ESP32/MACHINE_PWR_SENSE`; matches
@@ -90,4 +102,8 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 
 ## Result
 
-**PASS:** every schematic-derived local power part has a matching physical footprint.
+**BLOCKED:** the prototype power circuit is not fully represented on the PCB.
+- Topology mismatch: `D205.1` expected `/ESP32/MACHINE_PWR_SENSE`, found `+3V3`
+- Topology mismatch: `D205.2` expected `+3V3`, found `/ESP32/MACHINE_PWR_SENSE`
+- Topology mismatch: `D206.1` expected `GND`, found `/ESP32/MACHINE_PWR_SENSE`
+- Topology mismatch: `D206.2` expected `/ESP32/MACHINE_PWR_SENSE`, found `GND`
