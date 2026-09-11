@@ -153,6 +153,15 @@ def junction(x: float, y: float) -> str:
     )
 
 
+def local_label(name: str, x: float, y: float) -> str:
+    return (
+        f'  (label "{name}" (at {x:g} {y:g} 0) (fields_autoplaced)\n'
+        '    (effects (font (size 1.27 1.27)) (justify left bottom))\n'
+        f'    (uuid {uid()})\n'
+        '  )\n'
+    )
+
+
 def patch_schematic() -> None:
     mcu = MCU.read_text(encoding="utf-8")
     psu = PSU.read_text(encoding="utf-8")
@@ -222,6 +231,10 @@ def patch_schematic() -> None:
 
     wiring = "".join(
         [
+            # Explicitly name the capacitor pin as well as wiring it to the
+            # bus.  This makes the cloned symbol connectivity unambiguous to
+            # KiCad's standalone/top-level ERC path resolution.
+            local_label("MACHINE_PWR_SENSE", 220.98, 82.55),
             wire((205.74, 82.55), (220.98, 82.55)),
             wire((220.98, 87.63), (220.98, 90.17)),
             wire((213.36, 90.17), (220.98, 90.17)),
@@ -321,11 +334,11 @@ def patch_board() -> None:
         "Voltage rating": "50V X7R",
     }
     footprints = [
-        clone_footprint(diode_template, "D205", "CDBU0130-HF", 232.0, 157.0, 0.0,
+        clone_footprint(diode_template, "D205", "CDBU0130-HF", 234.0, 157.0, 0.0,
                         path("D205"), diode_props, {"1": (p3, "+3V3"), "2": (sense, SENSE)}),
-        clone_footprint(diode_template, "D206", "CDBU0130-HF", 232.0, 160.5, 180.0,
+        clone_footprint(diode_template, "D206", "CDBU0130-HF", 234.0, 160.5, 180.0,
                         path("D206"), diode_props, {"1": (sense, SENSE), "2": (gnd, "GND")}),
-        clone_footprint(cap_template, "C206", "100n", 235.25, 160.5, 0.0,
+        clone_footprint(cap_template, "C206", "100n", 237.25, 160.5, 0.0,
                         path("C206"), cap_props, {"1": (sense, SENSE), "2": (gnd, "GND")}),
     ]
     board_text = pcbutil.insert_before_first(board_text, "  (segment ", "\n".join(footprints))
@@ -383,8 +396,7 @@ def patch_board() -> None:
     # (GND); KiCad rejected those shorts.
     lower_channel_y = 161.75
     add_segment(sense_anchor, d205_sense, sense)
-    add_segment(sense_anchor, (sense_anchor[0], d206_sense[1]), sense)
-    add_segment((sense_anchor[0], d206_sense[1]), d206_sense, sense)
+    add_segment(d205_sense, d206_sense, sense)
     add_segment(d206_sense, (d206_sense[0], lower_channel_y), sense)
     add_segment((d206_sense[0], lower_channel_y), (cap_sense[0], lower_channel_y), sense)
     add_segment((cap_sense[0], lower_channel_y), cap_sense, sense)
@@ -393,9 +405,8 @@ def patch_board() -> None:
     # a second high-impedance clamp reference.
     d205_p3 = positions["D205.1"]
     p3_via = (235.51, 151.07)
-    add_segment(d205_p3, (234.0, 155.5), p3)
-    add_segment((234.0, 155.5), (234.0, 152.0), p3)
-    add_segment((234.0, 152.0), p3_via, p3)
+    add_segment(d205_p3, (d205_p3[0], 152.0), p3)
+    add_segment((d205_p3[0], 152.0), p3_via, p3)
 
     pcbnew.SaveBoard(str(PCB), board)
     print("SENSE_PROTECTION_BOARD_STAGED D205 D206 C206")

@@ -52,6 +52,7 @@ jobs:
           set -e
           cat /tmp/sense-protection-erc.rpt
           echo "ERC_EXIT=$rc"
+          grep -Eq 'ERC messages:.*Errors 0([[:space:]]|$)' /tmp/sense-protection-erc.rpt
       - name: Require zero staged PCB violations
         run: |
           kicad-cli pcb drc --exit-code-violations \
@@ -67,6 +68,7 @@ jobs:
             /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb \
             | tee /tmp/sense-protection-topology.log
       - name: Render disposable board
+        if: always()
         run: |
           kicad-cli pcb render --side top \
             --output /tmp/sense-protection-top.png \
@@ -90,4 +92,3 @@ jobs:
             /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb
             /tmp/rev-a-sense-protection/mcu.kicad_sch
           if-no-files-found: ignore
-
