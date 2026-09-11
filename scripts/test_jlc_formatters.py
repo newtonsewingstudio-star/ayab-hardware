@@ -51,6 +51,9 @@ class JlcFormatterTests(unittest.TestCase):
         self.assertNotIn("__LCSC ID", ordered)
         position_job = next(job for job in jobset["jobs"] if job["type"] == "pcb_export_pos")
         self.assertTrue(position_job["settings"]["exclude_dnp"])
+        gerber_job = next(job for job in jobset["jobs"] if job["type"] == "pcb_export_gerbers")
+        self.assertIn("F.Paste", gerber_job["settings"]["layers"])
+        self.assertIn("B.Paste", gerber_job["settings"]["layers"])
 
     def test_legacy_six_column_bom(self):
         result = self.run_formatter(

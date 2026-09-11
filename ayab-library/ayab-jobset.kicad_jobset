@@ -55,6 +55,7 @@
         "include_netlist_attributes": true,
         "layers": [
           "B.Cu",
+          "B.Paste",
           "B.Mask",
           "B.SilkS",
           "In30.Cu",
@@ -88,6 +89,7 @@
           "In2.Cu",
           "In1.Cu",
           "F.Cu",
+          "F.Paste",
           "F.Mask",
           "F.SilkS",
           "Edge.Cuts"
