@@ -2,7 +2,7 @@
 
 Generated from the full hierarchical KiCad netlist. This is the electrical source of truth for the legacy LM393 section before Rev A removal/rework.
 
-- components in netlist: **188**
+- components in netlist: **191**
 - nets in netlist: **152**
 - nets touching U702/U703: **0**
 - refs electrically adjacent to U702/U703: **2**
