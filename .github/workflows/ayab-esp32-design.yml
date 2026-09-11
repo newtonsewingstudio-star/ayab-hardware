@@ -10,6 +10,8 @@ on:
     paths:
       - ayab-esp32/**
       - ayab-library/**
+      - .github/workflows/ayab-esp32-design.yml
+      - scripts/dependencies.sh
 
   pull_request:
     branches:
@@ -17,6 +19,8 @@ on:
     paths:
       - ayab-esp32/**
       - ayab-library/**
+      - .github/workflows/ayab-esp32-design.yml
+      - scripts/dependencies.sh
 
 env:
   workflow_project_dir: ayab-esp32
