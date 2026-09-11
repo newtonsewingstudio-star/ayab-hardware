@@ -1651,11 +1651,6 @@
           (reference "J501") (unit 1)
         )
       )
-      (project "stm32g431-mt6701-stspin233"
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307/9a7f39aa-afb0-48e5-a983-57776588e1e5"
-          (reference "J601") (unit 1)
-        )
-      )
     )
   )
 
@@ -1739,14 +1734,6 @@
           (reference "C502") (unit 1)
         )
       )
-      (project "stm32g431-mt6701-stspin233"
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307"
-          (reference "C?") (unit 1)
-        )
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307/9a7f39aa-afb0-48e5-a983-57776588e1e5"
-          (reference "C602") (unit 1)
-        )
-      )
     )
   )
 
@@ -1825,11 +1812,6 @@
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/7889acbf-96cc-4a04-a98d-615c06d1b134"
           (reference "U501") (unit 1)
-        )
-      )
-      (project "stm32g431-mt6701-stspin233"
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307/9a7f39aa-afb0-48e5-a983-57776588e1e5"
-          (reference "U601") (unit 1)
         )
       )
     )
@@ -1930,14 +1912,6 @@
           (reference "#PWR0501") (unit 1)
         )
       )
-      (project "stm32g431-mt6701-stspin233"
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307/9a7f39aa-afb0-48e5-a983-57776588e1e5"
-          (reference "#PWR0601") (unit 1)
-        )
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307"
-          (reference "#PWR?") (unit 1)
-        )
-      )
     )
   )
 
@@ -1977,14 +1951,6 @@
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/7889acbf-96cc-4a04-a98d-615c06d1b134"
           (reference "C501") (unit 1)
-        )
-      )
-      (project "stm32g431-mt6701-stspin233"
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307"
-          (reference "C?") (unit 1)
-        )
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307/9a7f39aa-afb0-48e5-a983-57776588e1e5"
-          (reference "C601") (unit 1)
         )
       )
     )
@@ -2088,14 +2054,6 @@
           (reference "R501") (unit 1)
         )
       )
-      (project "stm32g431-mt6701-stspin233"
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307/9a7f39aa-afb0-48e5-a983-57776588e1e5"
-          (reference "R601") (unit 1)
-        )
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307"
-          (reference "R?") (unit 1)
-        )
-      )
     )
   )
 
@@ -2119,11 +2077,6 @@
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/7889acbf-96cc-4a04-a98d-615c06d1b134"
           (reference "#PWR0503") (unit 1)
-        )
-      )
-      (project "stm32g431-mt6701-stspin233"
-        (path "/bcb2c98d-7159-437a-9ffb-b81c5fcc4307/9a7f39aa-afb0-48e5-a983-57776588e1e5"
-          (reference "#PWR0604") (unit 1)
         )
       )
     )

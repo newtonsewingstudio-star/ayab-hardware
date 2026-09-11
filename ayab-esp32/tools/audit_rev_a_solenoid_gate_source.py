@@ -58,5 +58,5 @@ if SCH.count('"SOLENOID_12V_SW"') < 2:
 if '"DEFAULT_OFF' in SCH:
     raise RuntimeError("unexpected production-promotion marker in source")
 print("SOLENOID_GATE_SOURCE_AUDIT_OK")
-print("SOURCE_REVIEW: no prototype evidence and no fabrication output")
+print("SOURCE_REVIEW: no physical prototype evidence and no AYAB-ESP32 release fabrication output generated")
 print("PARTS: Q805 LP9435LT1G, Q806 AO3400A, 100k/10k default-off network, TP703")

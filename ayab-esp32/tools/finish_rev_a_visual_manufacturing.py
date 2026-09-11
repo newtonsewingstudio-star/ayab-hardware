@@ -75,7 +75,7 @@ if obsolete_c_legend is not None:
     board.Remove(obsolete_c_legend)
 
 labels = {
-    "KH910 REV A 09/2026": (145.5, 148.0, "F.SilkS", 0.80),
+    "KH910 REV A 09/2026": (174.0, 161.2, "F.SilkS", 0.80),
     "SOLENOID GATE": (106.5, 156.8, "F.SilkS", 0.80),
     "TP703 SW": (145.0, 162.4, "F.SilkS", 0.80),
     "D205 K=3V3": (235.5, 153.5, "B.SilkS", 0.80),

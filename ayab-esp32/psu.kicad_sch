@@ -2359,7 +2359,7 @@
   (symbol (lib_id "ayab-lib:C_Polarized_Small_US") (at 175.26 60.96 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 0c4dcc78-cf20-4915-ac3b-1c08c704e555)
-    (property "Reference" "C?" (at 172.085 60.3313 0)
+    (property "Reference" "C607" (at 172.085 60.3313 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "220u" (at 172.085 62.8713 0)
@@ -2389,14 +2389,6 @@
     (pin "1" (uuid 06e73735-fc09-4386-a415-7d809f781f5f))
     (pin "2" (uuid 84077b93-dedc-422b-aa43-155492e89523))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C411") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C607") (unit 1)
@@ -2472,11 +2464,6 @@
     (pin "1" (uuid 4f55cea1-c28e-4c67-a69b-6046d6e9f8c9))
     (pin "2" (uuid 6d3acbbb-2eeb-4765-9faf-e1294abe6c8c))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "D404") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "D604") (unit 1)
@@ -2488,7 +2475,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 48.26 124.46 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 12589d98-fa6a-4c04-9f50-2472913df903)
-    (property "Reference" "C?" (at 51.435 123.8313 0)
+    (property "Reference" "C604" (at 51.435 123.8313 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 51.435 126.3713 0)
@@ -2518,14 +2505,6 @@
     (pin "1" (uuid a9e5dd81-f157-4bff-af2b-2eb9a9d58710))
     (pin "2" (uuid f0adb452-474a-4586-af52-18c05eb41251))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C426") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C604") (unit 1)
@@ -2567,11 +2546,6 @@
     (pin "1" (uuid 1239b484-17c0-490b-b8a4-9a33cf9abb46))
     (pin "2" (uuid 96edcae4-cbba-43e1-a812-c5fe8b51185e))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C417") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C611") (unit 1)
@@ -2613,11 +2587,6 @@
     (pin "1" (uuid aca951ab-3d73-4a92-90ca-724f67f58526))
     (pin "2" (uuid 89ae9aad-2440-466b-b1f0-75bf63bd81a7))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C420") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C612") (unit 1)
@@ -2643,14 +2612,6 @@
     )
     (pin "1" (uuid 969f73ae-1ad2-40a2-b051-d7dde67655b5))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "#PWR0114") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0407") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0603") (unit 1)
@@ -2695,11 +2656,6 @@
     (pin "3" (uuid 654e48e5-1925-4e32-ae69-aece2ace4320))
     (pin "4" (uuid e590d712-f348-4a85-9ed0-96a2b9f8a97c))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "U402") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "U602") (unit 1)
@@ -2711,7 +2667,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 175.26 134.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 28de0664-fb2f-435d-9c96-e31987eedcaf)
-    (property "Reference" "C?" (at 172.085 133.9913 0)
+    (property "Reference" "C602" (at 172.085 133.9913 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 172.085 136.5313 0)
@@ -2741,14 +2697,6 @@
     (pin "1" (uuid 62169ffa-a939-44fa-9d2f-0bd0d598938a))
     (pin "2" (uuid 3c6e20f6-cb2b-4441-99b0-6ad9ea47d72e))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C424") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C602") (unit 1)
@@ -2825,11 +2773,6 @@
     (pin "1" (uuid 01619f3e-f19f-4669-abcc-c03ca5b6be85))
     (pin "2" (uuid 31ee35e3-3f35-4f5e-85fc-d8ec2c23c988))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "D402") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "D603") (unit 1)
@@ -2841,7 +2784,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 247.65 134.62 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2f3428fe-8bf7-46b7-9948-5ae29bd7d1f9)
-    (property "Reference" "C?" (at 250.825 133.9913 0)
+    (property "Reference" "C619" (at 250.825 133.9913 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 250.825 136.5313 0)
@@ -2871,14 +2814,6 @@
     (pin "1" (uuid c763a5a6-9f93-4e5f-aaa0-cb346e00fa4d))
     (pin "2" (uuid e938bd88-f410-43ec-a6f4-d837abbf3b8e))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C410") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C619") (unit 1)
@@ -2917,11 +2852,6 @@
     (pin "1" (uuid 3dba7312-0b66-4fe7-b9ee-f255797282d1))
     (pin "2" (uuid c3681d10-0464-45db-85f5-4fad1359fdd0))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "L401") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "L601") (unit 1)
@@ -2963,11 +2893,6 @@
     (pin "1" (uuid 63c6bae8-2265-42e2-a486-5368958b85ba))
     (pin "2" (uuid f0ad348a-5b10-4553-8a3a-9e75abae9fb8))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C415") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C609") (unit 1)
@@ -2993,11 +2918,6 @@
     )
     (pin "1" (uuid aad0d7f8-638d-4f74-89aa-22472ec4bfab))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0409") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0605") (unit 1)
@@ -3009,7 +2929,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 247.65 60.96 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 43c1c22f-ed3c-4d55-ad9c-b7d018187d15)
-    (property "Reference" "C?" (at 250.825 60.3313 0)
+    (property "Reference" "C618" (at 250.825 60.3313 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 250.825 62.8713 0)
@@ -3039,14 +2959,6 @@
     (pin "1" (uuid 7dc0de24-9f9a-4a3b-bebb-75950b8861b3))
     (pin "2" (uuid dbe4fb6f-4778-4ee3-af52-ee692a2c6830))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C402") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C618") (unit 1)
@@ -3085,11 +2997,6 @@
     (pin "1" (uuid cdb1fa67-3686-4202-b165-c1b45c66bcd1))
     (pin "2" (uuid 643033bf-d670-4f93-92fd-1164001c6dbe))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "R407") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "R609") (unit 1)
@@ -3128,11 +3035,6 @@
     (pin "1" (uuid d96cf564-c2b2-46e7-bff7-a087d76b356b))
     (pin "2" (uuid 20b805c8-6164-485b-b3e2-826154365ac6))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "R402") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "R604") (unit 1)
@@ -3171,11 +3073,6 @@
     (pin "1" (uuid cccad8ad-fbe7-427c-a52e-c88968de2b82))
     (pin "2" (uuid 0268a87c-7e7e-4d30-a7c5-10d5fb2eec92))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "L402") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "L602") (unit 1)
@@ -3210,11 +3107,6 @@
     )
     (pin "1" (uuid 91738af4-2296-4daf-a344-388169cae3f1))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "TP403") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "TP603") (unit 1)
@@ -3240,11 +3132,6 @@
     )
     (pin "1" (uuid f128ffbf-c77d-44ea-981c-b68569be4c39))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0413") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0609") (unit 1)
@@ -3279,11 +3166,6 @@
     )
     (pin "1" (uuid 01fe27ac-3965-47ff-b2de-3bc7bf1c8821))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "TP402") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "TP601") (unit 1)
@@ -3309,14 +3191,6 @@
     )
     (pin "1" (uuid c9ab84a7-fe70-480e-9384-2a47d18a88d1))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "#PWR0113") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0406") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0611") (unit 1)
@@ -3351,11 +3225,6 @@
     )
     (pin "1" (uuid 5cbdf671-93ab-4892-8065-a14921a7d451))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "TP401") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "TP602") (unit 1)
@@ -3367,7 +3236,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 237.49 60.96 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6e5365ac-435e-4855-ab20-93edfdb1b2c5)
-    (property "Reference" "C?" (at 240.665 60.3313 0)
+    (property "Reference" "C616" (at 240.665 60.3313 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 240.665 62.8713 0)
@@ -3397,14 +3266,6 @@
     (pin "1" (uuid 25246319-d53b-47c5-99c3-6014fef3e1f9))
     (pin "2" (uuid 7ae62767-c987-4004-b3ef-9107e29252c1))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C401") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C616") (unit 1)
@@ -3443,11 +3304,6 @@
     (pin "1" (uuid 68d22d73-00a4-46a5-886a-484c366406f0))
     (pin "2" (uuid c6befad5-55c7-4d0d-b5c6-e6b0d3d09b56))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "R404") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "R606") (unit 1)
@@ -3489,11 +3345,6 @@
     (pin "1" (uuid 720b4f04-4398-487d-b6a7-679f190ab1a1))
     (pin "2" (uuid 9d2d9c6e-e544-42ab-84d9-93213aeed9f9))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C421") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C613") (unit 1)
@@ -3544,11 +3395,6 @@
     )
     (pin "1" (uuid 842c957f-fab5-4721-8478-e2c2d27bbb98))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0414") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0610") (unit 1)
@@ -3587,11 +3433,6 @@
     (pin "1" (uuid 845a9bb9-40e2-47cf-baac-d65583bcf51e))
     (pin "2" (uuid 416f82e5-d660-4d72-af42-ae89ea506b61))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "D401") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "D602") (unit 1)
@@ -3617,11 +3458,6 @@
     )
     (pin "1" (uuid cd920fd8-c188-44c6-923f-2b8d4c8a3035))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0408") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0608") (unit 1)
@@ -3633,7 +3469,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 26.67 124.46 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 90b7cbb2-0126-47d5-9413-001560d95ba3)
-    (property "Reference" "C?" (at 29.845 123.8313 0)
+    (property "Reference" "C601" (at 29.845 123.8313 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 29.845 126.3713 0)
@@ -3663,14 +3499,6 @@
     (pin "1" (uuid fcb599bd-b8c4-49f1-9397-b1234df4beb9))
     (pin "2" (uuid 6952eb6a-a18e-4bc8-a32b-04a2640b49ac))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C423") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C601") (unit 1)
@@ -3696,14 +3524,6 @@
     )
     (pin "1" (uuid 4517ce2f-b1df-44fb-9fe6-cf3e91237f69))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "#PWR0114") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0407") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0607") (unit 1)
@@ -3754,11 +3574,6 @@
     )
     (pin "1" (uuid 3506ecca-c37f-44c5-aa67-a4e6e82d9b52))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0408") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0604") (unit 1)
@@ -3770,7 +3585,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 38.1 124.46 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid abc59437-34e4-45d9-b1fb-2e390a21879c)
-    (property "Reference" "C?" (at 41.275 123.8313 0)
+    (property "Reference" "C603" (at 41.275 123.8313 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 41.275 126.3713 0)
@@ -3800,14 +3615,6 @@
     (pin "1" (uuid ee0d1dda-bffc-4412-8e93-10b9ff900894))
     (pin "2" (uuid 9e604922-d68c-4c71-bf13-e010752d1fc7))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C425") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C603") (unit 1)
@@ -3846,11 +3653,6 @@
     (pin "1" (uuid 560ed412-d510-41ab-9cb6-cc04524a91ee))
     (pin "2" (uuid 739621ae-078d-4c1d-961d-f4e698a5db21))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "R401") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "R603") (unit 1)
@@ -3876,14 +3678,6 @@
     )
     (pin "1" (uuid 9bdfcdd2-1f23-463e-925c-2a93849a7908))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "#PWR0113") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0406") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0602") (unit 1)
@@ -3922,11 +3716,6 @@
     (pin "1" (uuid 86a376b4-3769-49e0-a1eb-b1b0e6c23004))
     (pin "2" (uuid d43f5ccf-b233-4b0b-b29c-5703df610f46))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "R405") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "R607") (unit 1)
@@ -3952,11 +3741,6 @@
     )
     (pin "1" (uuid 6f532673-2bf9-4269-a9f8-dfc1406185de))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0410") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0606") (unit 1)
@@ -3968,7 +3752,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 257.81 134.62 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid b8de604a-22a9-474c-bb3a-3250fdddf223)
-    (property "Reference" "C?" (at 260.985 133.9913 0)
+    (property "Reference" "C621" (at 260.985 133.9913 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 260.985 136.5313 0)
@@ -3998,14 +3782,6 @@
     (pin "1" (uuid bb1eb980-928a-44ac-8758-222704588d40))
     (pin "2" (uuid dc842a4b-5f1b-4bd9-a9af-7b14f9f188a2))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C412") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C621") (unit 1)
@@ -4017,7 +3793,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 237.49 134.62 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid bcfb0b5a-1be5-42ef-a5cb-f5b705a595df)
-    (property "Reference" "C?" (at 240.665 133.9913 0)
+    (property "Reference" "C617" (at 240.665 133.9913 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 240.665 136.5313 0)
@@ -4047,14 +3823,6 @@
     (pin "1" (uuid f6395029-fc0a-4033-ad0d-4fae6a099bb2))
     (pin "2" (uuid d3541d79-5115-4ccf-9d17-e95d3d5f97d0))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C408") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C617") (unit 1)
@@ -4093,11 +3861,6 @@
     (pin "1" (uuid c8ba4539-93d4-46ee-914d-1cf6c91d833d))
     (pin "2" (uuid 6bfcfce7-604e-4ab8-8ea5-54147caf682f))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "R403") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "R605") (unit 1)
@@ -4142,11 +3905,6 @@
     (pin "3" (uuid db27bc6c-adb0-47fd-9dc2-b6637a93cf7d))
     (pin "4" (uuid 3a297119-e3e0-45e7-ac18-ef6a4b9259c5))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "U401") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "U601") (unit 1)
@@ -4158,7 +3916,7 @@
   (symbol (lib_id "Connector:Barrel_Jack_Switch") (at 27.94 39.37 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid daac17c2-edbe-4abc-adf6-035304751803)
-    (property "Reference" "J?" (at 27.94 30.48 0)
+    (property "Reference" "J601" (at 27.94 30.48 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "VIN" (at 27.94 33.02 0)
@@ -4186,14 +3944,6 @@
     (pin "2" (uuid d54a7fb3-7552-4f8a-a930-6a5f8522f995))
     (pin "3" (uuid e675d562-d0d2-486a-bf28-4f161eea7592))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "J?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "J401") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "J601") (unit 1)
@@ -4214,7 +3964,10 @@
     (property "Footprint" "Diode_SMD:D_SMA" (at 214.63 134.62 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 214.63 134.62 0)
+    (property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/8a09f89034087b5d1623ed150a6cce5b.pdf?productCode=C22452" (at 214.63 134.62 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Description" "SS54 5 A 40 V SMA Schottky rectifier" (at 214.63 134.62 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Package" "SMA" (at 214.63 134.62 0)
@@ -4226,17 +3979,12 @@
     (property "OEM PN" "SS54" (at 214.63 134.62 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "OEM" "" (at 214.63 134.62 0)
+    (property "OEM" "MDD (Microdiode Semiconductor)" (at 214.63 134.62 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid b71ec137-e4c8-41ff-a54a-efdb0a1c785b))
     (pin "2" (uuid 30c08d88-3e56-4fee-8353-26c7efe8fceb))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "D406") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "D606") (unit 1)
@@ -4278,11 +4026,6 @@
     (pin "1" (uuid f86ec670-5172-4f5a-a00a-0b6a10d71a93))
     (pin "2" (uuid 6042b670-9986-41f3-9778-8b51f6d7ecba))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C416") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C610") (unit 1)
@@ -4294,7 +4037,7 @@
   (symbol (lib_id "ayab-lib:C_Polarized_Small_US") (at 68.58 124.46 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e295343a-cb94-4cca-817b-fedc28782d5d)
-    (property "Reference" "C?" (at 71.755 123.825 0)
+    (property "Reference" "C606" (at 71.755 123.825 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "220u" (at 71.755 126.365 0)
@@ -4324,14 +4067,6 @@
     (pin "1" (uuid f23c60df-065d-4970-977a-d458ca8547e2))
     (pin "2" (uuid bb885a68-1477-4460-8eba-df0fcf9fbae6))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C409") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C606") (unit 1)
@@ -4352,7 +4087,10 @@
     (property "Footprint" "Diode_SMD:D_SMA" (at 214.63 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 214.63 60.96 0)
+    (property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/8a09f89034087b5d1623ed150a6cce5b.pdf?productCode=C22452" (at 214.63 60.96 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Description" "SS54 5 A 40 V SMA Schottky rectifier" (at 214.63 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Package" "SMA" (at 214.63 60.96 0)
@@ -4364,17 +4102,12 @@
     (property "OEM PN" "SS54" (at 214.63 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "OEM" "" (at 214.63 60.96 0)
+    (property "OEM" "MDD (Microdiode Semiconductor)" (at 214.63 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 74388922-831d-4061-a9df-fb53390ac13f))
     (pin "2" (uuid f560a04e-2b3b-43eb-b01f-5ac64620fefb))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "D405") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "D605") (unit 1)
@@ -4400,14 +4133,6 @@
     )
     (pin "1" (uuid 05d06c37-518c-4f7f-b884-d03a028e78c0))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "#PWR0114") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0407") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0601") (unit 1)
@@ -4419,7 +4144,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 257.81 60.96 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ec6e00aa-970a-47f2-8095-3226e5582c2a)
-    (property "Reference" "C?" (at 260.985 60.3313 0)
+    (property "Reference" "C620" (at 260.985 60.3313 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 260.985 62.8713 0)
@@ -4449,14 +4174,6 @@
     (pin "1" (uuid 5c0df234-497c-401a-ae7e-196f54edfbe8))
     (pin "2" (uuid 8b406b24-020d-4212-bf7a-03b84589f79c))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C403") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C620") (unit 1)
@@ -4523,11 +4240,6 @@
     (pin "1" (uuid d1672577-e93a-4b22-bb3f-9b9884d8d080))
     (pin "2" (uuid 7b641973-a911-4f8b-8f2b-076f4f773fb5))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C419") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C615") (unit 1)
@@ -4566,11 +4278,6 @@
     (pin "1" (uuid a4026979-0210-4ee4-b209-45becfd16248))
     (pin "2" (uuid a499cbf1-5e8c-431f-ae45-f16820307d1a))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "R406") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "R610") (unit 1)
@@ -4596,14 +4303,6 @@
     )
     (pin "1" (uuid c71ca4a1-2604-4f73-9ad8-9f5bf7a400ea))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "#PWR0113") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR0406") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "#PWR0612") (unit 1)
@@ -4624,7 +4323,10 @@
     (property "Footprint" "easyeda2kicad:MBF-SMD_L4.8-W3.8-P2.54-LS6.8-TL" (at 59.69 49.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 59.69 49.53 0)
+    (property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/e72e2e5f3749444edb574593f092205f.pdf?productCode=C880909" (at 59.69 49.53 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Description" "KMB14F 1 A bridge rectifier; PCB pins 1/2=AC, 3=+12V, 4=GND" (at 59.69 49.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "LCSC ID" "C880909" (at 59.69 49.53 0)
@@ -4634,6 +4336,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "OEM PN" "KMB14F" (at 59.69 49.53 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Package" "MBF" (at 59.69 49.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid b8c8560d-19e7-4879-8e5c-cf7be38d0c5c))
@@ -4652,7 +4357,7 @@
   (symbol (lib_id "ayab-lib:C_Small") (at 58.42 124.46 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f83a97ee-015d-44f6-83b5-540d36318177)
-    (property "Reference" "C?" (at 61.595 123.8313 0)
+    (property "Reference" "C605" (at 61.595 123.8313 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10u" (at 61.595 126.3713 0)
@@ -4682,14 +4387,6 @@
     (pin "1" (uuid 0baad822-b976-4fe3-b7d8-a8c068c1d9b3))
     (pin "2" (uuid d983341a-135c-4c7c-babb-e55c64683704))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9"
-          (reference "C?") (unit 1)
-        )
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C427") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C605") (unit 1)
@@ -4728,11 +4425,6 @@
     (pin "1" (uuid f8ee765d-4530-4768-ae34-c4a8a64b37fa))
     (pin "2" (uuid 32772a0d-9f9b-44fc-b522-e46c6bfbcf3b))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "R406") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "R608") (unit 1)
@@ -4774,11 +4466,6 @@
     (pin "1" (uuid c4264a08-5117-4a02-9ba7-39588bb7a3da))
     (pin "2" (uuid 6a7943d5-81d7-4deb-aa76-6e19d2a55d4b))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "C418") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "C614") (unit 1)
@@ -4845,11 +4532,6 @@
     (pin "5" (uuid fa782193-b942-42b3-b9ec-dcec593f8a69))
     (pin "6" (uuid 1e42a2f6-2280-4142-9cf1-5a09d55d2aef))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "U403") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
           (reference "U403") (unit 1)
@@ -4860,7 +4542,7 @@
 (symbol (lib_id "power:GND") (at 264.16 64.77 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 8165fe0b-91c8-4c2a-8000-5b9ebf8f1ef7)
-    (property "Reference" "#PWR720" (at 264.16 71.12 0)
+    (property "Reference" "#PWR0613" (at 264.16 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 260.35 66.04 0)
@@ -4874,14 +4556,9 @@
     )
     (pin "1" (uuid 4fa2944d-c1b3-4f16-8060-6fb8f6ee71d7))
     (instances
-      (project "electronic-knitter"
-        (path "/a3f4eded-ecb9-44ce-82ad-ad815e00f2c9/d37dfdc2-398a-4de1-8840-934586e4e3cf"
-          (reference "#PWR720") (unit 1)
-        )
-      )
       (project "ayab-esp32"
         (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/512b1de4-f8f4-4173-a7be-69b46f59a5e5"
-          (reference "#PWR0609") (unit 1)
+          (reference "#PWR0613") (unit 1)
         )
       )
     )

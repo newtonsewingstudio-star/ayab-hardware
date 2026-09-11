@@ -68,18 +68,18 @@
 			)
 			(layer "In1.Cu"
 				(type "copper")
-				(thickness 0.0152)
+				(thickness 0.0175)
 			)
 			(layer "dielectric 2"
 				(type "core")
-				(thickness 1.065)
+				(thickness 1.0604)
 				(material "FR4")
 				(epsilon_r 4.5)
 				(loss_tangent 0.02)
 			)
 			(layer "In2.Cu"
 				(type "copper")
-				(thickness 0.0152)
+				(thickness 0.0175)
 			)
 			(layer "dielectric 3"
 				(type "prepreg")
@@ -1867,7 +1867,7 @@
 			(uuid "d55e8c80-e456-4957-b7fc-27e982165e88")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -2126,7 +2126,7 @@
 			(uuid "6b43ced8-9a8d-46b4-b4b7-408434560d04")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -2385,7 +2385,7 @@
 			(uuid "676f12f9-1a35-4be9-b7f6-888e319e676a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -2644,7 +2644,7 @@
 			(uuid "676f12f9-1a35-4be9-b7f6-888e319e676a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -2903,7 +2903,7 @@
 			(uuid "676f12f9-1a35-4be9-b7f6-888e319e676a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -3162,7 +3162,7 @@
 			(uuid "676f12f9-1a35-4be9-b7f6-888e319e676a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -4460,7 +4460,7 @@
 			(uuid "0742e93e-6c21-4de3-9c5d-a33e2774b472")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -4919,7 +4919,7 @@
 			(uuid "95eafa21-4a4c-410a-b0d9-356a5490d2b3")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -5178,7 +5178,7 @@
 			(uuid "a18d0c9d-3f99-47bd-a500-22bec765a5f8")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -5485,7 +5485,7 @@
 			(uuid "85a35ef5-e7d4-4534-8ecd-196bcc92d32a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/HNC2-2.5P-10DS.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/HNC2-2.5P-10DS.step"
 			(offset
 				(xyz -15 -2 0)
 			)
@@ -5797,7 +5797,7 @@
 			(uuid "a992419d-23a9-4c50-aaf3-d376c1a7a8c0")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/KEY-TH_4P-L7.5-W11.5-P4.5.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/KEY-TH_4P-L7.5-W11.5-P4.5.wrl"
 			(offset
 				(xyz 0 4.35 3.6)
 			)
@@ -6082,7 +6082,7 @@
 			(uuid "63a987c4-02ed-4473-8408-81e2bb6db831")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/HNC2-2.5P-8DS.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/HNC2-2.5P-8DS.step"
 			(offset
 				(xyz -13.75 -2 0)
 			)
@@ -6730,7 +6730,7 @@
 			(uuid "69023efe-41d1-4e3a-ba35-b2941933a800")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -6989,7 +6989,7 @@
 			(uuid "d4999363-9fbf-4293-baba-1525ab7cf1e3")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -7364,7 +7364,7 @@
 			(uuid "28ce702c-b6f4-4e63-be75-9e073a65d7a9")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -7775,7 +7775,7 @@
 			(uuid "6ac695c5-8809-4391-9641-23ea7dbb975f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -8022,7 +8022,7 @@
 			(uuid "b8b53d66-f2c5-464a-a178-3e9f681a167e")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -8430,7 +8430,7 @@
 			(uuid "2238612b-2d47-4016-a335-f9b468168844")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -8735,7 +8735,7 @@
 			(uuid "a5bb8a71-6891-457a-82ea-a13b02362ed7")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CONN-TH_3P-P2.00_A2004WV-3P.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CONN-TH_3P-P2.00_A2004WV-3P.wrl"
 			(offset
 				(xyz 0 1.46 1.9)
 			)
@@ -9288,7 +9288,7 @@
 			(uuid "149d0485-bf93-4b3e-8ed0-0cf728f7f94e")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/53014-0510.stp"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/53014-0510.stp"
 			(offset
 				(xyz -3.440000006 -0.5199999731 2.79999991)
 			)
@@ -9547,7 +9547,7 @@
 			(uuid "4e808385-c898-407d-b2d0-c58d729ec0d1")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -9804,8 +9804,11 @@
 			(pintype "passive")
 			(uuid "eb41978a-3905-53fa-98bc-fcded8669ecc")
 		)
+		(path "/a7e0db0f-e473-44d4-a2fe-681f732aacb2/7ec7d011-3001-49c9-8999-3317dce5e123")
+		(sheetname "ESP32")
+		(sheetfile "mcu.kicad_sch")
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -10064,7 +10067,7 @@
 			(uuid "193d3532-fbd4-46fc-bb53-3d3871c49c11")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -10323,7 +10326,7 @@
 			(uuid "4cdc7433-f638-451a-bbe9-0f2b7e22960d")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -10742,7 +10745,7 @@
 			(uuid "9cdce6e9-302a-4dc6-bf75-9e658b0a1f5c")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOIC-16_3.9x9.9mm_P1.27mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOIC-16_3.9x9.9mm_P1.27mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -11001,7 +11004,7 @@
 			(uuid "36edf059-d177-48ac-8bff-70286ecc742b")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -11270,7 +11273,7 @@
 			(uuid "fe64ab94-e9d3-48f6-89a8-c87e4f9146af")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -11805,7 +11808,7 @@
 			(uuid "7071c71f-a28d-45b6-8636-571e4935e8a7")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SM06B-SRSS-TB-LF--SN---3DModel-STEP-56544.STEP"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SM06B-SRSS-TB-LF--SN---3DModel-STEP-56544.STEP"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -12234,7 +12237,7 @@
 				)
 			)
 		)
-		(path "/a44519f5-2a17-4043-8636-a7b7c38f71bc/5d9e645e-7bc4-4a5e-897f-11ad25db0010")
+		(path "/a44519f5-2a17-4043-8636-a7b7c38f71bc/3d5b2f4e-bc42-4903-a356-cc83cf32fd79")
 		(sheetname "IO CONDITIONING")
 		(sheetfile "ioconditioning.kicad_sch")
 		(attr smd)
@@ -12368,7 +12371,7 @@
 			(uuid "e600ee0b-7450-43c0-af94-897381014d11")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -13052,7 +13055,7 @@
 			(uuid "b0c54eb4-30ec-4229-9791-0eab1c325625")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -13418,7 +13421,7 @@
 			(uuid "7bc8a476-cf04-4f43-98df-5aad08ae5aa1")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -13813,7 +13816,7 @@
 			(uuid "4e364618-d0a3-4112-bea4-bd78750f0251")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -14084,7 +14087,7 @@
 			(uuid "4f2edf0b-e4b8-4b19-a4f4-cad5074542b6")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -14503,7 +14506,7 @@
 			(uuid "d28756b1-e32b-4fb8-b8d7-264cdcd9fdc1")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOIC-16_3.9x9.9mm_P1.27mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOIC-16_3.9x9.9mm_P1.27mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -14762,7 +14765,7 @@
 			(uuid "89dc101e-4295-4ab9-997f-2e2e1e9b2642")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -15058,7 +15061,7 @@
 			(uuid "ab8ee652-b9cd-4013-8b95-671feb531418")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/DC-IN-SMD_L14.8-W9.0-H11.0-P6.1.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/DC-IN-SMD_L14.8-W9.0-H11.0-P6.1.wrl"
 			(offset
 				(xyz 3 5.75 0)
 			)
@@ -15445,7 +15448,7 @@
 			(uuid "e0c9c4f8-ae64-4fd6-bda3-9f7e45b1d9bc")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/PinHeader_2x04_P2.54mm_Vertical.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/PinHeader_2x04_P2.54mm_Vertical.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -15716,7 +15719,7 @@
 			(uuid "9c93c884-69f8-40aa-88ba-654ba54d23e3")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -15747,7 +15750,7 @@
 				)
 			)
 		)
-		(property "Value" "M3"
+		(property "Value" "M2"
 			(at 0 2.9 0)
 			(layer "F.Fab")
 			(uuid "219c3c0b-eee4-4207-a82d-b39d06076bb9")
@@ -16756,7 +16759,7 @@
 			(uuid "4136ed6c-e781-4520-a258-34dc8beecb92")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/PinHeader_1x04_P2.54mm_Horizontal.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/PinHeader_1x04_P2.54mm_Horizontal.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -17020,7 +17023,7 @@
 			(uuid "d936c4e5-9692-420f-954e-efea63fa5b84")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/Brother_5P.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/Brother_5P.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -17348,7 +17351,7 @@
 			(uuid "53d96b8a-2f71-4c84-8db7-f0736aa573d9")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CONN-TH_X2564WV-05-N0SN.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CONN-TH_X2564WV-05-N0SN.wrl"
 			(offset
 				(xyz -0 -0 0)
 			)
@@ -17607,7 +17610,7 @@
 			(uuid "e84abd4e-1b76-4240-8a9a-ca7aa887cdcf")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -18049,7 +18052,7 @@
 			(uuid "3ba6a323-176d-45a1-9bfe-1449da09d400")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -18350,7 +18353,7 @@
 			(uuid "3ba6a323-176d-45a1-9bfe-1449da09d400")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -18597,7 +18600,7 @@
 			(uuid "710f19f6-2cd0-47c9-95d5-179dd458bc68")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -19276,7 +19279,7 @@
 			(uuid "e47a10a9-44dd-4407-a365-bdff0279bade")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -19751,7 +19754,7 @@
 			(uuid "3d0a400f-cecf-40a8-a3ba-2278d3f6e0c6")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CONN-TH_3P-P2.00_A2004WV-3P.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CONN-TH_3P-P2.00_A2004WV-3P.wrl"
 			(offset
 				(xyz 0 1.46 1.9)
 			)
@@ -20010,7 +20013,7 @@
 			(uuid "82081888-7a80-444d-9af4-34edf49992ea")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -20257,7 +20260,7 @@
 			(uuid "ce6201c6-8b89-4ce1-be9a-62a4034920b1")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -20516,7 +20519,7 @@
 			(uuid "4fc23501-332f-4682-9260-7e642b7eb8c2")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -20775,7 +20778,7 @@
 			(uuid "d389662c-8a57-4f3a-a6ef-e6ad301f8500")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -21023,7 +21026,7 @@
 			(uuid "d16e41e4-52a1-4ed2-9e56-383428627556")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -21270,7 +21273,7 @@
 			(uuid "bba8aae0-9519-4fc8-ba2e-3cd5176073c2")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -21529,7 +21532,7 @@
 			(uuid "bf4ba1a1-68c4-4af4-815e-c0c2fbbd3f3c")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -21810,7 +21813,7 @@
 			(uuid "27c3d6c2-f95a-4186-942f-7542cea18145")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -22198,7 +22201,7 @@
 			(uuid "6ad699c7-b6b5-4653-bbde-2e16cde58615")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -22594,7 +22597,7 @@
 			(uuid "b484db0b-0a41-4ae4-bb19-2e8ba0f40d5e")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -22625,7 +22628,7 @@
 				)
 			)
 		)
-		(property "Value" "M3"
+		(property "Value" "M2"
 			(at 0 2.9 0)
 			(layer "F.Fab")
 			(uuid "dd62b2b2-f1d2-4c7d-8191-49e42f252583")
@@ -23156,7 +23159,7 @@
 			(uuid "c8e264ad-76fe-4a31-9200-5d9d698ab6df")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/PinHeader_2x04_P2.54mm_Vertical.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/PinHeader_2x04_P2.54mm_Vertical.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -23403,7 +23406,7 @@
 			(uuid "370dbee9-54b2-463f-bce4-9f49de26a34f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -24977,7 +24980,7 @@
 			(uuid "e585d70c-f7a3-4063-9298-ef67e4eddb42")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -25236,7 +25239,7 @@
 			(uuid "4352b8e9-02b1-4431-8e32-b7d87cd3b573")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -25495,7 +25498,7 @@
 			(uuid "0749f864-2e0c-4380-a507-11138940b255")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -26657,7 +26660,7 @@
 			(uuid "cea34cce-3022-4e16-8b60-9a615fb54a42")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/HNC2-2.5P-3DS.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/HNC2-2.5P-3DS.step"
 			(offset
 				(xyz -7.5 -2 0)
 			)
@@ -27057,7 +27060,7 @@
 			(uuid "9482768c-d290-4e0a-84be-dc0d4268f2c5")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -27316,7 +27319,7 @@
 			(uuid "60bebafe-6fd6-4b17-a00d-6f3ad6a11474")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -27575,7 +27578,7 @@
 			(uuid "7fae4002-e6c1-4ef1-a049-f65779252c1c")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -28005,7 +28008,7 @@
 			(uuid "dfb87f19-3a0b-4175-a308-1f89567bc964")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -28276,7 +28279,7 @@
 			(uuid "c77d7993-ac35-4491-847f-bd4c520515c4")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -28535,7 +28538,7 @@
 			(uuid "136465e3-10b9-4f8f-a971-c2f6484d69d8")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -28943,7 +28946,7 @@
 			(uuid "4f08a4ae-f823-49c7-b97f-26987c6572ac")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -29202,7 +29205,7 @@
 			(uuid "c537435e-7811-4907-b91d-4f5715e94790")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -29461,7 +29464,7 @@
 			(uuid "7b8138da-bff4-4280-ae4c-baa53bcc12b5")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -29841,7 +29844,7 @@
 			(uuid "2ae8b772-93f4-4fc9-a0eb-50d9b7452f3d")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/53014-0810.stp"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/53014-0810.stp"
 			(offset
 				(xyz -6.439999961 -0.6000000148 2.499999962)
 			)
@@ -30100,7 +30103,7 @@
 			(uuid "6796a208-e679-46db-b645-bd818ef32637")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -30401,7 +30404,7 @@
 			(uuid "d5e17a03-3373-433a-bcd6-b38934c2de09")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -30654,7 +30657,7 @@
 			(uuid "f47a9dc6-6d34-47f2-ba40-c1ad84f59e94")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/Brother_4P.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/Brother_4P.step"
 			(offset
 				(xyz 0 4 0)
 			)
@@ -30685,7 +30688,7 @@
 				)
 			)
 		)
-		(property "Value" "M3"
+		(property "Value" "M2"
 			(at 0 2.9 0)
 			(layer "F.Fab")
 			(uuid "12c13b7d-27c9-49d6-bb3d-9020fec20a94")
@@ -31088,7 +31091,7 @@
 			(uuid "d33cffa4-eb6c-4023-bce6-eede15447fa8")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -31359,7 +31362,7 @@
 			(uuid "f84d39af-43a5-4a34-a113-114af8b2daa4")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -31630,7 +31633,7 @@
 			(uuid "5a3f3785-8ce4-4914-8f06-544bfa73510f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -31889,7 +31892,7 @@
 			(uuid "8e0390a9-253f-494d-b316-2eb85e3a5618")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -32211,7 +32214,7 @@
 			(uuid "6d0c44d2-75fb-4c69-bc8e-9189d3928a2f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/KEY-TH_4P-L7.5-W11.5-P4.5.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/KEY-TH_4P-L7.5-W11.5-P4.5.wrl"
 			(offset
 				(xyz 0 4.35 3.6)
 			)
@@ -32458,7 +32461,7 @@
 			(uuid "c802609f-e2bb-4d8c-a059-bf43f60b0bdc")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -32919,7 +32922,7 @@
 			(uuid "9f103408-6764-49b8-b48f-360a22b00e34")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/HRO  TYPE-C-31-M-12.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/HRO  TYPE-C-31-M-12.step"
 			(offset
 				(xyz 0 -1 0)
 			)
@@ -33220,7 +33223,7 @@
 			(uuid "f427e99f-a368-4536-ac07-ec0ca9fe1c4d")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -33856,7 +33859,7 @@
 			(uuid "dc624cb8-560b-4457-9c78-976bcd0e30e2")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -34115,7 +34118,7 @@
 			(uuid "51053f44-5b79-4780-b73c-3086a4accfc5")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -34362,7 +34365,7 @@
 			(uuid "9b08b603-3842-4bf2-8978-5b9a7b9f11d7")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -34684,7 +34687,7 @@
 			(uuid "9aff92cd-db68-49de-9aa5-0a4520481a63")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/KEY-TH_4P-L7.5-W11.5-P4.5.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/KEY-TH_4P-L7.5-W11.5-P4.5.wrl"
 			(offset
 				(xyz 0 4.35 3.6)
 			)
@@ -36087,7 +36090,7 @@
 			(uuid "cc0c1980-9a04-4b1e-88f2-b10918257d94")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/L_Bourns_SRR1260.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/L_Bourns_SRR1260.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -36952,7 +36955,7 @@
 			(uuid "58f4650f-1cbc-4116-856a-0d36f5e80e2b")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/PinHeader_1x04_P2.54mm_Horizontal.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/PinHeader_1x04_P2.54mm_Horizontal.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -37211,7 +37214,7 @@
 			(uuid "a1739b87-75e0-4910-8123-dc6414b6f0f8")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -37470,7 +37473,7 @@
 			(uuid "c28e2899-955a-4dc4-bab9-1e6f5669e7f1")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -37509,7 +37512,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/e72e2e5f3749444edb574593f092205f.pdf?productCode=C880909"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -37521,7 +37524,7 @@
 				)
 			)
 		)
-		(property "Description" "Diode bridge, +ve/-ve/AC/AC"
+		(property "Description" "KMB14F 1 A bridge rectifier; PCB pins 1/2=AC, 3=+12V, 4=GND"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -37562,6 +37565,18 @@
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "f76b48d0-5e23-47e1-9b32-fcb1b2988915")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Package" "MBF"
+			(at 458.28 -145.98 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "67f4d046-1e69-4f53-b841-730a5e3848ad")
 			(effects
 				(font
 					(size 1 1)
@@ -37760,7 +37775,7 @@
 			(uuid "fbf1d210-14fb-427a-aed9-7580c55bece0")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/MBF-SMD_L4.8-W3.8-P2.54-LS6.8-TL.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/MBF-SMD_L4.8-W3.8-P2.54-LS6.8-TL.wrl"
 			(offset
 				(xyz 0 -0 0.75)
 			)
@@ -38019,7 +38034,7 @@
 			(uuid "7bac1bef-02d3-431b-a8d8-702d1cba4c2a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -38268,7 +38283,7 @@
 			(uuid "6384d956-ffda-41a3-a4f9-3aaca16b7658")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -38515,7 +38530,7 @@
 			(uuid "f96fca62-b0fe-40c5-b8ec-82dfb33b8126")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -38784,7 +38799,7 @@
 			(uuid "4f565c99-fbb7-4ccb-93d9-b892e1d0d10f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -39655,7 +39670,7 @@
 			(uuid "b4494018-6383-46c4-95f9-429d77ed20da")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/L_Bourns_SRR1260.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/L_Bourns_SRR1260.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -40520,7 +40535,7 @@
 			(uuid "eca2ecf8-364c-4153-8b38-5ae228984bf0")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/PinHeader_1x04_P2.54mm_Horizontal.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/PinHeader_1x04_P2.54mm_Horizontal.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -41020,7 +41035,7 @@
 			(uuid "5590b4d2-0c78-43d6-9bc9-3bdf3911c38d")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/BUZ-SMD_4P-L8.5-W8.5-H4.0.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/BUZ-SMD_4P-L8.5-W8.5-H4.0.wrl"
 			(offset
 				(xyz 0 -0 -0)
 			)
@@ -41401,7 +41416,7 @@
 			(uuid "175ce5f6-679b-4ca8-87f3-1f54ed720533")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -41660,7 +41675,7 @@
 			(uuid "76ec1c1c-397e-4080-9121-727027b2e0ae")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -42049,7 +42064,7 @@
 			(uuid "b04c5e3b-edf1-49e2-9528-f61d51b64781")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -42451,7 +42466,7 @@
 			(uuid "8d80677b-6a4a-48fc-b953-6de19b6a1022")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/53014-1010.stp"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/53014-1010.stp"
 			(offset
 				(xyz -8.44 -0.6 2.5)
 			)
@@ -44515,7 +44530,7 @@
 			(uuid "4e10ed9d-07e9-4069-a9d2-34b961b7a99f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -44786,7 +44801,7 @@
 			(uuid "4932028f-6543-4da5-acda-74b253bf19b4")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -45045,7 +45060,7 @@
 			(uuid "1c89c46e-660e-4c75-a899-527033161965")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -45393,7 +45408,7 @@
 			(uuid "c7e692ff-afc4-4572-a673-4873e7fd3491")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/99-99-0994.stp"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/99-99-0994.stp"
 			(offset
 				(xyz 11.24999983 -0.6299999858 2.869999842)
 			)
@@ -45424,7 +45439,7 @@
 				)
 			)
 		)
-		(property "Value" "M3"
+		(property "Value" "M2"
 			(at 0 2.9 0)
 			(layer "F.Fab")
 			(uuid "2687a16d-9f65-4544-a9ec-858171acc46b")
@@ -45827,7 +45842,7 @@
 			(uuid "0f6a6257-8874-4463-83eb-da2b64971cb9")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -46244,7 +46259,7 @@
 			(uuid "f207a4d4-248b-40b1-9b76-b52ebf9db148")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-363_SC-70-6.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-363_SC-70-6.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -46623,7 +46638,7 @@
 			(uuid "ccd62b7b-f705-4150-b46d-637e50787779")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -46882,7 +46897,7 @@
 			(uuid "138cfe77-0f9a-403c-bc4d-edf4ffd4a6a3")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -47183,7 +47198,7 @@
 			(uuid "4cb81eff-aa56-4172-8dbf-023cae27a1e3")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -47812,7 +47827,7 @@
 			(uuid "55dc3364-7c5e-4cd4-b72e-35bff21b70be")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23-6.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23-6.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -48119,7 +48134,7 @@
 			(uuid "44c7d851-9bdd-4ca6-9639-f6e892b7eaad")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/HNC2-2.5P-10DS.step"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/HNC2-2.5P-10DS.step"
 			(offset
 				(xyz -15 -2 0)
 			)
@@ -48458,7 +48473,7 @@
 			(uuid "da3ebd6d-c851-402f-9ea8-07c59c6fbbf3")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOIC-8_3.9x4.9mm_P1.27mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOIC-8_3.9x4.9mm_P1.27mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -48893,7 +48908,7 @@
 			(uuid "5cf2db61-8e89-429b-9bc8-3ee1856a9564")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CONN-TH_3P-P2.50_X2564WV-03-N0SN.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CONN-TH_3P-P2.50_X2564WV-03-N0SN.wrl"
 			(offset
 				(xyz 0 -0.6 0)
 			)
@@ -49567,7 +49582,7 @@
 			(uuid "0fa51844-e67a-4125-b192-f99362d1798b")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOIC-16_3.9x9.9mm_P1.27mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOIC-16_3.9x9.9mm_P1.27mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -49965,7 +49980,7 @@
 			(uuid "ff1ef4e1-4938-4673-b534-bbc0ad891056")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -50236,7 +50251,7 @@
 			(uuid "09c84d19-5452-41f3-9134-38717deb9d0a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -50670,7 +50685,7 @@
 			(uuid "ed56b80d-56c1-4773-9946-a7bb14718610")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CONN-TH_3P-P2.50_X2564WV-03-N0SN.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CONN-TH_3P-P2.50_X2564WV-03-N0SN.wrl"
 			(offset
 				(xyz 0 -0.6 0)
 			)
@@ -52552,7 +52567,7 @@
 			(uuid "ce36706b-2b65-4fae-9a1a-9c8c4a935a47")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -52593,7 +52608,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/8a09f89034087b5d1623ed150a6cce5b.pdf?productCode=C22452"
 			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
@@ -52605,7 +52620,7 @@
 				)
 			)
 		)
-		(property "Description" "Schottky diode"
+		(property "Description" "SS54 5 A 40 V SMA Schottky rectifier"
 			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
@@ -52617,7 +52632,7 @@
 				)
 			)
 		)
-		(property "LCSC ID" "C2290"
+		(property "LCSC ID" "C22452"
 			(at 622.1088 243.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -52629,7 +52644,7 @@
 				)
 			)
 		)
-		(property "OEM" "Hubei KENTO Elec"
+		(property "OEM" "MDD (Microdiode Semiconductor)"
 			(at 622.1088 243.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -52871,7 +52886,7 @@
 			(uuid "1fd2cfb6-c779-4454-bc5c-1e474c92253c")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_SMA.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_SMA.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -53083,7 +53098,7 @@
 				)
 			)
 		)
-		(path "/a44519f5-2a17-4043-8636-a7b7c38f71bc/afdd7756-10a8-40b4-8856-03a71629d18b")
+		(path "/a44519f5-2a17-4043-8636-a7b7c38f71bc/2eb13a2b-7d02-49dd-92c0-be152b720ea3")
 		(sheetname "IO CONDITIONING")
 		(sheetfile "ioconditioning.kicad_sch")
 		(attr smd)
@@ -53217,7 +53232,7 @@
 			(uuid "5a3f6f54-72f5-418d-8580-ae116798251c")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -53476,7 +53491,7 @@
 			(uuid "57d2f1d1-9090-4df3-91b7-3587227f7237")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -54017,7 +54032,7 @@
 			(uuid "2345403e-e2a4-49a0-b272-b667486019dd")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOIC-8_3.9x4.9mm_P1.27mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOIC-8_3.9x4.9mm_P1.27mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -54558,7 +54573,7 @@
 			(uuid "2db0a871-9c8c-4b64-8547-4644acc374fd")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SSOP-28_5.3x10.2mm_P0.65mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SSOP-28_5.3x10.2mm_P0.65mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -54815,8 +54830,11 @@
 			(pintype "passive")
 			(uuid "0da74bcc-b313-5c2b-85cf-d59216e40f3c")
 		)
+		(path "/a7e0db0f-e473-44d4-a2fe-681f732aacb2/a19b05df-401b-45d1-902b-04dd5c28419d")
+		(sheetname "ESP32")
+		(sheetfile "mcu.kicad_sch")
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -54847,7 +54865,7 @@
 				)
 			)
 		)
-		(property "Value" "M3"
+		(property "Value" "M2"
 			(at 0 2.9 0)
 			(layer "F.Fab")
 			(uuid "53dfd612-ca20-4298-8eab-1cd888548c80")
@@ -55262,7 +55280,7 @@
 			(uuid "d7346cf6-693e-4a04-a39e-edc8bb3ddfea")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -55397,7 +55415,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/8a09f89034087b5d1623ed150a6cce5b.pdf?productCode=C22452"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -55409,7 +55427,7 @@
 				)
 			)
 		)
-		(property "Description" "Diode"
+		(property "Description" "SS54 5 A 40 V SMA Schottky rectifier"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -55433,7 +55451,7 @@
 				)
 			)
 		)
-		(property "OEM" "Hubei KENTO Elec"
+		(property "OEM" "MDD (Microdiode Semiconductor)"
 			(at 400.365 -81.495 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -55699,7 +55717,7 @@
 			(uuid "dee1d6ef-2fa8-42e0-8e62-3f675a52156a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_SMA.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_SMA.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -56817,7 +56835,7 @@
 			(uuid "a44088c5-7bf1-404e-99b9-4428c3eba497")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SM04B-SRSS-TB(LF)(SN)--3DModel-STEP-56544.STEP"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SM04B-SRSS-TB(LF)(SN)--3DModel-STEP-56544.STEP"
 			(offset
 				(xyz 0 1.5 -0.25)
 			)
@@ -56930,7 +56948,7 @@
 				)
 			)
 		)
-		(path "/a44519f5-2a17-4043-8636-a7b7c38f71bc/84d17947-8adb-42f9-b584-713be54653b6")
+		(path "/a44519f5-2a17-4043-8636-a7b7c38f71bc/f53fc7b5-b429-4945-9bda-7fdfd59944c3")
 		(sheetname "IO CONDITIONING")
 		(sheetfile "ioconditioning.kicad_sch")
 		(attr smd)
@@ -57064,7 +57082,7 @@
 			(uuid "9d9f48a9-627a-4515-91f6-0ea472214233")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -57177,7 +57195,7 @@
 				)
 			)
 		)
-		(path "/a44519f5-2a17-4043-8636-a7b7c38f71bc/f3bef5a8-787a-4ce8-89bd-f693f8851a2e")
+		(path "/a44519f5-2a17-4043-8636-a7b7c38f71bc/ad5b5bd5-a30d-4dfe-bc0f-2aeb7aafd75a")
 		(sheetname "IO CONDITIONING")
 		(sheetfile "ioconditioning.kicad_sch")
 		(attr smd)
@@ -57311,7 +57329,7 @@
 			(uuid "4d18b890-6068-4d13-800a-4da95f00bc56")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -57722,7 +57740,7 @@
 			(uuid "524ad97c-938a-43ca-8d04-e8e3ec5950ab")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -58023,7 +58041,7 @@
 			(uuid "580cca6e-3137-4c99-a290-d4751351a5d9")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -58324,7 +58342,7 @@
 			(uuid "580cca6e-3137-4c99-a290-d4751351a5d9")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -58583,7 +58601,7 @@
 			(uuid "06c81f0d-f70c-45c8-b5a9-f6f3d7f4f3cb")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -59260,7 +59278,7 @@
 			(uuid "cd01fab2-20de-4c3f-af94-9d1799c93af3")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -59600,7 +59618,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/8a09f89034087b5d1623ed150a6cce5b.pdf?productCode=C22452"
 			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
@@ -59612,7 +59630,7 @@
 				)
 			)
 		)
-		(property "Description" "Schottky diode"
+		(property "Description" "SS54 5 A 40 V SMA Schottky rectifier"
 			(at 0 0 180)
 			(layer "F.Fab")
 			(hide yes)
@@ -59624,7 +59642,7 @@
 				)
 			)
 		)
-		(property "LCSC ID" "C2290"
+		(property "LCSC ID" "C22452"
 			(at 556.1188 243.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -59636,7 +59654,7 @@
 				)
 			)
 		)
-		(property "OEM" "Hubei KENTO Elec"
+		(property "OEM" "MDD (Microdiode Semiconductor)"
 			(at 556.1188 243.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -59878,7 +59896,7 @@
 			(uuid "43ff1af4-a846-4a76-8013-b1e7b016e3b1")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_SMA.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_SMA.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -60125,7 +60143,7 @@
 			(uuid "30d5e99e-b663-4b2d-b8be-6dd7bf275465")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -60372,7 +60390,7 @@
 			(uuid "064ccb2c-45e4-4e4f-9ae7-b892b55c9253")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -60631,7 +60649,7 @@
 			(uuid "2c62c882-b680-40b7-8354-4d1f14d8976a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -61069,7 +61087,7 @@
 			(uuid "5017e24f-72b4-455d-af56-344403172f26")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-23.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-23.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -62113,7 +62131,7 @@
 			(uuid "351cde6b-1575-49b0-a1a4-c70bbd39ea59")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/PinHeader_1x04_P2.54mm_Horizontal.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/PinHeader_1x04_P2.54mm_Horizontal.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -62372,7 +62390,7 @@
 			(uuid "6950106d-d490-486c-83fc-8a7d9c338124")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -62765,7 +62783,7 @@
 			(uuid "0598ce49-0b64-4e59-aefc-7bb0c9093e54")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -64339,7 +64357,7 @@
 			(uuid "59b3ec57-996f-449e-a6b7-5ace82452717")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/CP_Radial_D6.3mm_P2.50mm.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -64597,7 +64615,7 @@
 			(uuid "b127af83-f05e-4d2c-9d1d-31626f33dc07")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -64844,7 +64862,7 @@
 			(uuid "5b17841d-e1dd-4b6c-9a3f-a65363c800f5")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -65115,7 +65133,7 @@
 			(uuid "9f00da58-2ec3-40a8-a894-1777151a9a85")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -65374,7 +65392,7 @@
 			(uuid "8f4d53d4-c80c-4671-a4a6-f1e45b16ced0")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -65633,7 +65651,7 @@
 			(uuid "6185288b-b251-4924-a0b8-146e78ac9d91")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -65971,7 +65989,7 @@
 			(uuid "f7518949-50f3-4dc1-bd5a-807f45e3f173")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/99-99-0992.stp"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/99-99-0992.stp"
 			(offset
 				(xyz -8.749999869 -0.6299999858 2.950000003)
 			)
@@ -67035,7 +67053,7 @@
 			)
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/ESP32-S3-MINI-1.STEP"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/ESP32-S3-MINI-1.STEP"
 			(offset
 				(xyz -7.7 -7.7 0)
 			)
@@ -67455,7 +67473,7 @@
 			(uuid "0f867cd3-9bd3-400e-b18f-497c00a6e369")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -67714,7 +67732,7 @@
 			(uuid "6d12bba9-d4e6-46eb-bd20-49b4a901904a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -67973,7 +67991,7 @@
 			(uuid "302f7e04-5825-4519-9201-8674f7489084")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -68210,7 +68228,7 @@
 			(uuid "b752e7de-36ff-4d71-86f2-11b2f55b0ffa")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -68491,7 +68509,7 @@
 			(uuid "ff0ecb3c-2444-41a1-8b74-52de4739ff1c")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_0805_2012Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_0805_2012Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -68522,7 +68540,7 @@
 				)
 			)
 		)
-		(property "Value" "M3"
+		(property "Value" "M2"
 			(at 0 2.9 0)
 			(layer "F.Fab")
 			(uuid "ebb10454-10cb-476d-958a-4a4f4b590cd4")
@@ -68723,7 +68741,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Description" "Light emitting diode"
+		(property "Description" "CDBU0130-HF 30 V low-leakage Schottky diode"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -68933,7 +68951,7 @@
 			(uuid "e01470c8-58c1-4a60-99bf-0e4b042565ee")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -69191,7 +69209,7 @@
 			(uuid "9482768c-d290-4e0a-84be-dc0d4268f2c5")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/C_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/C_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -69248,7 +69266,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Description" "Light emitting diode"
+		(property "Description" "CDBU0130-HF 30 V low-leakage Schottky diode"
 			(at 0 0 0)
 			(layer "B.Fab")
 			(hide yes)
@@ -69458,7 +69476,7 @@
 			(uuid "7b8138da-bff4-4280-ae4c-baa53bcc12b5")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/D_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/D_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -70008,7 +70026,7 @@
 			(uuid "dd1f485d-1262-4ed4-96da-fc273e89326a")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -70277,7 +70295,7 @@
 			(uuid "d97f71e8-9c78-40e6-b8f8-7b91d5a4a9d8")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/R_0603_1608Metric.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/R_0603_1608Metric.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -70579,7 +70597,7 @@
 			(uuid "aaa640bf-3b22-484e-a898-e78214ca82af")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/packages3D/SOT-363_SC-70-6.wrl"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SOT-363_SC-70-6.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -72388,7 +72406,7 @@
 		)
 	)
 	(gr_text "KH910 REV A 09/2026"
-		(at 145.5 148 0)
+		(at 174 161.2 0)
 		(layer "F.SilkS")
 		(uuid "0d0a6fd8-d084-4dd2-bfae-169bfad0ec87")
 		(effects
