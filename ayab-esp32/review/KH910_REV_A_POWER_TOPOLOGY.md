@@ -62,10 +62,10 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 
 - C206.1: schematic `/ESP32/MACHINE_PWR_SENSE`; matches
 - C206.2: schematic `GND`; matches
-- D205.1: schematic `/ESP32/MACHINE_PWR_SENSE`; **PCB `+3V3`**
-- D205.2: schematic `+3V3`; **PCB `/ESP32/MACHINE_PWR_SENSE`**
-- D206.1: schematic `GND`; **PCB `/ESP32/MACHINE_PWR_SENSE`**
-- D206.2: schematic `/ESP32/MACHINE_PWR_SENSE`; **PCB `GND`**
+- D205.1: schematic `+3V3`; matches
+- D205.2: schematic `/ESP32/MACHINE_PWR_SENSE`; matches
+- D206.1: schematic `/ESP32/MACHINE_PWR_SENSE`; matches
+- D206.2: schematic `GND`; matches
 - R215.1: schematic `+12V`; matches
 - R215.2: schematic `/ESP32/MACHINE_PWR_SENSE`; matches
 - R216.1: schematic `/ESP32/MACHINE_PWR_SENSE`; matches
@@ -102,8 +102,4 @@ Read-only comparison of the schematic-derived Rev A power circuit with the physi
 
 ## Result
 
-**BLOCKED:** the prototype power circuit is not fully represented on the PCB.
-- Topology mismatch: `D205.1` expected `/ESP32/MACHINE_PWR_SENSE`, found `+3V3`
-- Topology mismatch: `D205.2` expected `+3V3`, found `/ESP32/MACHINE_PWR_SENSE`
-- Topology mismatch: `D206.1` expected `GND`, found `/ESP32/MACHINE_PWR_SENSE`
-- Topology mismatch: `D206.2` expected `/ESP32/MACHINE_PWR_SENSE`, found `GND`
+**PASS:** every schematic-derived local power part has a matching physical footprint.
