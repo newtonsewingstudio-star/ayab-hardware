@@ -321,9 +321,9 @@ def patch_board() -> None:
         "Voltage rating": "50V X7R",
     }
     footprints = [
-        clone_footprint(diode_template, "D205", "CDBU0130-HF", 232.0, 157.0, 180.0,
+        clone_footprint(diode_template, "D205", "CDBU0130-HF", 232.0, 157.0, 0.0,
                         path("D205"), diode_props, {"1": (p3, "+3V3"), "2": (sense, SENSE)}),
-        clone_footprint(diode_template, "D206", "CDBU0130-HF", 232.0, 160.5, 0.0,
+        clone_footprint(diode_template, "D206", "CDBU0130-HF", 232.0, 160.5, 180.0,
                         path("D206"), diode_props, {"1": (sense, SENSE), "2": (gnd, "GND")}),
         clone_footprint(cap_template, "C206", "100n", 235.25, 160.5, 0.0,
                         path("C206"), cap_props, {"1": (sense, SENSE), "2": (gnd, "GND")}),
@@ -381,12 +381,10 @@ def patch_board() -> None:
     # Route around the opposite-net pad of each 0603 device.  The first stage
     # used straight centreline tracks, which crossed D205.1 (+3V3) and C206.2
     # (GND); KiCad rejected those shorts.
-    upper_channel_y = 158.25
     lower_channel_y = 161.75
-    add_segment(sense_anchor, (sense_anchor[0], upper_channel_y), sense)
-    add_segment((sense_anchor[0], upper_channel_y), (d205_sense[0], upper_channel_y), sense)
-    add_segment((d205_sense[0], upper_channel_y), d205_sense, sense)
-    add_segment(d205_sense, d206_sense, sense)
+    add_segment(sense_anchor, d205_sense, sense)
+    add_segment(sense_anchor, (sense_anchor[0], d206_sense[1]), sense)
+    add_segment((sense_anchor[0], d206_sense[1]), d206_sense, sense)
     add_segment(d206_sense, (d206_sense[0], lower_channel_y), sense)
     add_segment((d206_sense[0], lower_channel_y), (cap_sense[0], lower_channel_y), sense)
     add_segment((cap_sense[0], lower_channel_y), cap_sense, sense)
