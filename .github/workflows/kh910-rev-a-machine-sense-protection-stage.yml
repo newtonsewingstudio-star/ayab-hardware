@@ -1,0 +1,93 @@
+name: KH910 Rev A Machine Sense Protection Stage
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ayab-esp32-kh910-rev-a]
+    paths:
+      - 'ayab-esp32/tools/stage_rev_a_machine_sense_protection.py'
+      - 'ayab-esp32/tools/validate_rev_a_machine_sense_protection.py'
+      - '.github/workflows/kh910-rev-a-machine-sense-protection-stage.yml'
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ayab-esp32-kh910-rev-a
+      - name: Install KiCad 9 runtime
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.sources
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update -qq
+          sudo apt-get install -qy --no-install-recommends kicad
+      - name: Require clean frozen source baseline
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/sense-baseline-drc.rpt ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/sense-baseline-drc.rpt
+      - name: Create disposable project copy
+        run: |
+          mkdir -p /tmp/rev-a-sense-protection
+          cp -a ayab-esp32/. /tmp/rev-a-sense-protection/
+      - name: Add independent clamp and ADC filter
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/stage_rev_a_machine_sense_protection.py \
+            /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb \
+            /tmp/rev-a-sense-protection/mcu.kicad_sch \
+            | tee /tmp/sense-protection-stage.log
+      - name: Refill zones
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/refill_rev_a_zones.py \
+            /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb
+      - name: Run staged schematic ERC
+        run: |
+          set +e
+          kicad-cli sch erc --exit-code-violations \
+            -o /tmp/sense-protection-erc.rpt \
+            /tmp/rev-a-sense-protection/ayab-esp32.kicad_sch
+          rc=$?
+          set -e
+          cat /tmp/sense-protection-erc.rpt
+          echo "ERC_EXIT=$rc"
+      - name: Require zero staged PCB violations
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/sense-protection-drc.rpt \
+            /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb
+          cat /tmp/sense-protection-drc.rpt
+          grep -Fxq '** Found 0 DRC violations **' /tmp/sense-protection-drc.rpt
+          grep -Fxq '** Found 0 unconnected pads **' /tmp/sense-protection-drc.rpt
+          grep -Fxq '** Found 0 Footprint errors **' /tmp/sense-protection-drc.rpt
+      - name: Require protected sense topology
+        run: |
+          /usr/bin/python3 ayab-esp32/tools/validate_rev_a_machine_sense_protection.py \
+            /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb \
+            | tee /tmp/sense-protection-topology.log
+      - name: Render disposable board
+        run: |
+          kicad-cli pcb render --side top \
+            --output /tmp/sense-protection-top.png \
+            /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb
+          kicad-cli pcb render --side bottom \
+            --output /tmp/sense-protection-bottom.png \
+            /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb
+      - name: Upload disposable evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kh910-rev-a-machine-sense-protection-stage
+          path: |
+            /tmp/sense-baseline-drc.rpt
+            /tmp/sense-protection-stage.log
+            /tmp/sense-protection-erc.rpt
+            /tmp/sense-protection-drc.rpt
+            /tmp/sense-protection-topology.log
+            /tmp/sense-protection-top.png
+            /tmp/sense-protection-bottom.png
+            /tmp/rev-a-sense-protection/ayab-esp32.kicad_pcb
+            /tmp/rev-a-sense-protection/mcu.kicad_sch
+          if-no-files-found: ignore
+
