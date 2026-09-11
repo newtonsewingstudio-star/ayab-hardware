@@ -2,7 +2,7 @@
 
 Review date: 2026-09-10
 
-Verdict: **HOLD until the protected machine-sense correction is integrated, independently revalidated in KiCad, and visually reviewed.** After those gates pass, this design may be released only for manufacture and supervised bring-up of one Rev A prototype. This is not a production or field-safety certification, and it does not replace the physical power-state tests listed below.
+Verdict: **PASS for manufacture and supervised bring-up of one Rev A prototype.** The protected machine-sense correction is integrated, KiCad DRC/ERC and topology checks pass, and the PCB has been visually reviewed. This is an electrical design release—not permission to operate solenoids before the no-coil physical power-state tests below, not a production release, and not a machinery-safety certification.
 
 ## Evidence reviewed
 
