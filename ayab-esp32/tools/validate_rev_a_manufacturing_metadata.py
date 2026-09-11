@@ -36,6 +36,13 @@ EXPECTED_PATHS = {
     "R738": "/a44519f5-2a17-4043-8636-a7b7c38f71bc/3d5b2f4e-bc42-4903-a356-cc83cf32fd79",
 }
 MOUNTING_REFS = {"H101", "H102", "H103", "H104", "H106", "H108"}
+SPECIALTY_CONNECTORS_WITHOUT_LCSC_ID = {
+    "J403": ("910.950 SOLENOIDS A", "Hirose", "HNC2-2.5P-10DS(02)"),
+    "J404": ("910.950 SOLENOIDS B", "Hirose", "HNC2-2.5P-8DS(02)"),
+    "J405": ("910.950 ENCODERS EOL R", "Hirose", "HNC2-2.5P-10DS(02)"),
+    "J406": ("930.940 SOLENOIDS A", "HR(Joint Tech Elec)", "A2506WV-10P"),
+    "J408": ("910.950 EOL L", "Hirose", "HNC2-2.5P-3DS(02)"),
+}
 
 
 def expression_at(text: str, start: int) -> tuple[str, int]:
@@ -116,6 +123,36 @@ def main() -> None:
     for ref in DNP_REFS:
         if not by_ref[ref].IsDNP():
             raise RuntimeError(f"{ref} must be marked DNP on the PCB")
+
+    fitted = [
+        footprint
+        for footprint in physical
+        if not footprint.IsDNP() and not footprint.IsExcludedFromBOM()
+    ]
+    missing_lcsc = {}
+    for footprint in fitted:
+        fields = footprint.GetFieldsText()
+        if not fields.get("LCSC ID", "").strip():
+            missing_lcsc[footprint.GetReference()] = (
+                footprint.GetValue().strip(),
+                fields.get("OEM", "").strip(),
+                fields.get("OEM PN", "").strip(),
+            )
+        if footprint.IsExcludedFromPosFiles():
+            raise RuntimeError(
+                f"fitted BOM item {footprint.GetReference()} is missing from placement output"
+            )
+    if missing_lcsc != SPECIALTY_CONNECTORS_WITHOUT_LCSC_ID:
+        raise RuntimeError(f"unexpected fitted parts without LCSC IDs: {missing_lcsc}")
+    if len(fitted) != 153:
+        raise RuntimeError(f"expected 153 fitted BOM references, found {len(fitted)}")
+    smd_count = sum(fp.GetAttributes() == pcbnew.FP_SMD for fp in fitted)
+    through_hole_count = sum(fp.GetAttributes() == pcbnew.FP_THROUGH_HOLE for fp in fitted)
+    if (smd_count, through_hole_count) != (133, 20):
+        raise RuntimeError(
+            "unexpected fitted technology counts: "
+            f"SMD={smd_count}, through-hole={through_hole_count}"
+        )
 
     for ref, expected in EXPECTED_PATHS.items():
         actual = by_ref[ref].GetPath().AsString()
@@ -206,7 +243,13 @@ def main() -> None:
         raise RuntimeError("revision label must remain on front silkscreen")
     revision_box = revision.GetBoundingBox().GetInflated(pcbnew.FromMM(0.20))
     board_outline = pcbnew.SHAPE_POLY_SET()
-    if not board.GetBoardPolygonOutlines(board_outline):
+    try:
+        outline_ok = board.GetBoardPolygonOutlines(board_outline)
+    except TypeError:
+        # KiCad 10 added the explicit infer-outline argument.  Keep KiCad 9 as
+        # the authoritative CI runtime while allowing the same check on 10.
+        outline_ok = board.GetBoardPolygonOutlines(board_outline, False)
+    if not outline_ok:
         raise RuntimeError("cannot construct the board outline for revision-label clearance")
     revision_corners = (
         pcbnew.VECTOR2I(revision_box.GetLeft(), revision_box.GetTop()),
@@ -276,7 +319,10 @@ def main() -> None:
     if wrong_case_models:
         raise RuntimeError(f"3D model filename case does not match the repository: {wrong_case_models}")
 
-    plugin = pcbnew.PCB_IO_MGR.PluginFind(pcbnew.PCB_IO_MGR.KICAD_SEXP)
+    plugin_factory = getattr(pcbnew.PCB_IO_MGR, "PluginFind", None)
+    if plugin_factory is None:
+        plugin_factory = pcbnew.PCB_IO_MGR.FindPlugin
+    plugin = plugin_factory(pcbnew.PCB_IO_MGR.KICAD_SEXP)
     checked_ids = set()
     checked_instances = 0
     for footprint in board.GetFootprints():
@@ -304,6 +350,10 @@ def main() -> None:
     print("PINNED_FOOTPRINT_INSTANCES", checked_instances)
     print("CONTROLLED_BOARD_RULES", len(required_rules))
     print("CONTROLLED_ASSEMBLY_LABELS", len(required_labels))
+    print("FITTED_BOM_REFS", len(fitted))
+    print("FITTED_SMD_REFS", smd_count)
+    print("FITTED_THROUGH_HOLE_REFS", through_hole_count)
+    print("SPECIALTY_CONNECTORS_WITHOUT_LCSC_ID", len(missing_lcsc))
     print("FOOTPRINT_TREE_UUIDS_UNIQUE", len(serialized_uuids))
     print("REVISION_LABEL_CLEARANCE_OK")
 

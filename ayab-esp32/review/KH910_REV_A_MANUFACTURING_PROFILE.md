@@ -37,6 +37,14 @@ The manufacturing validator additionally requires every serialized footprint-tre
 - D204/D605/D606 are MDD SS54 SMA Schottky rectifiers, orderable as LCSC C22452. C2290 is an LED and is prohibited for those three rectifier positions; the board's actual indicator LEDs legitimately retain C2290.
 - No Gerber, drill, placement, BOM, or other manufacturing output is authorized by this profile.
 
+## Assembly-release preflight
+
+The frozen population contains 153 fitted BOM references: 133 SMD and 20 through-hole. Every fitted item is present in placement data. All but five fitted specialty machine connectors have an LCSC identifier.
+
+The five connectors without LCSC identifiers are J403/J405 `HNC2-2.5P-10DS(02)`, J404 `HNC2-2.5P-8DS(02)`, J408 `HNC2-2.5P-3DS(02)`, and the non-KH910 J406 `A2506WV-10P`. For the KH910 prototype, J403/J404/J405/J408 must be sourced exactly and either consigned to the assembler or installed afterward. They must not be silently substituted with a generic 2.5 mm header because mating and housing geometry are part of the machine interface. J406 may remain part of the general multi-machine population, but it is not a KH910 mating connector.
+
+The JLC BOM and placement converters are regression-tested against the current ten-column KiCad BOM, legacy AYAB BOM formats, KiCad placement files with and without a footer, and top/bottom layer conversion. This preflight does not constitute component-stock confirmation; availability and every proposed substitution must be reviewed at quote time.
+
 ## Mechanical evidence and remaining physical gate
 
 The native board outline, central slot, mounting holes, connector rows, and critical front/back placements were reviewed. All 165 repository-supplied model references resolve through `${KIPRJMOD}/../ayab-library/packages3D`; the one remaining model uses KiCad's standard 3D library. Fresh top and bottom native renders are supporting visual evidence, while 2D fabrication/courtyard views remain authoritative for pad and body-outline checks. Same-side critical component overlap was not found. The source contains the exact custom connector pad geometry used by DRC and assembly review.
