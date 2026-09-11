@@ -2,7 +2,7 @@
 
 Review date: 2026-09-10
 
-Verdict: **PASS for manufacture and supervised bring-up of one Rev A prototype.** The protected machine-sense correction is integrated, KiCad DRC/ERC and topology checks pass, and the PCB has been visually reviewed. This is an electrical design release—not permission to operate solenoids before the no-coil physical power-state tests below, not a production release, and not a machinery-safety certification.
+Verdict: **PASS for manufacture and supervised bring-up of one Rev A prototype, subject to independent live KiCad reproduction before the PCB order.** The protected machine-sense correction is integrated, author CI KiCad DRC/ERC and topology checks pass, and the PCB has been visually reviewed. This is an electrical design release—not permission to operate solenoids before the no-coil physical power-state tests below, not a production release, and not a machinery-safety certification.
 
 ## Evidence reviewed
 
