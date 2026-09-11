@@ -9,12 +9,14 @@ on:
       - ayab-esp32-kh910-rev-a
     paths:
       - ayab-esp32/**
+      - ayab-library/**
 
   pull_request:
     branches:
       - main
     paths:
       - ayab-esp32/**
+      - ayab-library/**
 
 env:
   workflow_project_dir: ayab-esp32
@@ -31,15 +33,17 @@ jobs:
       - name: Install KiCad
         run: bash ./scripts/dependencies.sh
 
-      - name: Require zero Rev A PCB errors, unconnected pads, and footprint errors
+      - name: Require zero Rev A PCB errors, unconnected pads, footprint errors, and parity errors
         run: |
           kicad-cli pcb drc --exit-code-violations \
+            --schematic-parity \
             -o /tmp/rev-a-hardware-check-drc.rpt \
             ayab-esp32/ayab-esp32.kicad_pcb
           cat /tmp/rev-a-hardware-check-drc.rpt
           grep -Fxq '** Found 0 DRC violations **' /tmp/rev-a-hardware-check-drc.rpt
           grep -Fxq '** Found 0 unconnected pads **' /tmp/rev-a-hardware-check-drc.rpt
           grep -Fxq '** Found 0 Footprint errors **' /tmp/rev-a-hardware-check-drc.rpt
+          grep -Fxq '** Found 0 schematic parity issues **' /tmp/rev-a-hardware-check-drc.rpt
 
       - name: Require zero schematic ERC errors
         run: |
@@ -53,17 +57,22 @@ jobs:
           echo "ERC_EXIT=$rc"
           grep -Eq 'ERC messages:.*Errors 0([[:space:]]|$)' /tmp/rev-a-hardware-check-erc.rpt
 
-      - name: Require safety-critical topology and PCB parity
+      - name: Require all frozen Rev A audits and manufacturing metadata
         run: |
           python3 ayab-esp32/tools/validate_rev_a_machine_sense_protection.py \
             ayab-esp32/ayab-esp32.kicad_pcb
           python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py \
             ayab-esp32/ayab-esp32.kicad_pcb
           python3 ayab-esp32/tools/audit_rev_a_prototype_pcb_parity.py
-
-      - name: Verify clean design files
-        run: |
-          kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ${workflow_project_dir}/${kicad_project_name}.kicad_pro 
+          python3 ayab-esp32/tools/audit_rev_a_solenoid_gate_source.py
+          python3 ayab-esp32/tools/audit_rev_a_power_pcb_parity.py \
+            --output /tmp/rev-a-power-parity.md
+          python3 ayab-esp32/tools/audit_rev_a_hall_pcb_parity.py
+          python3 ayab-esp32/tools/audit_rev_a_kl_pcb_parity.py
+          python3 ayab-esp32/tools/audit_esp32_pinmap.py
+          grep -Fxq -- '- Target-function mismatches: **0**' \
+            ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
+          python3 ayab-esp32/tools/validate_rev_a_manufacturing_metadata.py
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
@@ -74,3 +83,4 @@ jobs:
             DesignChecks
             /tmp/rev-a-hardware-check-drc.rpt
             /tmp/rev-a-hardware-check-erc.rpt
+            /tmp/rev-a-power-parity.md

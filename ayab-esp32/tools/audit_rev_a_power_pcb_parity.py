@@ -112,8 +112,9 @@ def render_report(values: dict[str, str], net_members: dict[str, set[str]],
         if key[0] not in SEEDS:
             continue
         expected_net = normalized_pin_net(schematic_pins.get(key, ""))
-        if actual != expected_net:
-            topology_mismatches.append((key[0], key[1], expected_net, actual))
+        normalized_actual = normalized_pin_net(actual)
+        if normalized_actual != expected_net:
+            topology_mismatches.append((key[0], key[1], expected_net, normalized_actual))
     preserved_checks = [
         ("GPIO4 is machine-power sense", board_pins.get(("U201", "8")) == "/ESP32/MACHINE_PWR_SENSE"),
         ("active right end-stop remains on GPIO17",
@@ -155,7 +156,7 @@ def render_report(values: dict[str, str], net_members: dict[str, set[str]],
             if key[0] != ref:
                 continue
             expected_net = normalized_pin_net(raw_expected_net)
-            actual = board_pins.get(key, "")
+            actual = normalized_pin_net(board_pins.get(key, ""))
             status = "matches" if actual == expected_net else f"**PCB `{actual or 'unconnected'}`**"
             lines.append(f"- {ref}.{key[1]}: schematic `{expected_net or 'unconnected'}`; {status}")
 

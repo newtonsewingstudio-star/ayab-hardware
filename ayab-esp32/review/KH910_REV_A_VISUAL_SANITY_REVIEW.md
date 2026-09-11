@@ -2,7 +2,7 @@
 
 Review date: 2026-09-11
 
-Verdict: **PASS with no visual blocker found.** KiCad DRC remains authoritative for numeric clearance and connectivity.
+Verdict: **PASS for the corrected pre-order CAD revision, with no visual blocker found.** This is not a post-assembly mechanical or thermal sign-off. KiCad DRC remains authoritative for numeric clearance and connectivity.
 
 ## Views reviewed
 
@@ -23,5 +23,11 @@ Verdict: **PASS with no visual blocker found.** KiCad DRC remains authoritative 
 - The raw 12 V divider branch is short, and no new high-voltage trace is routed through USB/ESP32 antenna circuitry.
 - Copper pours remain continuous around the new work, with no obvious orphan islands, unintended neck-down on the shared solenoid trunk, or silkscreen obscuring a new assembly pad.
 - Connector rows, test points, and existing solenoid-gate placement remain unobstructed.
+- The obsolete `C:900,965,270` connector-family legend was removed because it crossed the new gate at its old location and obscured J401/J406 when moved. The connector references remain the assembly identifiers.
+- The obsolete `v0.1 rev A 02/24` badge was removed and replaced with `KH910 REV A 09/2026`.
+- New front-side `SOLENOID GATE` and `TP703 SW` labels identify the safety-critical gate and switched-rail test point without covering pads.
+- New rear-side `D205 K=3V3` and `D206 A=GND` labels make both machine-sense clamp orientations explicit at assembly.
+- Two GND stitching vias beside the antenna recess were shifted inward; the resulting board passes the explicit 0.25 mm copper-to-edge rule.
+- The pinned custom connector pads match every placed custom-footprint instance. Housing fit, mating force, chassis clearance, and underside tool access remain first-article physical checks.
 
 No fabrication files were produced as part of this review.

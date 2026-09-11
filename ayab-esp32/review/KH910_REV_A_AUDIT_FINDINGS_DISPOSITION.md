@@ -2,7 +2,7 @@
 
 Audit input: external static review of commit `e3dd936`.
 
-Status: author correction cycle complete. The corrected native KiCad source passes the internal release gates. The external auditor's Round 2 static review accepted the substantive P1/P2 closures and the editorial P3 closure. Independent live KiCad reproduction remains requested; it is not represented as completed by this document.
+Status: the first two audit rounds were closed, and the later independent KiCad 9/10 audit of commit `647998e` produced repair order F1–F12. Those items are closed in the corrected commit containing `KH910_REV_A_EXTERNAL_AUDIT_REPAIR_CLOSURE.md`. The final claim remains conditional on the corrected branch CI run being green; physical first-article and energized tests remain separate post-assembly gates.
 
 | Finding | Disposition | Closure evidence required |
 |---|---|---|
@@ -24,3 +24,9 @@ The physical measurements listed in the fail-safe review require an assembled bo
 The Round 2 reviewer also identified an audit-trail wording error in the handoff: the preliminary-notes file was a faithful structured summary, not a verbatim transcript. Future packages use that accurate description.
 
 No fabrication files are part of this correction or its evidence package.
+
+## Independent KiCad audit repair order
+
+The full F1–F12 disposition, including corrected ordering metadata, GPIO3 isolation, capacitor-rail parity, DNP flags, native instance paths, local-library pinning, fault-tree expansion, manufacturing limits, current derating, and visual/silkscreen cleanup, is recorded in `KH910_REV_A_EXTERNAL_AUDIT_REPAIR_CLOSURE.md`.
+
+The authoritative CI workflow now runs full KiCad 9 schematic parity plus all frozen Rev A audits. Its former jobset step was removed because that jobset includes fabrication-output jobs and therefore does not belong in design-only validation.

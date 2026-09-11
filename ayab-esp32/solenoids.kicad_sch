@@ -812,10 +812,7 @@
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid 3431c3f5-32b7-4f91-bce1-a2141ce56256)
   )
-  (label "SOLENOID_12V_SW" (at 243.84 167.64 0) (fields_autoplaced)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid ec53504f-40da-4fa6-a4e3-640cfa2908cb)
-  )
+
   (junction (at 228.6 167.64) (diameter 0) (color 0 0 0 0)
     (uuid b16503c8-349c-4daf-ba7e-81cf426cd509)
   )

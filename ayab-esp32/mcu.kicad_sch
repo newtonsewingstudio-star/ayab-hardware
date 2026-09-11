@@ -1210,10 +1210,7 @@
   (no_connect (at 259.08 44.45) (uuid 89bc4fff-163c-481f-94b3-f4ad590bcc83))
   (no_connect (at 93.98 115.57) (uuid a8b10082-f449-4376-bc86-77560163c533))
 
-  (label "SOLENOID_PWR_EN" (at 195.58 115.57 0) (fields_autoplaced)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid 82a513ad-c2e2-4e92-8aa5-3b620fb95c98)
-  )
+
   (global_label "SOLENOID_PWR_EN" (shape output) (at 203.2 115.57 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid 4015dada-c877-4d79-ba8d-9f32b607e16d)
@@ -1222,9 +1219,25 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 58bd3dd4-ce63-41b5-a1d3-34733b224b5c)
   )
-  (wire (pts (xy 205.74 82.55) (xy 220.98 82.55))
+  (label "FRONT_PANEL_AUX" (at 185.42 107.95 0) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid e70b07d9-0d46-4fee-9ad2-08c166dbe428)
+  )
+  (label "PANEL_INT" (at 93.98 69.85 180) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify right bottom))
+    (uuid 234870b3-b443-43d7-a23c-67e45e834e1e)
+  )
+  (label "USER_BUTTON" (at 93.98 125.73 180) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify right bottom))
+    (uuid 48a70c1b-9ca3-48da-996b-39600ea4dc71)
+  )
+  (wire (pts (xy 205.74 82.55) (xy 213.36 82.55))
     (stroke (width 0) (type default))
     (uuid fe89985e-3400-4fe9-a992-bbfc08ade135)
+  )
+  (wire (pts (xy 213.36 82.55) (xy 220.98 82.55))
+    (stroke (width 0) (type default))
+    (uuid 9f067a6a-b02e-44e9-b905-e2c18260f66e)
   )
   (wire (pts (xy 220.98 87.63) (xy 220.98 90.17))
     (stroke (width 0) (type default))
@@ -1311,7 +1324,7 @@
     (stroke (width 0) (type default))
     (uuid 2cfd1889-65bd-43b9-ad82-dcca24c01bd5)
   )
-  
+
   (wire (pts (xy 41.91 115.57) (xy 41.91 125.73))
     (stroke (width 0) (type default))
     (uuid 2dc55dfc-cc9c-4f1f-b1b5-4c5177c5a4e7)
@@ -9661,10 +9674,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 475427bd-e90c-4b82-ab67-2938f052ea66)
   )
-  (label "ESP39" (at 82.5122 69.85 0) (fields_autoplaced)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid 4c2355fc-a7d8-43e4-a05e-eefe9f1c4303)
-  )
+
   (label "BOOT1" (at 82.55 184.15 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 5a74894a-9c11-4c63-a373-b8bd7f93130d)
@@ -9701,18 +9711,12 @@
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid f1f8d09c-bb40-4cd2-b2a8-64507c3c2397)
   )
-  (label "ESP14" (at 198.12 107.95 180) (fields_autoplaced)
-    (effects (font (size 1.27 1.27)) (justify right bottom))
-    (uuid f57f474f-c2bb-4a13-be35-8f6f7056620a)
-  )
+
   (label "BUZZER" (at 232.41 63.5 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid fb3ca639-def3-4f4d-a693-9c45c419ecb4)
   )
-  (label "ESP21" (at 198.12 115.57 180) (fields_autoplaced)
-    (effects (font (size 1.27 1.27)) (justify right bottom))
-    (uuid fbc3fda0-ed07-4efb-9786-7fffb96271c6)
-  )
+
 
   (hierarchical_label "KH910_R_L" (shape input) (at 198.12 113.03 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left))
@@ -11553,7 +11557,7 @@
     (pin "2" (uuid 82a8ab9b-d15a-48fe-9ada-faee70bd800f))
     (instances
       (project "ayab-esp32"
-        (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/aaa14c5f-6969-439e-bdef-bb5fc66f917d"
+        (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/a7e0db0f-e473-44d4-a2fe-681f732aacb2"
           (reference "D205") (unit 1)
         )
       )
@@ -11590,7 +11594,7 @@
     (pin "2" (uuid e8150df2-8960-459a-8783-ccf90ff61024))
     (instances
       (project "ayab-esp32"
-        (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/175ec455-5c18-4495-952f-cdd672f0311a"
+        (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/a7e0db0f-e473-44d4-a2fe-681f732aacb2"
           (reference "D206") (unit 1)
         )
       )
@@ -11630,7 +11634,7 @@
     (pin "2" (uuid f0925377-3729-4ff2-9595-3ad452e71987))
     (instances
       (project "ayab-esp32"
-        (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/86d7191f-1078-449e-8193-ca35bc117e8d"
+        (path "/ad16b75f-afc8-4717-a7c6-8dd7b69a18e2/a7e0db0f-e473-44d4-a2fe-681f732aacb2"
           (reference "C206") (unit 1)
         )
       )

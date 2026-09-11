@@ -1,0 +1,26 @@
+ERC report (2026-09-11T13:07:37, Encoding UTF8)
+Report includes: Errors, Warnings
+
+***** Sheet /
+
+***** Sheet /ESP32/
+
+***** Sheet /SOLENOID DRIVERS/
+
+***** Sheet /BROTHER-CONNECTORS/
+
+***** Sheet /USB/
+
+***** Sheet /PSU/
+
+***** Sheet /IO CONDITIONING/
+
+***** Sheet /AUX-CONNECTORS/
+
+ ** ERC messages: 0  Errors 0  Warnings 0
+
+ ** Ignored checks:
+    - Global label only appears once in the schematic
+    - Four connection points are joined together
+    - SPICE model issue
+    - Assigned footprint doesn't match footprint filters

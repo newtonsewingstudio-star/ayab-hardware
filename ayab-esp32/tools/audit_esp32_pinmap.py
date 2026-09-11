@@ -57,6 +57,9 @@ TARGET = {
 ALIASES = {
     "ENC_C": {"ENC_BP", "ENC_BELTPHASE"},
     "BUZZER": {"PIEZO", "BUZZER"},
+    "LED_R": {"RED"},
+    "LED_G": {"GRN"},
+    "LED_B": {"YEL"},
 }
 
 IGNORE_LABEL = re.compile(r"ESP\d+$")
@@ -206,23 +209,34 @@ def main() -> None:
     labels = []
     for kind, pattern in (
         ("hierarchical", r'\(hierarchical_label\s+"([^"]+)".*?\(at\s+([-\d.]+)\s+([-\d.]+)\s+[-\d.]+\)'),
+        ("global", r'\(global_label\s+"([^"]+)".*?\(at\s+([-\d.]+)\s+([-\d.]+)\s+[-\d.]+\)'),
         ("local", r'\(label\s+"([^"]+)"\s+\(at\s+([-\d.]+)\s+([-\d.]+)\s+[-\d.]+\)'),
     ):
         for m in re.finditer(pattern, text, re.S):
             labels.append((m.group(1), pt(float(m.group(2)), float(m.group(3))), kind))
 
-    points = set()
+    semantic_points = set()
+    connection_points = set()
     for a, b in wires:
-        points.update((a, b))
+        semantic_points.update((a, b))
     for _, p, _ in labels:
-        points.add(p)
+        semantic_points.add(p)
+        connection_points.add(p)
     for info in gpio_pins.values():
-        points.add(info["point"])
+        semantic_points.add(info["point"])
+        connection_points.add(info["point"])
+    junctions = {
+        pt(float(x), float(y))
+        for x, y in re.findall(r"\(junction\s+\(at\s+([-\d.]+)\s+([-\d.]+)\)", text)
+    }
+    semantic_points.update(junctions)
+    connection_points.update(junctions)
 
-    dsu = DSU(points)
-    point_list = list(points)
+    dsu = DSU(semantic_points)
     for a, b in wires:
-        on = [p for p in point_list if on_segment(p, a, b)]
+        # A pure geometric crossing is not a KiCad connection.  Join the wire's
+        # own endpoints plus explicit semantic points (pins, labels, junctions).
+        on = [p for p in ({a, b} | connection_points) if on_segment(p, a, b)]
         if on:
             for p in on[1:]:
                 dsu.union(on[0], p)

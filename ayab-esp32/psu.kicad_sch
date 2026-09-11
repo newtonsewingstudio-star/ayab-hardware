@@ -107,7 +107,7 @@
         )
       )
     )
-    (symbol "Device:D_Bridge_+-AA" (pin_names (offset 0)) (in_bom yes) (on_board yes)
+    (symbol "ayab-lib:KMB14F_Bridge" (pin_names (offset 0)) (in_bom yes) (on_board yes)
       (property "Reference" "D?" (at -10.16 -3.81 0)
         (effects (font (size 1.27 1.27)))
       )
@@ -129,7 +129,7 @@
       (property "ki_fp_filters" "D*Bridge* D*Rectifier*" (at 0 0 0)
         (effects (font (size 1.27 1.27)) hide)
       )
-      (symbol "D_Bridge_+-AA_0_1"
+      (symbol "KMB14F_Bridge_0_1"
         (circle (center -5.08 0) (radius 0.254)
           (stroke (width 0) (type default))
           (fill (type outline))
@@ -230,7 +230,7 @@
           (fill (type outline))
         )
       )
-      (symbol "D_Bridge_+-AA_1_1"
+      (symbol "KMB14F_Bridge_1_1"
         (pin passive line (at 0 7.62 270) (length 2.54)
           (name "~" (effects (font (size 1.27 1.27))))
           (number "1" (effects (font (size 1.27 1.27))))
@@ -1382,10 +1382,7 @@
   (junction (at 264.16 62.23) (diameter 0) (color 0 0 0 0)
     (uuid dac0eeab-528d-4f97-a473-1bb4795a8fac)
   )
-  (label "MACHINE_5V_RAW" (at 257.81 54.61 0) (fields_autoplaced)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid 3f46d813-532f-48a9-8cc9-82669ff095ce)
-  )
+
   (wire (pts (xy 115.57 54.61) (xy 109.22 54.61))
     (stroke (width 0) (type default))
     (uuid 01069c9c-ea04-4163-81e3-187d4c2a9653)
@@ -2165,10 +2162,7 @@
     (stroke (width 0) (type default))
     (uuid e727e0d5-8415-45d9-b2dc-28bd49b81971)
   )
-  (wire (pts (xy 26.67 119.38) (xy 38.1 119.38))
-    (stroke (width 0) (type default))
-    (uuid e779043c-5db7-4006-9ab5-6899e56ee709)
-  )
+
   (wire (pts (xy 67.31 49.53) (xy 71.12 49.53))
     (stroke (width 0) (type default))
     (uuid e7c5b350-c57a-40f3-a897-e78c2c9dc8b0)
@@ -2218,10 +2212,7 @@
     (stroke (width 0) (type default))
     (uuid f2c9bf04-6774-4bc3-b107-7d3ddf7b7591)
   )
-  (wire (pts (xy 58.42 119.38) (xy 68.58 119.38))
-    (stroke (width 0) (type default))
-    (uuid f543d185-f58c-4c60-a410-346bd9709b61)
-  )
+
   (wire (pts (xy 247.65 140.97) (xy 257.81 140.97))
     (stroke (width 0) (type default))
     (uuid f887bf68-99e0-455c-9c89-f9ce91199762)
@@ -2294,10 +2285,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid a0b4564b-8bf1-485b-a480-8af72dc48c83)
   )
-  (label "BRIDGE_P" (at 71.12 36.83 0) (fields_autoplaced)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid c65f5d7d-7d9e-4b16-816f-9cc47995682e)
-  )
+
   (label "5V_SW" (at 240.03 54.61 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid caaf003c-f2fa-482c-a488-7771b1fa16f0)
@@ -4624,7 +4612,7 @@
     )
   )
 
-  (symbol (lib_id "Device:D_Bridge_+-AA") (at 59.69 49.53 0) (unit 1)
+  (symbol (lib_id "ayab-lib:KMB14F_Bridge") (at 59.69 49.53 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f7a30ae1-183f-4107-9a36-7f646f3235e9)
     (property "Reference" "D601" (at 64.77 54.61 0)
@@ -4899,4 +4887,12 @@
     )
   )
 
+  (global_label "SOLENOID_12V_SW" (shape input) (at 48.26 119.38 0) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify left))
+    (uuid 4f828ea9-7443-4c95-81ab-df2a21cf0e3d)
+  )
+  (global_label "+12V" (shape input) (at 68.58 119.38 0) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify left))
+    (uuid 70e9a705-69fc-42d5-8bc2-a0e0f07e5bf3)
+  )
 )

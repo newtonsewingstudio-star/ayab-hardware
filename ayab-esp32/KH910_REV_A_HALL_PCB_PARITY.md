@@ -2,8 +2,8 @@
 
 Generated read-only from the current repository PCB using KiCad `pcbnew`.
 
-- Board footprints: **238**
-- Board nets: **151**
+- Board footprints: **236**
+- Board nets: **153**
 - Obsolete comparator footprints still present: **0/24**
 - New Hall-divider footprints present: **4/4**
 
@@ -90,11 +90,11 @@ Generated read-only from the current repository PCB using KiCad `pcbnew`.
 - pad 1: (313.120, 158.075) net `/ESP32/HALL_R_ADC` (#144)
 - pad 2: (313.120, 156.425) net `GND` (#2)
 
-### TP701 — CMP-L
+### TP701 — HALL-L-RAW
 - footprint at: (85.390, 135.000) rot 0.0
 - pad 1: (85.390, 135.000) net `/BROTHER-CONNECTORS/EOL_L` (#63)
 
-### TP702 — CMP-R
+### TP702 — HALL-R-RAW
 - footprint at: (321.660, 160.160) rot 0.0
 - pad 1: (321.660, 160.160) net `/BROTHER-CONNECTORS/EOL_R` (#64)
 
@@ -103,7 +103,7 @@ Generated read-only from the current repository PCB using KiCad `pcbnew`.
 - pad 5: (217.125, 127.125) net `/ESP32/HALL_L_ADC` (#143)
 - pad 6: (217.125, 127.975) net `/ESP32/HALL_R_ADC` (#144)
 - pad 17: (219.025, 136.675) net `/AUX-CONNECTORS/AYAB_SCK` (#80)
-- pad 18: (219.875, 136.675) net `/ESP32/ESP14` (#109)
+- pad 18: (219.875, 136.675) net `/ESP32/FRONT_PANEL_AUX` (#109)
 
 ### U701 — SN74LVC4245
 - footprint at: (194.340, 157.530) rot 0.0
@@ -112,8 +112,8 @@ Generated read-only from the current repository PCB using KiCad `pcbnew`.
 - pad 3: (191.477, 155.255) net `/BROTHER-CONNECTORS/ENC_V1` (#66)
 - pad 4: (191.477, 155.905) net `/BROTHER-CONNECTORS/ENC_V2` (#65)
 - pad 5: (191.477, 156.555) net `/BROTHER-CONNECTORS/ENC_BELTPHASE` (#67)
-- pad 6: (191.477, 157.205) net `/IO CONDITIONING/EOL_L_K` (#37)
-- pad 7: (191.477, 157.855) net `/IO CONDITIONING/EOL_L_L` (#38)
+- pad 6: (191.477, 157.205) net `Net-(J702-Pin_4)` (#37)
+- pad 7: (191.477, 157.855) net `Net-(J702-Pin_5)` (#38)
 - pad 8: (191.477, 158.505) net `Net-(J702-Pin_6)` (#145)
 - pad 9: (191.477, 159.155) net `Net-(J702-Pin_7)` (#146)
 - pad 10: (191.477, 159.805) net `Net-(J702-Pin_8)` (#71)
@@ -121,10 +121,10 @@ Generated read-only from the current repository PCB using KiCad `pcbnew`.
 - pad 12: (191.477, 161.105) net `GND` (#2)
 - pad 13: (197.202, 161.105) net `GND` (#2)
 - pad 14: (197.202, 160.455) net `Net-(J701-Pin_8)` (#68)
-- pad 15: (197.202, 159.805) net `/ESP32/EOL_R_N` (#30)
-- pad 16: (197.202, 159.155) net `/ESP32/EOL_R_P` (#29)
-- pad 17: (197.202, 158.505) net `/ESP32/EOL_L_N` (#27)
-- pad 18: (197.202, 157.855) net `/ESP32/EOL_L_P` (#26)
+- pad 15: (197.202, 159.805) net `Net-(J701-Pin_7)` (#30)
+- pad 16: (197.202, 159.155) net `Net-(J701-Pin_6)` (#29)
+- pad 17: (197.202, 158.505) net `Net-(J701-Pin_5)` (#27)
+- pad 18: (197.202, 157.855) net `Net-(J701-Pin_4)` (#26)
 - pad 19: (197.202, 157.205) net `/ESP32/ENC_BP` (#33)
 - pad 20: (197.202, 156.555) net `/ESP32/ENC_B` (#32)
 - pad 21: (197.202, 155.905) net `/ESP32/ENC_A` (#31)
@@ -138,14 +138,8 @@ Generated read-only from the current repository PCB using KiCad `pcbnew`.
 - net 64: `/BROTHER-CONNECTORS/EOL_R`
 - net 69: `/BROTHER-CONNECTORS/EOL_R_N`
 - net 70: `/BROTHER-CONNECTORS/EOL_R_S`
-- net 27: `/ESP32/EOL_L_N`
-- net 26: `/ESP32/EOL_L_P`
-- net 30: `/ESP32/EOL_R_N`
-- net 29: `/ESP32/EOL_R_P`
 - net 143: `/ESP32/HALL_L_ADC`
 - net 144: `/ESP32/HALL_R_ADC`
-- net 37: `/IO CONDITIONING/EOL_L_K`
-- net 38: `/IO CONDITIONING/EOL_L_L`
 
 ## Raw Hall test points
 

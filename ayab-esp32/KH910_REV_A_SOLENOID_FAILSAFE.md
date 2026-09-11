@@ -1,6 +1,6 @@
 # AYAB-ESP32 KH910 Rev A — Solenoid Fail-Safe Power Gate
 
-Status: implementation architecture for Rev A. Do not fabricate until the KiCad implementation passes ERC/DRC and the prototype power-state tests in this document.
+Status: implemented architecture for Rev A. Ordering one controlled prototype requires clean ERC/DRC/parity, topology validation, visual review, and green CI. Do not connect or operate solenoids until the post-assembly power-state tests in this document pass.
 
 ## Objective
 
@@ -80,9 +80,9 @@ The source-to-gate pullup is the primary hardware OFF mechanism. The N-MOS gate 
 
 Brother KH-910 service information specifies approximately 140–150 ohm per selector solenoid. At 12 V this is approximately 80–86 mA per energized coil.
 
-A deliberately conservative 16-coil simultaneous case is therefore approximately 1.28–1.37 A. At 1.37 A and 70 mOhm worst-case RDS(on), the high-side MOSFET conduction loss is approximately 0.13 W and the voltage drop approximately 0.10 V.
+A 16-coil simultaneous case is approximately 1.28–1.37 A. At 1.37 A and 70 mOhm worst-case RDS(on), the high-side MOSFET stress calculation is approximately 0.13 W and 0.10 V. This is **not** an allowed Rev A operating point: D601 is a 1 A average-rated bridge and also supplies the board's logic load.
 
-Actual firmware should never treat simultaneous activation of every selector as a normal operating state; this calculation is only the hardware-switch sizing envelope.
+The unqualified prototype limit is 0.65 A total average current through D601 at no more than 40 °C ambient, with 0.25 A reserved for logic. At 86 mA per coil, no more than four selector coils may be on simultaneously (0.594 A calculated total). Firmware must reduce that count if measured logic or coil current makes the 0.65 A total limit tighter. Sixteen-coil simultaneous operation is prohibited until a later hardware revision or an explicit bridge/current-path redesign. The first assembled board must validate bridge, Q805, regulator, track and via temperature with a dummy load before solenoids are connected.
 
 ## Rail partitioning
 
@@ -126,9 +126,9 @@ Hardware must remain safe even before firmware reaches step 1 because the passiv
 | brownout/reset | unstable/resetting | falling/present | OFF | no unintended pulse |
 | USB + machine | ON | 12 V | only ON after enable | USB state must not bypass gate |
 
-## Prototype verification
+## Post-assembly prototype verification
 
-Before fabrication sign-off, measure:
+After the one-off board is assembled, but before any solenoid connector is attached, measure:
 
 1. RAW +12 V;
 2. `SOLENOID_12V_SW`;

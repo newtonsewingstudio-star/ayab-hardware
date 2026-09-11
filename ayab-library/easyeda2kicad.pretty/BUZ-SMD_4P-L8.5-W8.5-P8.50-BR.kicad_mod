@@ -1,0 +1,230 @@
+(footprint "BUZ-SMD_4P-L8.5-W8.5-P8.50-BR"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -7.6 180)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "0dde0fcc-291e-48ee-a9b1-0c74a812e188")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "BUZ-SMD_4P-L8.5-W8.5-P8.50-BR"
+		(at 0 7.6 180)
+		(layer "F.Fab")
+		(uuid "fd26997e-1e06-4023-a72d-0dfaf659d172")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "3d7a69ab-3a8e-40a9-adc0-f2936122f397")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "697cd78a-1a82-400a-b771-e9627e8d0607")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "LCSC ID" "C94599"
+		(at 467.32 317.44 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "41a0ad87-7722-4295-92d6-edfa4b41d19a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "OEM" "Jiangsu Huaneng Elec"
+		(at 467.32 317.44 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c8619a79-dcf1-48a5-9ff5-97098ac29244")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "OEM PN" "MLT-8530"
+		(at 467.32 317.44 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "70863825-5127-41bd-95ba-0007b60ef2a3")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -4.25 2.17)
+		(end -4.25 -2.17)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "159f7da2-cc7c-49ab-ab29-05cd8a4f0832")
+	)
+	(fp_line
+		(start -2.17 -4.25)
+		(end 2.17 -4.25)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "3d988eb0-1de9-4c6f-9444-b52dad68bd9f")
+	)
+	(fp_line
+		(start -1 -2.5)
+		(end 1 -2.5)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "89aea5e6-8830-46b1-be33-97a8fa96f219")
+	)
+	(fp_line
+		(start 0 -3.5)
+		(end -1 -2.5)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "e218cefa-3f46-4407-814a-ef177c41b712")
+	)
+	(fp_line
+		(start 1 -2.5)
+		(end 0 -3.5)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "7ab5b4d3-f66c-4eaf-ab05-4fa80aab5e5d")
+	)
+	(fp_line
+		(start 2.17 4.25)
+		(end -2.17 4.25)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "ea30d05c-76dc-42d8-9c98-caa0a63510f7")
+	)
+	(fp_line
+		(start 4.25 -2.17)
+		(end 4.25 2.17)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4049f59a-0f30-4036-bc9d-74aaa16f38e3")
+	)
+	(fp_circle
+		(center -4.25 4.25)
+		(end -4.22 4.25)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "40692d46-9b1d-44d4-b4e4-dac86527bb09")
+	)
+	(fp_text user "+"
+		(at -1 2.5 270)
+		(layer "F.SilkS")
+		(uuid "1023e8ab-4b2b-413d-b03b-9508dcefb185")
+		(effects
+			(font
+				(size 2.03 2.03)
+				(thickness 0.2)
+			)
+			(justify right)
+		)
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 180)
+		(layer "F.Fab")
+		(uuid "0e097e74-dae5-4a0d-925d-232540cb2dbc")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -3.6 3.6)
+		(size 2.4 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "3f87b91c-be0f-40ff-9ce1-8251233694b9")
+	)
+	(pad "2" smd rect
+		(at 3.6 3.6)
+		(size 2.4 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "7d9090c6-01f3-4983-bb98-608140a2ee34")
+	)
+	(pad "3" smd rect
+		(at 3.6 -3.6)
+		(size 2.4 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "9be3584e-4ad5-4c04-be0d-94cdc0ba4eac")
+	)
+	(pad "4" smd rect
+		(at -3.6 -3.6)
+		(size 2.4 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "2cff9c72-2426-4667-9bf1-8c6bb0bf3296")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/packages3D/BUZ-SMD_4P-L8.5-W8.5-H4.0.wrl"
+		(offset
+			(xyz 0 -0 -0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

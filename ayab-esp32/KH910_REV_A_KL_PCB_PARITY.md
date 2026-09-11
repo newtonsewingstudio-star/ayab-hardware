@@ -6,10 +6,10 @@ Read-only inventory of the current repository PCB. The validated schematic separ
 
 ### J202 — SPARE0
 - footprint: (126.6200, 120.3000) rot 90.0
-- pad 1: (126.6200, 120.3000) net `/ESP32/ESP14` (#109)
+- pad 1: (126.6200, 120.3000) net `/ESP32/FRONT_PANEL_AUX` (#109)
 - pad 2: (129.1600, 120.3000) net `/BROTHER-CONNECTORS/EOL_R_N` (#69)
 - pad 3: (131.7000, 120.3000) net `/BROTHER-CONNECTORS/EOL_R_S` (#70)
-- pad 4: (134.2400, 120.3000) net `/ESP32/ESP21` (#138)
+- pad 4: (134.2400, 120.3000) net `SOLENOID_PWR_EN` (#138)
 
 ### J405 — 910.950 ENCODERS EOL R
 - footprint: (280.9300, 145.1700) rot 180.0
@@ -29,8 +29,8 @@ Read-only inventory of the current repository PCB. The validated schematic separ
 - pad 1: (184.6500, 152.4900) net `/BROTHER-CONNECTORS/ENC_V1` (#66)
 - pad 2: (187.1900, 152.4900) net `/BROTHER-CONNECTORS/ENC_V2` (#65)
 - pad 3: (184.6500, 155.0300) net `/BROTHER-CONNECTORS/ENC_BELTPHASE` (#67)
-- pad 4: (187.1900, 155.0300) net `/IO CONDITIONING/EOL_L_K` (#37)
-- pad 5: (184.6500, 157.5700) net `/IO CONDITIONING/EOL_L_L` (#38)
+- pad 4: (187.1900, 155.0300) net `Net-(J702-Pin_4)` (#37)
+- pad 5: (184.6500, 157.5700) net `Net-(J702-Pin_5)` (#38)
 - pad 6: (187.1900, 157.5700) net `Net-(J702-Pin_6)` (#145)
 - pad 7: (184.6500, 160.1100) net `Net-(J702-Pin_7)` (#146)
 - pad 8: (187.1900, 160.1100) net `Net-(J702-Pin_8)` (#71)
@@ -73,8 +73,8 @@ Read-only inventory of the current repository PCB. The validated schematic separ
 - pad 4: (217.1250, 126.2750) net `/ESP32/BOOT0` (#25)
 - pad 5: (217.1250, 127.1250) net `/ESP32/HALL_L_ADC` (#143)
 - pad 6: (217.1250, 127.9750) net `/ESP32/HALL_R_ADC` (#144)
-- pad 7: (217.1250, 128.8250) net `/ESP32/EOL_R_P` (#29)
-- pad 8: (217.1250, 129.6750) net `/ESP32/EOL_R_N` (#30)
+- pad 7: (217.1250, 128.8250) net `unconnected-(U201-GPIO3{slash}TOUCH3{slash}ADC1_CH2-Pad7)` (#151)
+- pad 8: (217.1250, 129.6750) net `/ESP32/MACHINE_PWR_SENSE` (#150)
 - pad 9: (217.1250, 130.5250) net `/ESP32/ENC_A` (#31)
 - pad 10: (217.1250, 131.3750) net `/ESP32/ENC_B` (#32)
 - pad 11: (217.1250, 132.2250) net `/ESP32/ENC_BP` (#33)
@@ -84,24 +84,24 @@ Read-only inventory of the current repository PCB. The validated schematic separ
 - pad 15: (217.1250, 135.6250) net `/AUX-CONNECTORS/AYAB_CIPO` (#94)
 - pad 16: (218.1750, 136.6750) net `/AUX-CONNECTORS/AYAB_COPI` (#78)
 - pad 17: (219.0250, 136.6750) net `/AUX-CONNECTORS/AYAB_SCK` (#80)
-- pad 18: (219.8750, 136.6750) net `/ESP32/ESP14` (#109)
+- pad 18: (219.8750, 136.6750) net `/ESP32/FRONT_PANEL_AUX` (#109)
 - pad 19: (220.7250, 136.6750) net `/AUX-CONNECTORS/I2C_SDA` (#91)
 - pad 20: (221.5750, 136.6750) net `/AUX-CONNECTORS/I2C_SCL` (#90)
 - pad 21: (222.4250, 136.6750) net `/BROTHER-CONNECTORS/EOL_R_N` (#69)
 - pad 22: (223.2750, 136.6750) net `/BROTHER-CONNECTORS/EOL_R_S` (#70)
 - pad 23: (224.1250, 136.6750) net `/ESP32/USB_M` (#1)
 - pad 24: (224.9750, 136.6750) net `/ESP32/USB_P` (#3)
-- pad 25: (225.8250, 136.6750) net `/ESP32/ESP21` (#138)
+- pad 25: (225.8250, 136.6750) net `SOLENOID_PWR_EN` (#138)
 - pad 26: (226.6750, 136.6750) net `unconnected-(U201-GPIO26-Pad26)` (#28)
 - pad 27: (227.5250, 136.6750) net `unconnected-(U201-GPIO47{slash}SPICLK_P{slash}SUBSPICLK_P_DIFF-Pad27)` (#103)
 - pad 28: (228.3750, 136.6750) net `/ESP32/RED` (#45)
 - pad 29: (229.2250, 136.6750) net `/ESP32/GRN` (#43)
 - pad 30: (230.0750, 136.6750) net `unconnected-(U201-GPIO48{slash}SPICLK_N{slash}SUBSPICLK_N_DIFF-Pad30)` (#104)
 - pad 31: (231.1250, 135.6250) net `/ESP32/YEL` (#41)
-- pad 32: (231.1250, 134.7750) net `Net-(U201-SPIIO7{slash}GPIO36{slash}FSPICLK{slash}SUBSPICLK)` (#40)
+- pad 32: (231.1250, 134.7750) net `/ESP32/USER_BUTTON` (#40)
 - pad 33: (231.1250, 133.9250) net `unconnected-(U201-SPIDQS{slash}GPIO37{slash}FSPIQ{slash}SUBSPIQ-Pad33)` (#105)
 - pad 34: (231.1250, 133.0750) net `/ESP32/BUZZER` (#21)
-- pad 35: (231.1250, 132.2250) net `/ESP32/ESP39` (#102)
+- pad 35: (231.1250, 132.2250) net `/ESP32/PANEL_INT` (#102)
 - pad 36: (231.1250, 131.3750) net `/ESP32/ESP40` (#106)
 - pad 37: (231.1250, 130.5250) net `/ESP32/ESP41` (#107)
 - pad 38: (231.1250, 129.6750) net `/ESP32/ESP42` (#108)
@@ -148,8 +148,8 @@ Read-only inventory of the current repository PCB. The validated schematic separ
 - pad 3: (191.4775, 155.2550) net `/BROTHER-CONNECTORS/ENC_V1` (#66)
 - pad 4: (191.4775, 155.9050) net `/BROTHER-CONNECTORS/ENC_V2` (#65)
 - pad 5: (191.4775, 156.5550) net `/BROTHER-CONNECTORS/ENC_BELTPHASE` (#67)
-- pad 6: (191.4775, 157.2050) net `/IO CONDITIONING/EOL_L_K` (#37)
-- pad 7: (191.4775, 157.8550) net `/IO CONDITIONING/EOL_L_L` (#38)
+- pad 6: (191.4775, 157.2050) net `Net-(J702-Pin_4)` (#37)
+- pad 7: (191.4775, 157.8550) net `Net-(J702-Pin_5)` (#38)
 - pad 8: (191.4775, 158.5050) net `Net-(J702-Pin_6)` (#145)
 - pad 9: (191.4775, 159.1550) net `Net-(J702-Pin_7)` (#146)
 - pad 10: (191.4775, 159.8050) net `Net-(J702-Pin_8)` (#71)
@@ -157,10 +157,10 @@ Read-only inventory of the current repository PCB. The validated schematic separ
 - pad 12: (191.4775, 161.1050) net `GND` (#2)
 - pad 13: (197.2025, 161.1050) net `GND` (#2)
 - pad 14: (197.2025, 160.4550) net `Net-(J701-Pin_8)` (#68)
-- pad 15: (197.2025, 159.8050) net `/ESP32/EOL_R_N` (#30)
-- pad 16: (197.2025, 159.1550) net `/ESP32/EOL_R_P` (#29)
-- pad 17: (197.2025, 158.5050) net `/ESP32/EOL_L_N` (#27)
-- pad 18: (197.2025, 157.8550) net `/ESP32/EOL_L_P` (#26)
+- pad 15: (197.2025, 159.8050) net `Net-(J701-Pin_7)` (#30)
+- pad 16: (197.2025, 159.1550) net `Net-(J701-Pin_6)` (#29)
+- pad 17: (197.2025, 158.5050) net `Net-(J701-Pin_5)` (#27)
+- pad 18: (197.2025, 157.8550) net `Net-(J701-Pin_4)` (#26)
 - pad 19: (197.2025, 157.2050) net `/ESP32/ENC_BP` (#33)
 - pad 20: (197.2025, 156.5550) net `/ESP32/ENC_B` (#32)
 - pad 21: (197.2025, 155.9050) net `/ESP32/ENC_A` (#31)
@@ -169,12 +169,6 @@ Read-only inventory of the current repository PCB. The validated schematic separ
 - pad 24: (197.2025, 153.9550) net `+3V3` (#6)
 
 ## Matching board nets and connected pads
-
-### net 30: `/ESP32/EOL_R_N`
-
-- J701.7 at (212.5875, 160.1374)
-- U201.8 at (217.1250, 129.6750)
-- U701.15 at (197.2025, 159.8050)
 
 ### net 69: `/BROTHER-CONNECTORS/EOL_R_N`
 
@@ -206,18 +200,6 @@ Read-only inventory of the current repository PCB. The validated schematic separ
 
 ## Copper on matching nets
 
-- `/ESP32/EOL_R_N` F.Cu: (197.2025, 159.8050) -> (212.2551, 159.8050)
-- `/ESP32/EOL_R_N` F.Cu: (207.4900, 131.9700) -> (209.7850, 129.6750)
-- `/ESP32/EOL_R_N` F.Cu: (212.2551, 159.8050) -> (212.5875, 160.1374)
-- `/ESP32/EOL_R_N` F.Cu: (209.7850, 129.6750) -> (217.1250, 129.6750)
-- `/ESP32/EOL_R_N` via at (207.4900, 131.9700)
-- `/ESP32/EOL_R_N` B.Cu: (211.1674, 158.7173) -> (211.1674, 151.9375)
-- `/ESP32/EOL_R_N` B.Cu: (211.1674, 151.9375) -> (217.6700, 145.4349)
-- `/ESP32/EOL_R_N` B.Cu: (215.0143, 133.4000) -> (208.9200, 133.4000)
-- `/ESP32/EOL_R_N` B.Cu: (208.9200, 133.4000) -> (207.4900, 131.9700)
-- `/ESP32/EOL_R_N` B.Cu: (212.5875, 160.1374) -> (211.1674, 158.7173)
-- `/ESP32/EOL_R_N` B.Cu: (217.6700, 145.4349) -> (217.6700, 136.0557)
-- `/ESP32/EOL_R_N` B.Cu: (217.6700, 136.0557) -> (215.0143, 133.4000)
 - `/BROTHER-CONNECTORS/EOL_R_N` F.Cu: (260.8250, 124.0000) -> (262.0000, 124.0000)
 - `/BROTHER-CONNECTORS/EOL_R_N` F.Cu: (222.4250, 135.6050) -> (220.9700, 134.1500)
 - `/BROTHER-CONNECTORS/EOL_R_N` F.Cu: (272.1700, 143.9100) -> (273.4300, 145.1700)

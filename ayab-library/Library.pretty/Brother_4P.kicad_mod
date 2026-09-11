@@ -5,22 +5,22 @@
 	(layer "F.Cu")
 	(descr "Brother_5P StepUp generated footprint")
 	(property "Reference" "REF**"
-		(at -1.495 -1.2 270)
+		(at 10.16 -5.08 0)
 		(layer "F.SilkS")
-		(uuid "826710ab-ed11-47a6-84aa-8010d32fe079")
+		(hide yes)
+		(uuid "d9adace4-e089-4d78-aba5-b9bc98538ce0")
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.25)
-				(bold yes)
+				(thickness 0.15)
 			)
 		)
 	)
-	(property "Value" "BROTHER POWER"
-		(at 18.305 -5 180)
+	(property "Value" "Brother_4P"
+		(at 5.08 -5.08 0)
 		(layer "F.SilkS")
 		(hide yes)
-		(uuid "c23ee7ac-aa76-4906-b024-b0089a3cea68")
+		(uuid "119c0233-2f22-4047-b427-1e706799957d")
 		(effects
 			(font
 				(size 1 1)
@@ -29,35 +29,70 @@
 		)
 	)
 	(property "Datasheet" ""
-		(at 0 0 180)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "74405f98-564e-42f3-86cf-7fdc59166e2c")
-		(effects
-			(font
-				(size 1.27 1.27)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Description" ""
-		(at 0 0 180)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "55bc3f8e-d7bb-497d-ae47-ab2fe500eba3")
-		(effects
-			(font
-				(size 1.27 1.27)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Mfg" ""
 		(at 0 0 0)
-		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "18702eeb-3a22-426e-8f8e-a365a2ce9f88")
+		(uuid "95651fa9-c667-4117-8164-7cebcba37007")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "247398ad-d099-465f-a9b5-344a330f924e")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "OEM" ""
+		(at 487.11 -196.79 270)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "45f276dc-04a5-47e7-a1ed-c17aa7ae3667")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "OEM PN" ""
+		(at 487.11 -196.79 270)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "94090021-dccf-4151-b289-9896f01eb148")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Package" ""
+		(at 487.11 -196.79 270)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "fb6847e3-365c-47a8-95b4-22ae05237ca5")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "exclude_from_bom" ""
+		(at 487.11 -196.79 270)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "e970c67e-daf0-40d6-9371-b6d4c0805fd8")
 		(effects
 			(font
 				(size 1 1)
@@ -74,7 +109,7 @@
 			(type solid)
 		)
 		(layer "F.SilkS")
-		(uuid "d5fe183e-607b-46a6-a933-7f2bc6b26e4a")
+		(uuid "c62bc091-a5c4-43d4-baa1-f829940d69da")
 	)
 	(fp_line
 		(start 0 0)
@@ -84,7 +119,7 @@
 			(type solid)
 		)
 		(layer "F.SilkS")
-		(uuid "57ad84fb-f7d4-4eca-87a9-8c63bed38480")
+		(uuid "e760d3f3-ed73-4dd8-8a06-8ba8a68e0ca5")
 	)
 	(fp_line
 		(start 24.5 -4)
@@ -94,7 +129,7 @@
 			(type solid)
 		)
 		(layer "F.SilkS")
-		(uuid "960f0bc0-1bf2-47e8-a61d-315d6b14a04a")
+		(uuid "0aa348ae-cbca-4e1f-9163-d61a1a55927d")
 	)
 	(fp_line
 		(start 24.5 0)
@@ -104,7 +139,7 @@
 			(type solid)
 		)
 		(layer "F.SilkS")
-		(uuid "6e5c95a1-0d37-4671-8c2d-2478361de0c9")
+		(uuid "f59fd5ee-79fe-4f50-be29-d2e99cfc9cee")
 	)
 	(fp_line
 		(start -0.5 -4.5)
@@ -114,7 +149,7 @@
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "e72bfa19-25a9-4a5e-8e37-3081ee02c9fe")
+		(uuid "1fa0da51-6cdc-47b6-a068-2511f0d98ac6")
 	)
 	(fp_line
 		(start -0.5 0.5)
@@ -124,7 +159,7 @@
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "0ab75051-cab7-4ac0-aa07-635885a02d96")
+		(uuid "803d474c-8b39-4993-ba2a-34fbed9acfad")
 	)
 	(fp_line
 		(start 25 -4.5)
@@ -134,7 +169,7 @@
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "ad3b7d9d-f362-4070-88cd-9147c23698a7")
+		(uuid "7fca31f8-4ef4-445b-8056-1dd0c6fd5372")
 	)
 	(fp_line
 		(start 25 0.5)
@@ -144,12 +179,12 @@
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "b9d3f0e8-9e7b-4d1d-ab49-b19a92015ec2")
+		(uuid "5228c7f5-51c1-423a-a17c-1de7ca252351")
 	)
 	(fp_text user "${REFERENCE}"
-		(at 17.78 -5.08 180)
+		(at 17.78 -5.08 0)
 		(layer "F.Fab")
-		(uuid "1ff537ef-94ba-4962-8916-c8798875b85a")
+		(uuid "28a4c0f1-f07a-40e5-a526-20a60b48704e")
 		(effects
 			(font
 				(size 1 1)
@@ -163,7 +198,7 @@
 		(drill 2)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "d42f3151-f17b-48ea-b3af-c4385689edd5")
+		(uuid "cec47154-5187-477b-bbff-eff5b05f9754")
 	)
 	(pad "2" thru_hole circle
 		(at 13.505 -2)
@@ -171,7 +206,7 @@
 		(drill 2)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "fc3ed7c0-dd74-4e4f-a6ed-bccb358c2605")
+		(uuid "340fff61-b8dc-481b-8f0b-4d3cccddc2df")
 	)
 	(pad "3" thru_hole circle
 		(at 8.505 -2)
@@ -179,7 +214,7 @@
 		(drill 2)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "05aa790a-7627-4880-845e-4a8c6cded67a")
+		(uuid "0f931bff-ffcc-4913-9f4e-aa55da6b07fc")
 	)
 	(pad "4" thru_hole circle
 		(at 3.505 -2)
@@ -187,10 +222,10 @@
 		(drill 2)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "52eb4c90-9b63-4bdc-830b-2812ea817630")
+		(uuid "61b5ddb6-d07a-4496-a02d-5be6cd32cea5")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/../ayab-library/packages3D/Brother_4P.step"
+	(model "${KIPRJMOD}/packages3D/Brother_4P.step"
 		(offset
 			(xyz 0 4 0)
 		)

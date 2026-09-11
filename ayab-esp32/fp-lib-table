@@ -1,4 +1,6 @@
 (fp_lib_table
   (version 7)
-  (lib (name "Library")(type "KiCad")(uri "${KIPRJMOD}/Library.pretty")(options "")(descr ""))
+  (lib (name "Library")(type "KiCad")(uri "${KIPRJMOD}/../ayab-library/Library.pretty")(options "")(descr "Project-pinned AYAB footprints"))
+  (lib (name "easyeda2kicad")(type "KiCad")(uri "${KIPRJMOD}/../ayab-library/easyeda2kicad.pretty")(options "")(descr "Project-pinned imported production footprints"))
+  (lib (name "Espressif")(type "KiCad")(uri "${KIPRJMOD}/../ayab-library/Espressif.pretty")(options "")(descr "Project-pinned Espressif module footprint"))
 )

@@ -6,7 +6,7 @@ This report describes the **current electrical connectivity**, not the desired R
 
 - ESP32 instance origin: `139.7, 92.71`, rotation `0`
 - GPIOs extracted: **39**
-- Target-function mismatches: **6**
+- Target-function mismatches: **0**
 - Native USB GPIO19 current labels: `USB_M`
 - Native USB GPIO20 current labels: `USB_P`
 
@@ -23,10 +23,10 @@ This report describes the **current electrical connectivity**, not the desired R
 | 8 | `185.42, 92.71` | 12 | `GPIO8/TOUCH8/ADC1_CH7/SUBSPICS1` | `I2C0_SDA` | `I2C0_SDA` | **OK** |
 | 9 | `185.42, 95.25` | 13 | `GPIO9/TOUCH9/ADC1_CH8/FSPIHD/SUBSPIHD` | `I2C0_SCL` | `I2C0_SCL` | **OK** |
 | 10 | `185.42, 97.79` | 14 | `GPIO10/TOUCH10/ADC1_CH9/FSPICS0/FSPIIO4/SUBSPICS0` | `DISPLAY_CS` | `DISPLAY_CS` | **OK** |
-| 11 | `185.42, 100.33` | 15 | `GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5/SUBSPID` | `SPI0_CIPO`, `SPI0_COPI`, `SPI0_SCK` | `SPI0_CIPO` | **OK** |
-| 12 | `185.42, 102.87` | 16 | `GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6/SUBSPICLK` | `SPI0_CIPO`, `SPI0_COPI`, `SPI0_SCK` | `SPI0_COPI` | **OK** |
-| 13 | `185.42, 105.41` | 17 | `GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7/SUBSPIQ` | `SPI0_CIPO`, `SPI0_COPI`, `SPI0_SCK` | `SPI0_SCK` | **OK** |
-| 14 | `185.42, 107.95` | 18 | `GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS/SUBSPIWP` | — | `FRONT_PANEL_AUX` | **MISMATCH** |
+| 11 | `185.42, 100.33` | 15 | `GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5/SUBSPID` | `SPI0_CIPO` | `SPI0_CIPO` | **OK** |
+| 12 | `185.42, 102.87` | 16 | `GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6/SUBSPICLK` | `SPI0_COPI` | `SPI0_COPI` | **OK** |
+| 13 | `185.42, 105.41` | 17 | `GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7/SUBSPIQ` | `SPI0_SCK` | `SPI0_SCK` | **OK** |
+| 14 | `185.42, 107.95` | 18 | `GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS/SUBSPIWP` | `FRONT_PANEL_AUX` | `FRONT_PANEL_AUX` | **OK** |
 | 15 | `93.98, 62.23` | 19 | `GPIO15/U0RTS/ADC2_CH4/XTAL_32K_P` | `I2C1_SDA` | `I2C1_SDA` | **OK** |
 | 16 | `93.98, 64.77` | 20 | `GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N` | `I2C1_SCL` | `I2C1_SCL` | **OK** |
 | 17 | `185.42, 110.49` | 21 | `GPIO17/U1TXD/ADC2_CH6` | `KH910_R_K` | `KH910_R_K` | **OK** |
@@ -35,13 +35,13 @@ This report describes the **current electrical connectivity**, not the desired R
 | 20 | `185.42, 64.77` | 24 | `GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+` | `USB_P` | `USB_P` | **OK** |
 | 21 | `185.42, 115.57` | 25 | `GPIO21` | `SOLENOID_PWR_EN` | `SOLENOID_PWR_EN` | **OK** |
 | 26 | `93.98, 115.57` | 26 | `GPIO26` | — | `—` | **open** |
-| 33 | `93.98, 118.11` | 28 | `SPIIO4/GPIO33/FSPIHD/SUBSPIHD` | `RED` | `LED_R` | **MISMATCH** |
-| 34 | `93.98, 120.65` | 29 | `SPIIO5/GPIO34/FSPICS0/SUBSPICS0` | `GRN` | `LED_G` | **MISMATCH** |
-| 35 | `93.98, 123.19` | 31 | `SPIIO6/GPIO35/FSPID/SUBSPID` | `YEL` | `LED_B` | **MISMATCH** |
-| 36 | `93.98, 125.73` | 32 | `SPIIO7/GPIO36/FSPICLK/SUBSPICLK` | — | `USER_BUTTON` | **MISMATCH** |
+| 33 | `93.98, 118.11` | 28 | `SPIIO4/GPIO33/FSPIHD/SUBSPIHD` | `RED` | `LED_R` | **OK** |
+| 34 | `93.98, 120.65` | 29 | `SPIIO5/GPIO34/FSPICS0/SUBSPICS0` | `GRN` | `LED_G` | **OK** |
+| 35 | `93.98, 123.19` | 31 | `SPIIO6/GPIO35/FSPID/SUBSPID` | `YEL` | `LED_B` | **OK** |
+| 36 | `93.98, 125.73` | 32 | `SPIIO7/GPIO36/FSPICLK/SUBSPICLK` | `USER_BUTTON` | `USER_BUTTON` | **OK** |
 | 37 | `93.98, 128.27` | 33 | `SPIDQS/GPIO37/FSPIQ/SUBSPIQ` | — | `—` | **open** |
 | 38 | `185.42, 118.11` | 34 | `GPIO38/FSPIWP/SUBSPIWP` | `BUZZER` | `BUZZER` | **OK** |
-| 39 | `93.98, 69.85` | 35 | `MTCK/GPIO39/CLK_OUT3/SUBSPICS1` | — | `PANEL_INT` | **MISMATCH** |
+| 39 | `93.98, 69.85` | 35 | `MTCK/GPIO39/CLK_OUT3/SUBSPICS1` | `PANEL_INT` | `PANEL_INT` | **OK** |
 | 40 | `93.98, 72.39` | 36 | `MTDO/GPIO40/CLK_OUT2` | — | `SPARE` | **open** |
 | 41 | `93.98, 74.93` | 37 | `MTDI/GPIO41/CLK_OUT1` | — | `SPARE` | **open** |
 | 42 | `93.98, 77.47` | 38 | `MTMS/GPIO42` | — | `SPARE` | **open** |
