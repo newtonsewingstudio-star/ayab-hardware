@@ -12,6 +12,9 @@ on:
       - ayab-library/**
       - .github/workflows/ayab-esp32-design.yml
       - scripts/dependencies.sh
+      - scripts/jlc_bom_formatter.py
+      - scripts/jlc_cpl_formatter.py
+      - scripts/test_jlc_formatters.py
 
   pull_request:
     branches:
@@ -21,6 +24,9 @@ on:
       - ayab-library/**
       - .github/workflows/ayab-esp32-design.yml
       - scripts/dependencies.sh
+      - scripts/jlc_bom_formatter.py
+      - scripts/jlc_cpl_formatter.py
+      - scripts/test_jlc_formatters.py
 
 env:
   workflow_project_dir: ayab-esp32
@@ -78,6 +84,9 @@ jobs:
           grep -Fxq -- '- Target-function mismatches: **0**' \
             ayab-esp32/KH910_REV_A_CURRENT_PIN_AUDIT.md
           python3 ayab-esp32/tools/validate_rev_a_manufacturing_metadata.py
+
+      - name: Validate manufacturing-data formatters without generating release files
+        run: python3 -m unittest scripts/test_jlc_formatters.py
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4

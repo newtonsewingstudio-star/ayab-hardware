@@ -1,5 +1,6 @@
+import sys
+
 import pandas as pd
-import os, sys, csv
 
 def footprintFix(fpName):
     propertiesList = fpName.split('_')
@@ -12,19 +13,58 @@ def footprintFix(fpName):
     # Strip out library name from FP.
     return fpName.split(":")[-1]
 
-bom_file = pd.read_csv(sys.argv[1])
 
-#Number of columns - ideally this is more unified but I don't want to modify the formatter and the design files in the same PR.
-bom_format = bom_file.shape[1]
+def normalize_bom(bom_file):
+    """Return the four header-driven columns expected by JLCPCB.
 
-match bom_format:
-    case 4:
-        bom_file.columns = ['Designator', 'Value', 'Footprint', 'JLCPCB Part #']
-    case 5:
-        bom_file.columns = ['Designator', 'Value', 'Footprint', 'Mfg', 'Mfg P/N']
-    case 6:
-        bom_file.columns = ['Designator', 'Value', 'Footprint', 'Mfg', 'Mfg P/N', 'JLCPCB Part #']
+    Current KiCad jobsets emit ten named columns.  Older AYAB exports used
+    four, five, or six positional columns, so retain that compatibility while
+    refusing ambiguous input instead of silently shifting fields.
+    """
+    bom_file.columns = [str(column).strip().lstrip("\ufeff") for column in bom_file.columns]
 
-bom_file['Footprint'] = bom_file['Footprint'].apply(lambda x: footprintFix(x))
+    aliases = {
+        "Reference": "Designator",
+        "References": "Designator",
+        "Value": "Comment",
+        "Package": "Footprint",
+        "LCSC ID": "LCSC Part #",
+        "LCSC PN": "LCSC Part #",
+        "JLCPCB Part #": "LCSC Part #",
+    }
+    bom_file = bom_file.rename(columns=aliases)
 
-bom_file.to_csv(sys.argv[2], index=False)
+    required = {"Designator", "Comment", "Footprint"}
+    if not required.issubset(bom_file.columns):
+        legacy_width = bom_file.shape[1]
+        legacy_columns = {
+            4: ["Designator", "Comment", "Footprint", "LCSC Part #"],
+            5: ["Designator", "Comment", "Footprint", "Mfg", "Mfg P/N"],
+            6: ["Designator", "Comment", "Footprint", "Mfg", "Mfg P/N", "LCSC Part #"],
+        }
+        if legacy_width not in legacy_columns:
+            raise ValueError(
+                "Unrecognized BOM columns; expected named KiCad fields or "
+                "a legacy 4-, 5-, or 6-column AYAB export: "
+                + ", ".join(bom_file.columns)
+            )
+        bom_file.columns = legacy_columns[legacy_width]
+
+    if "LCSC Part #" not in bom_file.columns:
+        bom_file["LCSC Part #"] = ""
+
+    result = bom_file[["Comment", "Designator", "Footprint", "LCSC Part #"]].copy()
+    result["Footprint"] = result["Footprint"].apply(footprintFix)
+    return result
+
+
+def main():
+    if len(sys.argv) != 3:
+        raise SystemExit("usage: jlc_bom_formatter.py INPUT.csv OUTPUT.csv")
+
+    bom_file = pd.read_csv(sys.argv[1], dtype=str, keep_default_na=False)
+    normalize_bom(bom_file).to_csv(sys.argv[2], index=False)
+
+
+if __name__ == "__main__":
+    main()
