@@ -2,12 +2,14 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 import pandas as pd
 
 
 SCRIPTS = Path(__file__).resolve().parent
+ROOT = SCRIPTS.parent
 
 
 class JlcFormatterTests(unittest.TestCase):
@@ -39,6 +41,17 @@ class JlcFormatterTests(unittest.TestCase):
             "LCSC Part #": "C25804",
         })
 
+    def test_jobset_exports_lcsc_id_as_a_custom_field(self):
+        jobset = json.loads(
+            (ROOT / "ayab-library" / "ayab-jobset.kicad_jobset").read_text(encoding="utf-8")
+        )
+        bom_job = next(job for job in jobset["jobs"] if job["type"] == "sch_export_bom")
+        ordered = bom_job["settings"]["fields_ordered"]
+        self.assertIn("LCSC ID", ordered)
+        self.assertNotIn("__LCSC ID", ordered)
+        position_job = next(job for job in jobset["jobs"] if job["type"] == "pcb_export_pos")
+        self.assertTrue(position_job["settings"]["exclude_dnp"])
+
     def test_legacy_six_column_bom(self):
         result = self.run_formatter(
             "jlc_bom_formatter.py",
@@ -61,6 +74,36 @@ class JlcFormatterTests(unittest.TestCase):
             "Ref,Val,Package,PosX,PosY,Rot,Side\nR1,10k,R0603,10.0,20.0,90,top\n# End of position file,,,,,,\n",
         )
         self.assertEqual(list(result["Designator"]), ["R1"])
+
+    def test_cpl_is_reconciled_to_fitted_bom(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source.csv"
+            bom = Path(directory) / "bom.csv"
+            output = Path(directory) / "output.csv"
+            source.write_text(
+                "Ref,Val,Package,PosX,PosY,Rot,Side\n"
+                "R1,10k,R0603,10.0,20.0,90,top\n"
+                "R2,10k,R0603,11.0,21.0,90,top\n"
+                "R3,DNP,R0603,12.0,22.0,90,top\n"
+                "FID1,Fiducial,Fiducial,13.0,23.0,0,top\n",
+                encoding="utf-8",
+            )
+            bom.write_text(
+                "Comment,Designator,Footprint,LCSC Part #\n10k,R1 R2,R0603,C25804\n",
+                encoding="utf-8",
+            )
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPTS / "jlc_cpl_formatter.py"),
+                    str(source),
+                    str(output),
+                    str(bom),
+                ],
+                check=True,
+            )
+            result = pd.read_csv(output, dtype=str, keep_default_na=False)
+            self.assertEqual(list(result["Designator"]), ["R1", "R2"])
 
 
 if __name__ == "__main__":

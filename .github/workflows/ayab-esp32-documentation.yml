@@ -46,7 +46,7 @@ jobs:
         run: |
           mv -v Outputs/raw-pos-all-pos.csv Outputs/raw-pos.csv
           python3 scripts/jlc_bom_formatter.py Outputs/raw-bom.csv Outputs/${kicad_project_name}-BOM-JLC.csv
-          python3 scripts/jlc_cpl_formatter.py Outputs/raw-pos.csv Outputs/${kicad_project_name}-CPL-JLC.csv
+          python3 scripts/jlc_cpl_formatter.py Outputs/raw-pos.csv Outputs/${kicad_project_name}-CPL-JLC.csv Outputs/${kicad_project_name}-BOM-JLC.csv
           
           mv -v Outputs/raw-bom.csv Outputs/${kicad_project_name}-bom.csv 
           mv -v Outputs/raw-pos.csv Outputs/${kicad_project_name}-pos.csv

@@ -1,4 +1,5 @@
 import sys
+import re
 
 import pandas as pd
 
@@ -40,8 +41,35 @@ def normalize_cpl(cpl_file):
     return cpl_file.reindex(columns=required)
 
 
+def reconcile_to_bom(cpl_file, bom_file):
+    bom_file.columns = [str(column).strip().lstrip("\ufeff") for column in bom_file.columns]
+    designator_column = next(
+        (name for name in ("Designator", "Reference", "References") if name in bom_file.columns),
+        None,
+    )
+    if designator_column is None:
+        raise ValueError("BOM has no Designator or Reference column")
+
+    bom_designators = {
+        reference
+        for group in bom_file[designator_column].astype(str)
+        for reference in re.split(r"[,;\s]+", group.strip())
+        if reference
+    }
+    cpl_designators = set(cpl_file["Designator"])
+    missing = sorted(bom_designators - cpl_designators)
+    if missing:
+        raise ValueError(f"BOM references missing from CPL: {missing}")
+
+    return cpl_file[cpl_file["Designator"].isin(bom_designators)].copy()
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        raise SystemExit("usage: jlc_cpl_formatter.py INPUT.csv OUTPUT.csv")
+    if len(sys.argv) not in (3, 4):
+        raise SystemExit("usage: jlc_cpl_formatter.py INPUT.csv OUTPUT.csv [BOM.csv]")
     cpl_file = pd.read_csv(sys.argv[1], dtype=str, keep_default_na=False)
-    normalize_cpl(cpl_file).to_csv(sys.argv[2], index=False)
+    result = normalize_cpl(cpl_file)
+    if len(sys.argv) == 4:
+        bom_file = pd.read_csv(sys.argv[3], dtype=str, keep_default_na=False)
+        result = reconcile_to_bom(result, bom_file)
+    result.to_csv(sys.argv[2], index=False)

@@ -137,7 +137,7 @@
         "bom_format_preset_name": "",
         "bom_preset_name": "",
         "description": "",
-        "exclude_dnp": false,
+        "exclude_dnp": true,
         "field_delimiter": ",",
         "fields_group_by": [],
         "fields_labels": [
@@ -162,7 +162,7 @@
           "__${ITEM_NUMBER}",
           "Mfg",
           "Mfg P/N",
-          "__LCSC ID"
+          "LCSC ID"
         ],
         "filter_string": "",
         "include_excluded_from_bom": false,
@@ -182,7 +182,7 @@
       "id": "f1f039f7-5c50-4fda-80f3-99532da5c93a",
       "settings": {
         "description": "",
-        "exclude_dnp": false,
+        "exclude_dnp": true,
         "exclude_footprints_with_th": false,
         "format": "csv",
         "gerber_board_edge": true,
