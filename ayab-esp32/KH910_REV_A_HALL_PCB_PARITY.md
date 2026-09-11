@@ -2,7 +2,7 @@
 
 Generated read-only from the current repository PCB using KiCad `pcbnew`.
 
-- Board footprints: **235**
+- Board footprints: **238**
 - Board nets: **151**
 - Obsolete comparator footprints still present: **0/24**
 - New Hall-divider footprints present: **4/4**
