@@ -39,11 +39,12 @@ jobs:
             --schematic-parity \
             -o /tmp/rev-a-hardware-check-drc.rpt \
             ayab-esp32/ayab-esp32.kicad_pcb
+          # KiCad 9 prints the parity count to stdout and fails this command on
+          # any parity issue; it does not repeat the parity count in the report.
           cat /tmp/rev-a-hardware-check-drc.rpt
           grep -Fxq '** Found 0 DRC violations **' /tmp/rev-a-hardware-check-drc.rpt
           grep -Fxq '** Found 0 unconnected pads **' /tmp/rev-a-hardware-check-drc.rpt
           grep -Fxq '** Found 0 Footprint errors **' /tmp/rev-a-hardware-check-drc.rpt
-          grep -Fxq '** Found 0 schematic parity issues **' /tmp/rev-a-hardware-check-drc.rpt
 
       - name: Require zero schematic ERC errors
         run: |
