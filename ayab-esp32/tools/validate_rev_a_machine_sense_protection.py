@@ -15,8 +15,8 @@ MCU = PCB.with_name("mcu.kicad_sch")
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
 
 schematic = MCU.read_text(encoding="utf-8")
-for ref, value in (("R215", "47k"), ("R216", "10k"), ("D205", "BAT54WS-7-F"),
-                   ("D206", "BAT54WS-7-F"), ("C206", "100n")):
+for ref, value in (("R215", "47k"), ("R216", "10k"), ("D205", "CDBU0130-HF"),
+                   ("D206", "CDBU0130-HF"), ("C206", "100n")):
     marker = f'(property "Reference" "{ref}"'
     start = schematic.find(marker)
     if start < 0:
@@ -65,4 +65,3 @@ print("ADC_FILTER C206: 100n MACHINE_PWR_SENSE to GND")
 for voltage in (12.0, 15.0, 40.0):
     current_ma = max(0.0, voltage - 3.6) / 47000.0 * 1000.0
     print(f"R216_OPEN_LIMIT VRAW={voltage:.1f}V ICLAMP_LE_{current_ma:.3f}mA at 3.6V node")
-

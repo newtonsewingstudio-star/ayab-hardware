@@ -5,8 +5,8 @@ The existing divider remains:
     +12V -- R215 47k -- MACHINE_PWR_SENSE -- R216 10k -- GND
 
 This stage adds, physically close to the GPIO4 route:
-    D205 BAT54WS: MACHINE_PWR_SENSE (A) -> +3V3 (K)
-    D206 BAT54WS: GND (A) -> MACHINE_PWR_SENSE (K)
+    D205 CDBU0130-HF: MACHINE_PWR_SENSE (A) -> +3V3 (K)
+    D206 CDBU0130-HF: GND (A) -> MACHINE_PWR_SENSE (K)
     C206 100n:    MACHINE_PWR_SENSE -> GND
 
 R215 limits clamp current if R216 opens or the machine rail has a positive
@@ -39,7 +39,10 @@ MCU = Path(sys.argv[2])
 PSU = MCU.with_name("psu.kicad_sch")
 
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
-BAT54_DATASHEET = "https://www.diodes.com/datasheet/download/BAT54WS.pdf"
+CDBU0130_DATASHEET = (
+    "https://datasheet.lcsc.com/lcsc/2205091530_"
+    "Comchip-Technology-CDBU0130-HF_C2886021.pdf"
+)
 
 
 def uid() -> str:
@@ -184,9 +187,9 @@ def patch_schematic() -> None:
     upper = clone_at(psu, diode_token, 213.36, 78.74, "D405", "D205", 90)
     lower = clone_at(psu, diode_token, 213.36, 86.36, "D405", "D206", 90)
     for ref, block in (("D205", upper), ("D206", lower)):
-        block = set_property(block, "Value", "BAT54WS-7-F")
+        block = set_property(block, "Value", "CDBU0130-HF")
         block = set_property(block, "Footprint", "Diode_SMD:D_0603_1608Metric")
-        block = set_property(block, "Datasheet", BAT54_DATASHEET)
+        block = set_property(block, "Datasheet", CDBU0130_DATASHEET)
         block = set_property(block, "Package", "0603/SOD-523F")
         block = set_property(block, "LCSC ID", "C2886021")
         block = set_property(block, "OEM PN", "CDBU0130-HF")
@@ -198,7 +201,10 @@ def patch_schematic() -> None:
             lower = block
 
     cap_token = '(symbol (lib_id "ayab-lib:C_Small") (at 154.94 41.91 0)'
-    cap = clone_at(mcu, cap_token, 220.98, 86.36, "C204", "C206")
+    # Put pin 1 directly on the existing sense bus.  This avoids a short
+    # one-grid wire stub that KiCad correctly reports as dangling when the
+    # cloned symbol has not yet been normalized by eeschema.
+    cap = clone_at(mcu, cap_token, 220.98, 85.09, "C204", "C206")
     cap = set_property(cap, "Value", "100n")
     cap = set_property(cap, "LCSC ID", "C14663")
     cap = set_property(cap, "Voltage rating", "50V X7R")
@@ -217,8 +223,7 @@ def patch_schematic() -> None:
     wiring = "".join(
         [
             wire((205.74, 82.55), (220.98, 82.55)),
-            wire((220.98, 82.55), (220.98, 83.82)),
-            wire((220.98, 88.90), (220.98, 90.17)),
+            wire((220.98, 87.63), (220.98, 90.17)),
             wire((213.36, 90.17), (220.98, 90.17)),
             junction(213.36, 82.55),
             junction(220.98, 82.55),
@@ -233,7 +238,7 @@ def patch_schematic() -> None:
         raise RuntimeError("schematic root close missing")
     mcu = mcu[:root_close] + "\n" + "\n".join((upper, lower, cap, p3, gnd)) + "\n" + mcu[root_close:]
 
-    for token in ("D205", "D206", "C206", "C2886021", "C14663", BAT54_DATASHEET):
+    for token in ("D205", "D206", "C206", "C2886021", "C14663", CDBU0130_DATASHEET):
         if token not in mcu:
             raise RuntimeError(f"schematic postcondition missing: {token}")
     MCU.write_text(mcu, encoding="utf-8")
@@ -302,7 +307,7 @@ def patch_board() -> None:
     path = lambda ref: f"{prefix}/{symbol_uuid[ref]}"
 
     diode_props = {
-        "Datasheet": BAT54_DATASHEET,
+        "Datasheet": CDBU0130_DATASHEET,
         "LCSC ID": "C2886021",
         "OEM PN": "CDBU0130-HF",
         "OEM": "Comchip Technology",
@@ -316,9 +321,9 @@ def patch_board() -> None:
         "Voltage rating": "50V X7R",
     }
     footprints = [
-        clone_footprint(diode_template, "D205", "BAT54WS-7-F", 232.0, 157.0, 180.0,
+        clone_footprint(diode_template, "D205", "CDBU0130-HF", 232.0, 157.0, 180.0,
                         path("D205"), diode_props, {"1": (p3, "+3V3"), "2": (sense, SENSE)}),
-        clone_footprint(diode_template, "D206", "BAT54WS-7-F", 232.0, 160.5, 0.0,
+        clone_footprint(diode_template, "D206", "CDBU0130-HF", 232.0, 160.5, 0.0,
                         path("D206"), diode_props, {"1": (sense, SENSE), "2": (gnd, "GND")}),
         clone_footprint(cap_template, "C206", "100n", 235.25, 160.5, 0.0,
                         path("C206"), cap_props, {"1": (sense, SENSE), "2": (gnd, "GND")}),
@@ -373,10 +378,18 @@ def patch_board() -> None:
     d205_sense = positions["D205.2"]
     d206_sense = positions["D206.1"]
     cap_sense = positions["C206.1"]
-    add_segment(sense_anchor, d205_sense, sense)
-    add_segment(d205_sense, (d205_sense[0], d206_sense[1]), sense)
-    add_segment((d205_sense[0], d206_sense[1]), d206_sense, sense)
-    add_segment(d206_sense, cap_sense, sense)
+    # Route around the opposite-net pad of each 0603 device.  The first stage
+    # used straight centreline tracks, which crossed D205.1 (+3V3) and C206.2
+    # (GND); KiCad rejected those shorts.
+    upper_channel_y = 158.25
+    lower_channel_y = 161.75
+    add_segment(sense_anchor, (sense_anchor[0], upper_channel_y), sense)
+    add_segment((sense_anchor[0], upper_channel_y), (d205_sense[0], upper_channel_y), sense)
+    add_segment((d205_sense[0], upper_channel_y), d205_sense, sense)
+    add_segment(d205_sense, d206_sense, sense)
+    add_segment(d206_sense, (d206_sense[0], lower_channel_y), sense)
+    add_segment((d206_sense[0], lower_channel_y), (cap_sense[0], lower_channel_y), sense)
+    add_segment((cap_sense[0], lower_channel_y), cap_sense, sense)
 
     # Reuse the nearest existing +3V3 through-via, avoiding a new rail stub or
     # a second high-impedance clamp reference.
@@ -395,4 +408,3 @@ def patch_board() -> None:
 patch_schematic()
 patch_board()
 print("MACHINE_SENSE_PROTECTION_STAGE_OK")
-
