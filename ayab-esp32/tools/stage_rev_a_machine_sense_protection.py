@@ -193,8 +193,10 @@ def patch_schematic() -> None:
     sheet_path = path_match.group(1).rstrip("/")
 
     diode_token = '(symbol (lib_id "ayab-lib:D_Schottky") (at 214.63 60.96 270)'
-    upper = clone_at(psu, diode_token, 213.36, 78.74, "D405", "D205", 90)
-    lower = clone_at(psu, diode_token, 213.36, 86.36, "D405", "D206", 90)
+    # Pin 1 is the cathode.  Rotation 270 places D205.1 on +3V3 and
+    # D206.1 on MACHINE_PWR_SENSE, matching the physical pad topology.
+    upper = clone_at(psu, diode_token, 213.36, 78.74, "D405", "D205", 270)
+    lower = clone_at(psu, diode_token, 213.36, 86.36, "D405", "D206", 270)
     for ref, block in (("D205", upper), ("D206", lower)):
         block = set_property(block, "Value", "CDBU0130-HF")
         block = set_property(block, "Footprint", "Diode_SMD:D_0603_1608Metric")

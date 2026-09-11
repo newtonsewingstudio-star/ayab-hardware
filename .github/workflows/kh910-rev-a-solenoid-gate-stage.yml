@@ -37,20 +37,36 @@ jobs:
           rm -rf /tmp/solenoid-gate-stage
           mkdir -p /tmp/solenoid-gate-stage
           cp -a ayab-esp32/. /tmp/solenoid-gate-stage/
+      - name: Detect already integrated gate
+        id: gate-state
+        run: |
+          if grep -Fq '(property "Reference" "Q805"' /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb \
+             && grep -Fq '(property "Reference" "Q806"' /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb \
+             && grep -Fq '(property "Reference" "R822"' /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb; then
+            echo 'integrated=true' >> "$GITHUB_OUTPUT"
+            echo 'Gate is already integrated; validate the promoted source copy.'
+          else
+            echo 'integrated=false' >> "$GITHUB_OUTPUT"
+          fi
       - name: Stage compact local gate
+        if: steps.gate-state.outputs.integrated != 'true'
         run: |
           set -o pipefail
           /usr/bin/python3 ayab-esp32/tools/stage_rev_a_solenoid_gate_local_v1.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb | tee /tmp/gate-stage.txt
       - name: Clear P-gate corner conflict
+        if: steps.gate-state.outputs.integrated != 'true'
         run: |
           /usr/bin/python3 ayab-esp32/tools/fix_rev_a_solenoid_pg_corner.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb | tee -a /tmp/gate-stage.txt
       - name: Route solenoid enable with all-layer via clearance
+        if: steps.gate-state.outputs.integrated != 'true'
         run: |
           /usr/bin/python3 ayab-esp32/tools/route_rev_a_solenoid_enable_astar.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb | tee -a /tmp/gate-stage.txt
       - name: Stage switched-rail test point
+        if: steps.gate-state.outputs.integrated != 'true'
         run: |
           /usr/bin/python3 ayab-esp32/tools/stage_rev_a_solenoid_tp703_astar.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb | tee -a /tmp/gate-stage.txt
       - name: Refill zones
+        if: steps.gate-state.outputs.integrated != 'true'
         run: |
           /usr/bin/python3 ayab-esp32/tools/refill_rev_a_zones.py /tmp/solenoid-gate-stage/ayab-esp32.kicad_pcb
       - name: Require zero staged DRC violations and unconnected pads

@@ -11522,7 +11522,7 @@
     )
   )
 
-(symbol (lib_id "ayab-lib:D_Schottky") (at 213.36 78.74 90) (unit 1)
+(symbol (lib_id "ayab-lib:D_Schottky") (at 213.36 78.74 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid aaa14c5f-6969-439e-bdef-bb5fc66f917d)
     (property "Reference" "D205" (at 215.9 77.7875 90)
@@ -11559,7 +11559,7 @@
       )
     )
   )
-(symbol (lib_id "ayab-lib:D_Schottky") (at 213.36 86.36 90) (unit 1)
+(symbol (lib_id "ayab-lib:D_Schottky") (at 213.36 86.36 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 175ec455-5c18-4495-952f-cdd672f0311a)
     (property "Reference" "D206" (at 215.9 85.4075 90)
