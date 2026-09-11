@@ -54,6 +54,12 @@ class JlcFormatterTests(unittest.TestCase):
         gerber_job = next(job for job in jobset["jobs"] if job["type"] == "pcb_export_gerbers")
         self.assertIn("F.Paste", gerber_job["settings"]["layers"])
         self.assertIn("B.Paste", gerber_job["settings"]["layers"])
+        self.assertTrue(gerber_job["settings"]["subtract_solder_mask_from_silk"])
+        drill_job = next(job for job in jobset["jobs"] if job["type"] == "pcb_export_drill")
+        self.assertEqual(drill_job["settings"]["units"], "mm")
+        self.assertTrue(drill_job["settings"]["excellon.combine_pth_npth"])
+        self.assertTrue(drill_job["settings"]["generate_map"])
+        self.assertEqual(drill_job["settings"]["map_format"], "gerberx2")
 
     def test_legacy_six_column_bom(self):
         result = self.run_formatter(

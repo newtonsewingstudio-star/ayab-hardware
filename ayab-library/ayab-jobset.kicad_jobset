@@ -105,7 +105,7 @@
         "precision": 5,
         "sketch_dnp_footprints_on_fab_layers": true,
         "sketch_pads_on_fab_layers": false,
-        "subtract_solder_mask_from_silk": false,
+        "subtract_solder_mask_from_silk": true,
         "use_drill_origin": false,
         "use_protel_file_extension": true,
         "use_x2_format": true
@@ -123,11 +123,11 @@
         "excellon.mirror_y": false,
         "excellon.oval_drill_route": false,
         "format": "excellon",
-        "generate_map": false,
+        "generate_map": true,
         "gerber_precision": 5,
-        "map_format": "pdf",
+        "map_format": "gerberx2",
         "output_dir": "./Gerbers",
-        "units": "in",
+        "units": "mm",
         "zero_format": "decimal"
       },
       "type": "pcb_export_drill"
