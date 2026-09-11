@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Validate Rev A ordering, population, and repository-pinned footprint data."""
 
+import collections
 import json
 import re
 from pathlib import Path
@@ -37,6 +38,42 @@ EXPECTED_PATHS = {
 MOUNTING_REFS = {"H101", "H102", "H103", "H104", "H106", "H108"}
 
 
+def expression_at(text: str, start: int) -> tuple[str, int]:
+    depth = 0
+    quoted = False
+    escaped = False
+    for pos in range(start, len(text)):
+        char = text[pos]
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+            continue
+        if char == '"':
+            quoted = True
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                return text[start : pos + 1], pos + 1
+    raise RuntimeError(f"unbalanced PCB expression at {start}")
+
+
+def serialized_footprint_uuids(board_text: str) -> list[str]:
+    values = []
+    pos = 0
+    while True:
+        start = board_text.find('(footprint "', pos)
+        if start < 0:
+            return values
+        block, pos = expression_at(board_text, start)
+        values.extend(re.findall(r'\(uuid "?([0-9a-f-]{36})"?\)', block))
+
+
 def pad_signature(footprint) -> dict[str, tuple]:
     result = {}
     for pad in footprint.Pads():
@@ -53,6 +90,17 @@ def pad_signature(footprint) -> dict[str, tuple]:
 def main() -> None:
     board_text = PCB.read_text(encoding="utf-8")
     board = pcbnew.LoadBoard(str(PCB))
+    serialized_uuids = serialized_footprint_uuids(board_text)
+    duplicate_uuids = {
+        value: count
+        for value, count in collections.Counter(serialized_uuids).items()
+        if count > 1
+    }
+    if duplicate_uuids:
+        excess = sum(count - 1 for count in duplicate_uuids.values())
+        raise RuntimeError(
+            f"duplicate serialized footprint-tree UUIDs: {len(duplicate_uuids)} groups, {excess} excess uses"
+        )
     physical = [fp for fp in board.GetFootprints() if fp.GetReference() != "G***"]
     by_ref = {fp.GetReference(): fp for fp in physical}
     if len(by_ref) != len(physical):
@@ -154,8 +202,63 @@ def main() -> None:
         drawing for drawing in board.GetDrawings()
         if isinstance(drawing, pcbnew.PCB_TEXT) and drawing.GetText() == "KH910 REV A 09/2026"
     )
-    if tuple(revision.GetPosition()) != (174_000_000, 161_200_000):
-        raise RuntimeError("revision label moved from its visually reviewed clear location")
+    if revision.GetLayer() != pcbnew.F_SilkS:
+        raise RuntimeError("revision label must remain on front silkscreen")
+    revision_box = revision.GetBoundingBox().GetInflated(pcbnew.FromMM(0.20))
+    board_outline = pcbnew.SHAPE_POLY_SET()
+    if not board.GetBoardPolygonOutlines(board_outline):
+        raise RuntimeError("cannot construct the board outline for revision-label clearance")
+    revision_corners = (
+        pcbnew.VECTOR2I(revision_box.GetLeft(), revision_box.GetTop()),
+        pcbnew.VECTOR2I(revision_box.GetRight(), revision_box.GetTop()),
+        pcbnew.VECTOR2I(revision_box.GetLeft(), revision_box.GetBottom()),
+        pcbnew.VECTOR2I(revision_box.GetRight(), revision_box.GetBottom()),
+    )
+    if not all(board_outline.Contains(corner) for corner in revision_corners):
+        raise RuntimeError("revision label and clearance margin extend beyond the board outline")
+
+    pad_hits = []
+    for footprint in physical:
+        for pad in footprint.Pads():
+            if pad.IsOnLayer(pcbnew.F_Mask) and revision_box.Intersects(
+                pad.GetBoundingBox().GetInflated(pcbnew.FromMM(0.10))
+            ):
+                pad_hits.append(f"{footprint.GetReference()}.{pad.GetNumber()}")
+    if pad_hits:
+        raise RuntimeError(f"revision label overlaps front pad/mask clearance: {sorted(pad_hits)}")
+
+    courtyard_hits = []
+    footprint_silk_hits = []
+    for footprint in physical:
+        if footprint.GetLayer() != pcbnew.F_Cu:
+            continue
+        courtyard = footprint.GetCourtyard(pcbnew.F_CrtYd)
+        if not courtyard.IsEmpty() and revision_box.Intersects(
+            courtyard.BBox().GetInflated(pcbnew.FromMM(0.10))
+        ):
+            courtyard_hits.append(footprint.GetReference())
+        for graphic in footprint.GraphicalItems():
+            if graphic.GetLayer() != pcbnew.F_SilkS:
+                continue
+            if hasattr(graphic, "IsVisible") and not graphic.IsVisible():
+                continue
+            if revision_box.Intersects(graphic.GetBoundingBox().GetInflated(pcbnew.FromMM(0.05))):
+                footprint_silk_hits.append(footprint.GetReference())
+    if courtyard_hits:
+        raise RuntimeError(f"revision label overlaps front footprint courtyards: {sorted(courtyard_hits)}")
+    if footprint_silk_hits:
+        raise RuntimeError(f"revision label overlaps front footprint silkscreen: {sorted(set(footprint_silk_hits))}")
+
+    board_silk_hits = []
+    for drawing in board.GetDrawings():
+        if drawing.GetLayer() != pcbnew.F_SilkS:
+            continue
+        if isinstance(drawing, pcbnew.PCB_TEXT) and drawing.GetText() == revision.GetText():
+            continue
+        if revision_box.Intersects(drawing.GetBoundingBox().GetInflated(pcbnew.FromMM(0.05))):
+            board_silk_hits.append(type(drawing).__name__)
+    if board_silk_hits:
+        raise RuntimeError(f"revision label overlaps existing board silkscreen: {board_silk_hits}")
     if any(fp.GetReference() == "kibuzzard-65BDBF94" for fp in board.GetFootprints()):
         raise RuntimeError("obsolete v0.1 rev A 02/24 badge is still present")
     if any(fp.GetReference() == "kibuzzard-65BFE062" for fp in board.GetFootprints()):
@@ -200,6 +303,8 @@ def main() -> None:
     print("PINNED_FOOTPRINT_INSTANCES", checked_instances)
     print("CONTROLLED_BOARD_RULES", len(required_rules))
     print("CONTROLLED_ASSEMBLY_LABELS", len(required_labels))
+    print("FOOTPRINT_TREE_UUIDS_UNIQUE", len(serialized_uuids))
+    print("REVISION_LABEL_CLEARANCE_OK")
 
 
 if __name__ == "__main__":

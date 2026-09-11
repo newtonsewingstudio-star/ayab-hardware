@@ -11,7 +11,7 @@ This record closes the ten repair-order findings reported against commit `032c31
 | N1 — D605/D606 ordering identity | Closed | Both SS54 rectifiers now identify MDD part `SS54`, LCSC `C22452`, with the SS54 datasheet. The LED code `C2290` is prohibited for these rectifier positions by the manufacturing validator; actual indicator LEDs legitimately retain it. D204 was normalized to the same identity. |
 | N2 — footprint schematic paths | Closed | R213/R214 now have their native ESP32-sheet paths. R735–R738 now point to their current connector-sheet symbols. Exact paths are enforced by `validate_rev_a_manufacturing_metadata.py`. |
 | N3 — inner copper ambiguity | Closed | The modeled stackup is 35 µm outer / 17.5 µm inner copper. The core was adjusted so modeled thickness remains 1.6062 mm. The manufacturing profile requires at least these copper weights. |
-| N4 — revision silk overlap | Closed | `KH910 REV A 09/2026` moved to `(174.0, 161.2)` on F.SilkS. Fresh front copper/silk and 3D renders show it clear of J406. The coordinate is validator-controlled. |
+| N4 — revision silk overlap | Closed after follow-up audit | `KH910 REV A 09/2026` moved again to `(180.0, 142.0)` on F.SilkS after the independent 00b3978 audit found pad interference at the preceding location. The validator now checks actual pad/mask, courtyard, board-edge, and silkscreen clearance instead of trusting a fixed coordinate. |
 | N5 — clamp-current overclaim | Closed | The validator and fail-safe review now distinguish conditional 3.6 V-node calculations from deliberately loose current bounds and explicitly state that neither proves GPIO voltage or surge compliance. |
 | N6 — unresolved 3D models | Closed | All 165 project-local model references were rebased to the repository library and resolve. The remaining model is from KiCad's standard library. Fresh top and bottom native renders load the board models. |
 | N7 — critical-part metadata | Closed | D204/D205/D206/D601/D605/D606 now carry explicit device descriptions and datasheets; D601 also carries its MBF package metadata. These fields are checked automatically. |
@@ -24,7 +24,7 @@ This record closes the ten repair-order findings reported against commit `032c31
 - KiCad 9.0.9 PCB DRC with schematic parity: 0 violations, 0 unconnected items, 0 schematic parity issues.
 - KiCad 10.0.6 board DRC: 0 violations, 0 unconnected items.
 - KiCad 10.0.6 ERC: 0 errors, 0 warnings.
-- KiCad 10.0.6 supplemental board-to-schematic field comparison reports inherited local `Description` overrides only; it reports no geometry or connectivity fault and is not counted as the KiCad 9 controlled parity gate.
+- KiCad 10.0.6 supplemental board-to-schematic field comparison reports inherited local `Description` and `Datasheet` overrides plus TP701's `Package` override; it reports no geometry or connectivity fault and is not counted as the KiCad 9 controlled parity gate.
 - GPIO/pin-map, Hall parity, KL parity, power parity, prototype parity, machine-sense protection, solenoid gate source, solenoid PCB fail-safe, and manufacturing-metadata checks pass.
 - Fresh top, bottom, top-copper/silk, and bottom-copper/silk views received a visual sanity review with no visible blocker.
 

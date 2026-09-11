@@ -106,17 +106,18 @@ print("MACHINE_SENSE_PROTECTION_TOPOLOGY_OK")
 print("POSITIVE_CLAMP D205: MACHINE_PWR_SENSE anode, +3V3 cathode")
 print("NEGATIVE_CLAMP D206: GND anode, MACHINE_PWR_SENSE cathode")
 print("ADC_FILTER C206: 100n MACHINE_PWR_SENSE to GND")
-# R215/C25819 is specified as 47 kohm +/-1%, +/-100 ppm/C.  The controlled
-# prototype ambient is at most 40 C, so the 25 C nominal can fall by at most
-# 1.15% from initial tolerance plus TCR.  A node >= 0 V gives a deliberately
-# loose current upper bound that does not rely on a particular clamp voltage.
-r215_min_ohm_at_40c = 47000.0 * (1.0 - 0.01 - 100e-6 * 15.0)
+# R215/C25819 is specified as 47 kohm +/-1%, +/-100 ppm/C, -55 to +155 C.
+# Across that full rated element-temperature range, the largest departure from
+# the 25 C nominal is 130 C.  Applying tolerance and worst-sign TCR together is
+# deliberately conservative.  A node >= 0 V then gives a loose current upper
+# bound that does not rely on ambient temperature or a particular clamp voltage.
+r215_min_ohm_full_rated_temperature = 47000.0 * (1.0 - 0.01 - 100e-6 * 130.0)
 for voltage in (12.0, 15.0, 40.0):
     conditional_ma = max(0.0, voltage - 3.6) / 47000.0 * 1000.0
-    loose_upper_ma = voltage / r215_min_ohm_at_40c * 1000.0
+    loose_upper_ma = voltage / r215_min_ohm_full_rated_temperature * 1000.0
     print(
         f"R216_OPEN_CURRENT VRAW={voltage:.1f}V "
         f"CONDITIONAL_{conditional_ma:.3f}mA_AT_3V6_NOMINAL_R215 "
-        f"LOOSE_UPPER_{loose_upper_ma:.3f}mA_NODE_GE_0V_R215_MIN_AT_40C"
+        f"LOOSE_UPPER_{loose_upper_ma:.3f}mA_NODE_GE_0V_R215_MIN_FULL_RATED_ELEMENT_TEMP"
     )
 print("CURRENT_BOUNDS_DO_NOT_GUARANTEE_GPIO_VOLTAGE_OR_SURGE_COMPLIANCE")

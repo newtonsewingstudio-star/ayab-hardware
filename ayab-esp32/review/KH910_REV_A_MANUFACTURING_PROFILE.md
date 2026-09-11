@@ -26,6 +26,8 @@ The KiCad project now rejects geometry below these values:
 
 Two zone-only GND stitching vias at the upper antenna recess were moved 0.30 mm inward so the 0.25 mm copper-edge rule passes. The controlled KiCad 9 DRC must report 0 violations, 0 unconnected pads, and 0 footprint/parity errors with these limits active.
 
+The manufacturing validator additionally requires every serialized footprint-tree UUID—including nested pads, fields, text, and graphics—to be unique. It also checks the complete revision-marking bounding box with margin against the native board outline, front pad/mask regions, footprint courtyards, and other silkscreen. These are explicit preorder source-integrity checks because native DRC alone does not detect copied object identities or guarantee useful marking placement.
+
 ## Ordering restrictions
 
 - Select a board-house capability that meets or improves every minimum above; do not allow automatic relaxation.
