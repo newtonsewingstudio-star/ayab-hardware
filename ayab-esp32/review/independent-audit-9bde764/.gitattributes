@@ -1,0 +1,4 @@
+# Preserve the exact audited artifact bytes and their SHA-256 hashes.
+* -text whitespace=cr-at-eol
+# The archived report includes verbatim renderer output with trailing spaces.
+AYAB_KH910_Final_Preorder_Audit_9bde764.md -whitespace

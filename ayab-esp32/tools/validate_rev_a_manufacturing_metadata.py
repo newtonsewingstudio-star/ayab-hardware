@@ -229,7 +229,8 @@ def main() -> None:
 
     courtyard_hits = []
     footprint_silk_hits = []
-    for footprint in physical:
+    # Artwork footprints have no component reference but still obstruct silk.
+    for footprint in board.GetFootprints():
         if footprint.GetLayer() != pcbnew.F_Cu:
             continue
         courtyard = footprint.GetCourtyard(pcbnew.F_CrtYd)

@@ -24,7 +24,7 @@ This record closes the ten repair-order findings reported against commit `032c31
 - KiCad 9.0.9 PCB DRC with schematic parity: 0 violations, 0 unconnected items, 0 schematic parity issues.
 - KiCad 10.0.6 board DRC: 0 violations, 0 unconnected items.
 - KiCad 10.0.6 ERC: 0 errors, 0 warnings.
-- KiCad 10.0.6 supplemental board-to-schematic field comparison reports inherited local `Description` and `Datasheet` overrides plus TP701's `Package` override; it reports no geometry or connectivity fault and is not counted as the KiCad 9 controlled parity gate.
+- KiCad 10.0.6 supplemental board-to-schematic field comparison reports inherited local `Description` and `Datasheet` overrides plus TP703's `Package` override; it reports no geometry or connectivity fault and is not counted as the KiCad 9 controlled parity gate.
 - GPIO/pin-map, Hall parity, KL parity, power parity, prototype parity, machine-sense protection, solenoid gate source, solenoid PCB fail-safe, and manufacturing-metadata checks pass.
 - Fresh top, bottom, top-copper/silk, and bottom-copper/silk views received a visual sanity review with no visible blocker.
 

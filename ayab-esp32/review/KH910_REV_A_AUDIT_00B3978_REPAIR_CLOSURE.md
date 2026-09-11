@@ -29,7 +29,7 @@ The manufacturing validator now scans every UUID inside every serialized footpri
 
 ## P3 qualifications
 
-- N12: the KiCad 10 compatibility wording now accurately identifies inherited `Description` and `Datasheet` field overrides plus TP701's `Package` override. These are not represented as electrical or purchasing-identity failures.
+- N12: the KiCad 10 compatibility wording now accurately identifies inherited `Description` and `Datasheet` field overrides plus TP703's `Package` override. These are not represented as electrical or purchasing-identity failures.
 - N13: the R215 loose current bound no longer infers resistor-element temperature from ambient. It uses the component's full rated -55 °C to +155 °C element-temperature range, ±1% tolerance, and ±100 ppm/°C TCR, giving a conservative 45.919 kΩ minimum. The resulting loose bounds are 0.261 mA at 12 V, 0.327 mA at 15 V, and 0.871 mA at 40 V, while explicitly not guaranteeing GPIO voltage or surge compliance.
 
 ## Reproduced local result
