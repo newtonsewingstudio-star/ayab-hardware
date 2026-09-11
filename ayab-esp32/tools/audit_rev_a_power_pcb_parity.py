@@ -30,7 +30,7 @@ PCB = ROOT / "ayab-esp32.kicad_pcb"
 # retain historical labels from an earlier project, for example U401 -> U601
 # and TP403 -> TP603.  Only the assembled root netlist resolves those mappings
 # correctly, so do not inspect child sheets in isolation for PCB parity.
-SEEDS = {"U601", "U602", "U403", "R215", "R216", "TP603"}
+SEEDS = {"U601", "U602", "U403", "R215", "R216", "D205", "D206", "C206", "TP603"}
 GLOBAL_NETS = {"", "GND", "+12V", "+5V", "+3V3", "5V", "3V3"}
 
 

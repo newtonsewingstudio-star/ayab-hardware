@@ -15,6 +15,7 @@ MCU = PCB.with_name("mcu.kicad_sch")
 SENSE = "/ESP32/MACHINE_PWR_SENSE"
 
 schematic = MCU.read_text(encoding="utf-8")
+pcb_text = PCB.read_text(encoding="utf-8")
 for ref, value in (("R215", "47k"), ("R216", "10k"), ("D205", "CDBU0130-HF"),
                    ("D206", "CDBU0130-HF"), ("C206", "100n")):
     marker = f'(property "Reference" "{ref}"'
@@ -29,6 +30,49 @@ for ref, value in (("R215", "47k"), ("R216", "10k"), ("D205", "CDBU0130-HF"),
 for token in ("C2886021", "CDBU0130-HF", "C14663", "CL10B104KB8NNNC"):
     if token not in schematic:
         raise RuntimeError(f"schematic ordering metadata missing: {token}")
+
+
+def component_snippet(text: str, ref: str, kind: str) -> str:
+    marker = f'(property "Reference" "{ref}"'
+    marker_at = text.find(marker)
+    if marker_at < 0:
+        raise RuntimeError(f"{kind} component missing: {ref}")
+    if kind == "schematic":
+        start = text.rfind("(symbol (lib_id ", 0, marker_at)
+        return text[start:marker_at + 1400]
+    start = text.rfind("(footprint ", 0, marker_at)
+    next_start = text.find("\n\t(footprint ", marker_at)
+    return text[start:next_start if next_start >= 0 else len(text)]
+
+
+# The earlier BOM metadata named a 10 nF part on eight footprints whose design
+# value is 100 nF.  Require one consistent, orderable 100 nF/50 V X7R part in
+# both schematic and PCB so the value error cannot return at ordering time.
+cap_refs = {"C201", "C202", "C203", "C204", "C206", "C301", "C305", "C701", "C702"}
+schematic_texts = [
+    path.read_text(encoding="utf-8")
+    for path in MCU.parent.glob("*.kicad_sch")
+]
+for ref in sorted(cap_refs):
+    source = next((text for text in schematic_texts if f'(property "Reference" "{ref}"' in text), None)
+    if source is None:
+        raise RuntimeError(f"schematic capacitor missing: {ref}")
+    for kind, snippet in (
+        ("schematic", component_snippet(source, ref, "schematic")),
+        ("PCB", component_snippet(pcb_text, ref, "PCB")),
+    ):
+        for token in ('(property "Value" "100n"', "C14663", "CL10B104KB8NNNC", "50V X7R"):
+            if token not in snippet:
+                raise RuntimeError(f"{ref} {kind} 100 nF ordering metadata missing: {token}")
+
+for ref in ("D205", "D206"):
+    for kind, snippet in (
+        ("schematic", component_snippet(schematic, ref, "schematic")),
+        ("PCB", component_snippet(pcb_text, ref, "PCB")),
+    ):
+        for token in ('(property "Value" "CDBU0130-HF"', "C2886021", "Comchip Technology"):
+            if token not in snippet:
+                raise RuntimeError(f"{ref} {kind} diode ordering metadata missing: {token}")
 
 board = pcbnew.LoadBoard(str(PCB))
 if board is None:

@@ -32,6 +32,9 @@ expected = {
     # Machine-presence divider on GPIO4.
     "R215": "47k",
     "R216": "10k",
+    "D205": "CDBU0130-HF",
+    "D206": "CDBU0130-HF",
+    "C206": "100n",
     # A directly accessible 3.3 V check point.
     "TP403": "3V3",
     # Hardware-default-OFF solenoid power gate.

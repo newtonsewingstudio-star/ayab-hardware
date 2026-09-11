@@ -2,7 +2,7 @@
 
 Review date: 2026-09-10
 
-Verdict: **PASS for manufacture and supervised bring-up of one Rev A prototype.** This is not a production or field-safety certification, and it does not replace the physical power-state tests listed below.
+Verdict: **HOLD until the protected machine-sense correction is integrated, independently revalidated in KiCad, and visually reviewed.** After those gates pass, this design may be released only for manufacture and supervised bring-up of one Rev A prototype. This is not a production or field-safety certification, and it does not replace the physical power-state tests listed below.
 
 ## Evidence reviewed
 
@@ -37,7 +37,9 @@ R215/R216 form the intended `+12V -> 47k -> MACHINE_PWR_SENSE -> 10k -> GND` div
 - At 15.0 V input: 2.632 V at GPIO4 and 0.263 mA divider current.
 - The divider reaches 3.6 V only at approximately 20.5 V input.
 
-This is suitable for detecting the nominal machine rail. The 47 kΩ upper resistor also limits abnormal input current, but the divider is not a precision transient suppressor. Initial bring-up must confirm the real rail peak and ADC reading before solenoid enable is allowed.
+The divider alone is suitable for detecting the nominal machine rail, but it is not sufficient input protection: an open R216 would leave the ESP32 input supplied through R215, and Espressif does not specify an allowable GPIO injection current for that condition. The release correction adds D205/D206 Schottky clamps to `+3V3` and ground plus C206 100 nF to ground. R215 then limits positive-clamp current to approximately 0.179 mA at 12 V, 0.243 mA at 15 V, and 0.774 mA at a conservative 40 V disturbance (using a 3.6 V node bound). C206 filters fast switching noise; D206 clamps negative excursions.
+
+This closes the auditor's R216-open and ordinary transient concerns without claiming surge immunity. An R215 short, a clamp installed with the wrong polarity, or loss of the 3.3 V clamp reference remains outside the single-fault claim and is covered by assembly inspection and current-limited first-power tests. Initial bring-up must still record the real machine-rail peak and ADC reading before solenoid enable is allowed.
 
 ## Solenoid hardware default-OFF behavior
 
@@ -64,6 +66,26 @@ Using the documented conservative 1.37 A all-coil envelope and 70 mΩ Q805 resis
 | Valid machine power and deliberate enable | GPIO21 high turns Q806 and then Q805 ON |
 | Brownout or watchdog reset | GPIO21 releases; passive hardware returns the gate OFF |
 | Machine power removed while USB remains | the switched rail collapses while logic may remain powered |
+
+## Solenoid-gate component fault tree
+
+The gate is hardware-default-OFF for normal reset, boot, brownout, unpowered-MCU, and released-GPIO states. It is not a redundant or safety-rated single-fault shutdown circuit. The explicit component-level review is:
+
+| Fault | Expected result | Classification |
+|---|---|---|
+| R820 open | Q805 gate can float; leakage or coupling can enable the switched rail | unsafe residual; inspect/continuity-test before coils |
+| R820 short | Q805 gate is held at source | safe OFF |
+| R821 open | Q806 cannot be driven on | safe OFF |
+| R821 short | enable remains functional but GPIO current limiting/isolation is lost; R822 still pulls down | degraded, not an automatic enable |
+| R822 open | Q806 gate can float during reset or while the MCU is unpowered | unsafe residual; inspect/continuity-test before coils |
+| R822 short | Q806 gate is held low | safe OFF |
+| Q806 drain-source short | Q805 is forced on whenever machine 12 V is present | unsafe residual; rail gate lost |
+| Q806 open | Q805 remains pulled off by R820 | safe OFF |
+| Q805 drain-source short | `SOLENOID_12V_SW` is permanently live; ULN2003 input defaults become the remaining barrier | unsafe residual; rail gate lost |
+| Q805 open | switched solenoid rail remains off | safe OFF |
+| GPIO21 stuck high | rail remains enabled until firmware/watchdog/reset releases it | known software/control residual |
+
+The one-off prototype therefore relies on correct assembly of R820/R822 and both MOSFETs, followed by continuity checks and powered reset/brownout tests before any coil connector is attached. No SIL, machinery-safety, or comprehensive single-fault rating is claimed.
 
 ## Safety envelope and required bring-up tests
 

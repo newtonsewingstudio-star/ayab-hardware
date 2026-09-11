@@ -1,6 +1,8 @@
 # AYAB-ESP32 KH910 Rev A — I/O and Pin Architecture
 
-Status: architecture draft for Rev A. This document is intended to become the authoritative signal/pin map before schematic rerouting. Do not fabricate from the current schematic until this map is reconciled with KiCad and ERC/DRC.
+Status: Rev A interface contract and design-intent map. The native KiCad schematic and PCB at the reviewed commit are authoritative for actual electrical connectivity and layout. `KH910_REV_A_CURRENT_PIN_AUDIT.md` is the generated reconciliation of this contract against the schematic. If these sources disagree, release is blocked until the KiCad source or this contract is corrected; this prose file never overrides the netlist.
+
+Rows described as candidate, spare, or proposed reserve future interfaces and are not claims that the feature is populated. Implemented safety-critical assignments must be marked `OK` by the generated current-pin audit before prototype release.
 
 ## Why this document exists
 
@@ -25,7 +27,7 @@ The original AYAB-ESP32 schematic already routes native ESP32-S3 USB correctly:
 
 USB pin assignment is therefore **not** a Rev A schematic defect. USB power-path/backfeed behavior remains a separate Rev A defect to solve.
 
-## Rev A proposed ESP32-S3 allocation
+## Rev A ESP32-S3 allocation contract
 
 | Function | Rev A GPIO | Electrical type | Notes |
 |---|---:|---|---|

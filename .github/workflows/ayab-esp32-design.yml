@@ -31,6 +31,36 @@ jobs:
       - name: Install KiCad
         run: bash ./scripts/dependencies.sh
 
+      - name: Require zero Rev A PCB errors, unconnected pads, and footprint errors
+        run: |
+          kicad-cli pcb drc --exit-code-violations \
+            -o /tmp/rev-a-hardware-check-drc.rpt \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          cat /tmp/rev-a-hardware-check-drc.rpt
+          grep -Fxq '** Found 0 DRC violations **' /tmp/rev-a-hardware-check-drc.rpt
+          grep -Fxq '** Found 0 unconnected pads **' /tmp/rev-a-hardware-check-drc.rpt
+          grep -Fxq '** Found 0 Footprint errors **' /tmp/rev-a-hardware-check-drc.rpt
+
+      - name: Require zero schematic ERC errors
+        run: |
+          set +e
+          kicad-cli sch erc --exit-code-violations \
+            -o /tmp/rev-a-hardware-check-erc.rpt \
+            ayab-esp32/ayab-esp32.kicad_sch
+          rc=$?
+          set -e
+          cat /tmp/rev-a-hardware-check-erc.rpt
+          echo "ERC_EXIT=$rc"
+          grep -Eq 'ERC messages:.*Errors 0([[:space:]]|$)' /tmp/rev-a-hardware-check-erc.rpt
+
+      - name: Require safety-critical topology and PCB parity
+        run: |
+          python3 ayab-esp32/tools/validate_rev_a_machine_sense_protection.py \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          python3 ayab-esp32/tools/validate_rev_a_solenoid_failsafe_pcb.py \
+            ayab-esp32/ayab-esp32.kicad_pcb
+          python3 ayab-esp32/tools/audit_rev_a_prototype_pcb_parity.py
+
       - name: Verify clean design files
         run: |
           kicad-cli jobset run --file ./ayab-library/ayab-jobset.kicad_jobset --output 546878ce-2bd2-4fb6-b2a1-e67785afa624 ${workflow_project_dir}/${kicad_project_name}.kicad_pro 
@@ -40,4 +70,7 @@ jobs:
         if: always()
         with:
           name: erc-drc-artifacts
-          path: DesignChecks
+          path: |
+            DesignChecks
+            /tmp/rev-a-hardware-check-drc.rpt
+            /tmp/rev-a-hardware-check-erc.rpt
