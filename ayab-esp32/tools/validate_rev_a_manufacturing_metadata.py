@@ -167,6 +167,10 @@ def main() -> None:
     missing_models = sorted(name for name in model_paths if not (LIBRARY_ROOT / "packages3D" / name).is_file())
     if missing_models:
         raise RuntimeError(f"unresolved repository 3D models: {missing_models}")
+    exact_model_names = {path.name for path in (LIBRARY_ROOT / "packages3D").iterdir() if path.is_file()}
+    wrong_case_models = sorted(name for name in model_paths if name not in exact_model_names)
+    if wrong_case_models:
+        raise RuntimeError(f"3D model filename case does not match the repository: {wrong_case_models}")
 
     plugin = pcbnew.PCB_IO_MGR.PluginFind(pcbnew.PCB_IO_MGR.KICAD_SEXP)
     checked_ids = set()

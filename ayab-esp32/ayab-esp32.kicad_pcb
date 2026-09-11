@@ -11808,7 +11808,7 @@
 			(uuid "7071c71f-a28d-45b6-8636-571e4935e8a7")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../ayab-library/packages3D/SM06B-SRSS-TB-LF--SN---3DModel-STEP-56544.STEP"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SM06B-SRSS-TB-LF--SN---3DModel-STEP-56544.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -56835,7 +56835,7 @@
 			(uuid "a44088c5-7bf1-404e-99b9-4428c3eba497")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../ayab-library/packages3D/SM04B-SRSS-TB(LF)(SN)--3DModel-STEP-56544.STEP"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/SM04B-SRSS-TB(LF)(SN)--3DModel-STEP-56544.step"
 			(offset
 				(xyz 0 1.5 -0.25)
 			)
@@ -67053,7 +67053,7 @@
 			)
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../ayab-library/packages3D/ESP32-S3-MINI-1.STEP"
+		(model "${KIPRJMOD}/../ayab-library/packages3D/ESP32-S3-MINI-1.step"
 			(offset
 				(xyz -7.7 -7.7 0)
 			)
