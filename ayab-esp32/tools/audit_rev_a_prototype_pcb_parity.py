@@ -27,7 +27,7 @@ def references(text: str) -> dict[str, str]:
 expected = {
     # USB/machine-source isolation and both machine-derived regulators.
     "U601": "XL1509",
-    "U602": "XL1509-3.3E1",
+    "U602": "XL1509",
     "U403": "LM66100DCKR",
     # Machine-presence divider on GPIO4.
     "R215": "47k",
