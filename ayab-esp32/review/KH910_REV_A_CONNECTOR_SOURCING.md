@@ -21,10 +21,17 @@ For one prototype, procure at least two fitted sets when practical: four 10-posi
 | Exact MPN | Preferred source | Observed status | Procurement note |
 |---|---|---|---|
 | `HNC2-2.5P-10DS(02)` | [Mouser 798-HNC22.5P10DS02](https://www.mouser.es/en/ProductDetail/Hirose-Connector/HNC2-25P-10DS02?qs=gyfFsMMHMKwKipyRCQFxxQ%3D%3D) | 398 pieces shown in stock; discontinued | Buy exact new-old stock while traceable inventory remains. Two are fitted per board. |
-| `HNC2-2.5P-8DS(02)` | [Furutaka Parts Online](https://www.furutaka-netsel.co.jp/maker/hrs/hnc2-2.5p-8ds_02) | Listed as in stock at JPY 80 before tax | Confirm export/shipping availability and exact `(02)` suffix before payment. |
+| `HNC2-2.5P-8DS(02)` | [Furutaka Parts Online](https://www.furutaka-netsel.co.jp/maker/hrs/hnc2-2.5p-8ds_02) | Catalog listing remains, but the live cart reports discontinued/out of stock and will not accept an order | Do not rely on the displayed JPY 80 catalog price. The exact part requires verified new-old stock or a controlled alternative assembly plan. |
 | `HNC2-2.5P-3DS(02)` | [DigiKey H126245-ND](https://www.digikey.com/en/products/detail/hirose-electric-co-ltd/HNC2-2-5P-3DS-02/4284914) | Active; 669 pieces shown in stock at USD 0.88 each | Preferred authorized-distributor source for J408. |
 
 Hirose's [HNC series page](https://www.hirose.com/en/product/series/HNC) and [series catalog](https://www.mouser.com/datasheet/2/185/HNC_2_5S_C_A_252815_2529_CL0218_0021_5_15_Catalog_-2492144.pdf) are the identity and mechanical references. Distributor inventory and prices are volatile and are not design guarantees.
+
+## Procurement activity on 2026-09-12
+
+- JLCPCB Global Sourcing request for `HNC2-2.5P-10DS(02)` was submitted against Mouser part `798-HNC22.5P10DS02`. The portal status was `Reviewing`; the request entered quantity four, and live support was asked to quote quantity ten if five assembled boards are required. Do not release an order until the quoted quantity is reconciled with two fitted connectors per board plus attrition.
+- Ten `HNC2-2.5P-3DS(02)` parts from DigiKey (`H126245-ND`) were quoted in JLCPCB Global Sourcing at USD 9.53 total. The portal showed 669 in stock, an 8–14 business-day lead time, and a minimum assembly quantity of five boards. Cart contents are not a purchase record and must be rechecked before order release.
+- JLCPCB Global Sourcing and its general parts-quote search both returned zero stock for the exact `HNC2-2.5P-8DS(02)`. One detailed internal record described the correct 8-position, 2.5 mm, through-hole part but could not be selected because stock was zero; a second low-price generic `TH-8P` record was rejected because its identity and geometry were not established.
+- JLCPCB live support advised purchasing the 8-position part externally and consigning it. Furutaka's live cart then reported the exact part unavailable because it is discontinued or out of stock. A quote request for ten pieces was prepared for independent obsolete-parts distributor Express Technology Group with explicit requirements for genuine new Hirose parts, source traceability, manufacturer packaging, date/lot data, actual-part and label photographs, RoHS status, price, MOQ, lead time, and shipment to JLCPCB. The browser did not return a submission receipt, so the request remains **submission uncertain** until an email response is received. Do not submit a duplicate or purchase broker stock without resolving provenance and inspection terms.
 
 ## Substitution control
 
