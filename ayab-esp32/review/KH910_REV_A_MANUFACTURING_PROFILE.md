@@ -43,6 +43,8 @@ The frozen population contains 153 fitted BOM references: 133 SMD and 20 through
 
 The five connectors without LCSC identifiers are J403/J405 `HNC2-2.5P-10DS(02)`, J404 `HNC2-2.5P-8DS(02)`, J408 `HNC2-2.5P-3DS(02)`, and the non-KH910 J406 `A2506WV-10P`. For the KH910 prototype, J403/J404/J405/J408 must be sourced exactly and either consigned to the assembler or installed afterward. They must not be silently substituted with a generic 2.5 mm header because mating and housing geometry are part of the machine interface. J406 may remain part of the general multi-machine population, but it is not a KH910 mating connector.
 
+The controlled supplier record, dated stock observations, substitution rules, spare quantities, and manufacturer-installation decision path are in [`KH910_REV_A_CONNECTOR_SOURCING.md`](KH910_REV_A_CONNECTOR_SOURCING.md). The preferred path is an exact-MPN New Parts Request or Global Sourcing match. Consignment is supported but may be poor value for a one-off; qualified local installation remains the controlled fallback. No order-specific manufacturer BOM may be released until the exact private/global/consigned part identifiers are known and explicitly matched.
+
 The JLC BOM and placement converters are regression-tested against the current ten-column KiCad BOM, legacy AYAB BOM formats, KiCad placement files with and without a footer, and top/bottom layer conversion. This preflight does not constitute component-stock confirmation; availability and every proposed substitution must be reviewed at quote time.
 
 ## Mechanical evidence and remaining physical gate
