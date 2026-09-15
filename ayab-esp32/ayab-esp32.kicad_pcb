@@ -5874,7 +5874,7 @@
 				)
 			)
 		)
-		(property "OEM PN" "HNC2-2.5P-8DS(02)"
+		(property "OEM PN" "HNC2-2.5P-8DS(55)"
 			(at 644.4 290.6 0)
 			(layer "F.Fab")
 			(hide yes)

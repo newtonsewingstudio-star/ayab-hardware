@@ -9,7 +9,7 @@ Last supplier check: 2026-09-12
 | References | Qty/board | Manufacturer | Exact MPN | Finish | Board footprint |
 |---|---:|---|---|---|---|
 | J403, J405 | 2 | Hirose | `HNC2-2.5P-10DS(02)` | Gold | `Library:HNC2-2.5P-10DS` |
-| J404 | 1 | Hirose | `HNC2-2.5P-8DS(02)` | Gold | `Library:HNC2-2.5P-8DS` |
+| J404 | 1 | Hirose | `HNC2-2.5P-8DS(55)` | Tin | `Library:HNC2-2.5P-8DS` |
 | J408 | 1 | Hirose | `HNC2-2.5P-3DS(02)` | Gold | `Library:HNC2-2.5P-3DS` |
 
 J406 is for other Brother machine variants and is not fitted for the KH910 prototype. Generic 2.5 mm headers are not approved substitutes: pitch alone does not establish the required housing geometry, polarization, lock, contact position, or machine-harness fit.
@@ -33,9 +33,23 @@ Hirose's [HNC series page](https://www.hirose.com/en/product/series/HNC) and [se
 - JLCPCB Global Sourcing and its general parts-quote search both returned zero stock for the exact `HNC2-2.5P-8DS(02)`. One detailed internal record described the correct 8-position, 2.5 mm, through-hole part but could not be selected because stock was zero; a second low-price generic `TH-8P` record was rejected because its identity and geometry were not established.
 - JLCPCB live support advised purchasing the 8-position part externally and consigning it. Furutaka's live cart then reported the exact part unavailable because it is discontinued or out of stock. A quote request for ten pieces was prepared for independent obsolete-parts distributor Express Technology Group with explicit requirements for genuine new Hirose parts, source traceability, manufacturer packaging, date/lot data, actual-part and label photographs, RoHS status, price, MOQ, lead time, and shipment to JLCPCB. The browser did not return a submission receipt, so the request remains **submission uncertain** until an email response is received. Do not submit a duplicate or purchase broker stock without resolving provenance and inspection terms.
 
+## Procurement activity on 2026-09-15
+
+- JLCPCB component pre-order `POB0202609152209713` was placed for 439 pieces of the exact `HNC2-2.5P-8DS(02)` under JLCPCB part `C7437112`. JLCPCB subsequently reported that the part was out of stock and that it could not obtain a quotation. JLCPCB cancelled the part and initiated an USD 8.61 refund to the original payment method. The preceding pending-payment reminder is obsolete and is not evidence that the order remains open.
+- No reply from Express Technology Group was present in the project mailbox when checked on 2026-09-15. The earlier RFQ therefore remains unconfirmed rather than an active or accepted quote.
+- Mouser showed more than 700 pieces of `HNC2-2.5P-8DS(55)` available for immediate shipment. Hirose's HNC catalog identifies `(55)` as tin plated and `(02)` as gold plated while retaining the same 8-position straight-header geometry. Following the Rev A prototype reliability decision below, `(55)` is the approved J404 choice.
+- Several independent/broker catalog pages claimed stock of the exact `(02)` part. Those claims were not treated as verified inventory. Any broker purchase must remain contingent on an actual written quote, traceability, manufacturer-label and part photographs, RoHS status, inspection/return terms, and shipment or consignment instructions.
+
 ## Substitution control
 
-`HNC2-2.5P-10DS(55)` and `HNC2-2.5P-8DS(55)` are same-series, same-position-count tin-finish parts that appear to share the required board geometry. They are **not approved substitutions** for this first article. The machine-side female contact finish has not been physically verified, and mixing gold and tin at a separable contact interface can reduce long-term reliability.
+`HNC2-2.5P-10DS(55)` is not approved as a blanket substitute for the specified 10-position gold parts. `HNC2-2.5P-8DS(55)` is approved specifically for J404 on this noncommercial Rev A one-off prototype. Hirose documents the same 8-position straight-header geometry for `(55)` and `(02)`; the suffix changes the contact finish from gold to tin. The possible mixed-finish interface is accepted for this limited prototype, with contact voltage-drop and heating checks during bring-up and without a claim of multi-decade service life.
+
+For J404, use this procurement order:
+
+1. source genuine `HNC2-2.5P-8DS(55)` from an authorized distributor with traceable stock;
+2. have the assembler install it only if the exact MPN can be matched and the through-hole process is confirmed;
+3. otherwise install the exact part after assembly using a documented, inspected hand-solder process;
+4. do not use a generic-header substitution or daughterboard.
 
 No substitute may be accepted from a distributor or assembler solely because it is described as a 2.5 mm header or a parametric equivalent. A proposed substitute requires a documented comparison of the manufacturer drawing, pin numbering, polarization/keying, latch geometry, body envelope, board drill pattern, current rating, and both mating contact finishes, followed by a new mechanical/electrical review.
 

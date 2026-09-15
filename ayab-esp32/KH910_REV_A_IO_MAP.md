@@ -138,6 +138,19 @@ Preferred electrical architecture:
 - original Brother button legends may be reassigned in firmware;
 - exact display D/C, reset and backlight pins remain unfrozen until a physical display is selected.
 
+The Rev A PCB already implements a display connector. J805 is a six-position, 1.00 mm-pitch SH-style `AYAB_SPI` connector (specified as XUNPU `WAFER-SH1.0-6PWB`, on the matching JST-SH board footprint) with this board pinout:
+
+| J805 pin | Signal |
+|---:|---|
+| 1 | SPI chip select (`DISPLAY_CS` / `AYAB_CS`) |
+| 2 | controller-to-display data (`SPI0_COPI` / `AYAB_COPI`) |
+| 3 | display-to-controller data (`SPI0_CIPO`; optional for a write-only display) |
+| 4 | SPI clock (`SPI0_SCK` / `AYAB_SCK`) |
+| 5 | 3.3 V |
+| 6 | ground |
+
+GPIO14 (`FRONT_PANEL_AUX`) is available on J202 pin 1 for a display D/C, reset, or panel-interrupt function. J805 is therefore a real populated electrical interface, but it is not a promise that every off-the-shelf screen will be plug-compatible: a selected module may still need a small cable harness, and its reset/backlight requirements must fit the documented 3.3 V logic and power budget. This does not require a daughterboard.
+
 Mechanical geometry is intentionally not guessed here. Existing documentation will be exhausted before requesting measurements from the prototype machine.
 
 ## USB

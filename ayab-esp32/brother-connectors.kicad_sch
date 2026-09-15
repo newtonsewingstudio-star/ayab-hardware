@@ -2059,7 +2059,7 @@
     (property "Package" "" (at 152.4 77.47 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "OEM PN" "HNC2-2.5P-8DS(02)" (at 152.4 77.47 0)
+    (property "OEM PN" "HNC2-2.5P-8DS(55)" (at 152.4 77.47 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "OEM" "Hirose" (at 152.4 77.47 0)
